@@ -2,7 +2,7 @@
 Submit.java
 **/Submit.java
 
-# Ignore time-table files
+# Ignore time-table data files
 /timetable/
 
 # Ignore all submition files
@@ -50,3 +50,4 @@ replay_pid*
 *.ipr
 *.iws
 .idea/misc.xml
+
