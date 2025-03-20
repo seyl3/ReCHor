@@ -8,6 +8,7 @@ Submit.java
 # Ignore all submition files
 /submissions/
 /src/ch/epfl/sigcheck/
+/src/ch/epfl/sigcheck/
 
 # Common Java gitignore patterns
 # Compiled class file
@@ -50,4 +51,3 @@ replay_pid*
 *.ipr
 *.iws
 .idea/misc.xml
-
