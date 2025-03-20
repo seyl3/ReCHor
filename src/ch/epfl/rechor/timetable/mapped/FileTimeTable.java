@@ -1,14 +1,14 @@
 package ch.epfl.rechor.timetable.mapped;
 
 import ch.epfl.rechor.timetable.*;
-
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -72,11 +72,43 @@ public record FileTimeTable(Path directory,
 
     @Override
     public Trips tripsFor(LocalDate date) {
-        return null;
+        try {
+            String dateDir = date.toString(); // "yyyy-MM-dd" je crois ?
+            Path dayDirectory = directory.resolve(dateDir);
+            Path tripsPath = dayDirectory.resolve("trips.bin");
+
+            ByteBuffer tripsBuffer;
+            try (FileChannel channel = FileChannel.open(tripsPath)) {
+                tripsBuffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
+            }
+
+            return new BufferedTrips(stringTable, tripsBuffer);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Override
-    public Connections connectionsFor(LocalDate date) {
-        return null;
+public Connections connectionsFor(LocalDate date) {
+    try {
+        String dateDir = date.toString(); // "yyyy-MM-dd" je crois ?
+        Path dayDirectory = directory.resolve(dateDir);
+        Path connectionsPath = dayDirectory.resolve("connections.bin");
+        Path connectionsSuccPath = dayDirectory.resolve("connections-succ.bin");
+
+        ByteBuffer connectionsBuffer;
+        try (FileChannel channel = FileChannel.open(connectionsPath)) {
+            connectionsBuffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
+        }
+        
+        ByteBuffer connectionsSuccBuffer;
+        try (FileChannel channel = FileChannel.open(connectionsSuccPath)) {
+            connectionsSuccBuffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
+        }
+
+        return new BufferedConnections(connectionsBuffer, connectionsSuccBuffer);
+    } catch (IOException e) {
+        throw new UncheckedIOException(e);
     }
+}
 }
