@@ -9,7 +9,6 @@ Submit.java
 /submissions/
 /src/ch/epfl/sigcheck/
 
-
 # Common Java gitignore patterns
 # Compiled class file
 *.class
