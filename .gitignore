@@ -5,6 +5,10 @@ Submit.java
 # Ignore time-table files
 /timetable/
 
+# Ignore all submition files
+/submissions/
+/src/ch/epfl/sigcheck/
+
 # Common Java gitignore patterns
 # Compiled class file
 *.class
