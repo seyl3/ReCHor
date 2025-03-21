@@ -142,7 +142,7 @@ public record FileTimeTable(Path directory,
     }
 
         /**
-     * Retourne les liaisons  à la date spécifiée.
+     * Retourne les liaisons à la date spécifiée.
      * <p>
      * Cette méthode charge les données des liaisons depuis les fichiers connections.bin
      * et connections-succ.bin se trouvant dans le sous-dossier correspondant à la date spécifiée.
@@ -156,7 +156,7 @@ public record FileTimeTable(Path directory,
     @Override
 public Connections connectionsFor(LocalDate date) {
     try {
-        String dateDir = date.toString(); // "yyyy-MM-dd" je crois ?
+        String dateDir = date.toString();
         Path dayDirectory = directory.resolve(dateDir);
         Path connectionsPath = dayDirectory.resolve("connections.bin");
         Path connectionsSuccPath = dayDirectory.resolve("connections-succ.bin");
