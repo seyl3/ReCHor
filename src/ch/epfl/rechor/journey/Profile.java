@@ -1,10 +1,8 @@
 package ch.epfl.rechor.journey;
 
-import ch.epfl.rechor.Preconditions;
 import ch.epfl.rechor.timetable.Connections;
 import ch.epfl.rechor.timetable.TimeTable;
 import ch.epfl.rechor.timetable.Trips;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,10 +55,10 @@ public record Profile(TimeTable timeTable, LocalDate date, int arrStationId, Lis
         }
 
         public ParetoFront.Builder forTrip(int tripId){
-            if (tripId<0 || tripId>=stationFrontBuilders.length){
+            if (tripId<0 || tripId>=tripsFrontBuilders.length){
                 throw new IndexOutOfBoundsException();
             }
-            return stationFrontBuilders[tripId];
+            return tripsFrontBuilders[tripId];
         }
 
         public void setForTrip(int tripId, ParetoFront.Builder builder){
