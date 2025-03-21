@@ -12,11 +12,10 @@ public class JourneyExtractor {
         ParetoFront pf = profile.forStation(depStationId);
         List<Journey> journeys = new ArrayList<>();
         pf.forEach((long criteria) -> {
+            List<Journey.Leg> legs = new ArrayList<>();
 
         });
-        journeys.sort(Comparator
-                .comparing(Journey::depTime)
-                .thenComparing(Journey::arrTime));
+
         return journeys;
     }
 }
