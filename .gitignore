@@ -7,7 +7,7 @@ Submit.java
 
 # Ignore all submition files
 /submissions/
-/src/ch/epfl/sigcheck/
+/sigcheck/
 
 # Common Java gitignore patterns
 # Compiled class file
