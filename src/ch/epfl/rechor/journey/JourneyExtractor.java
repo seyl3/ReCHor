@@ -95,7 +95,7 @@ public class JourneyExtractor {
 
 
 
-            
+
             journeys.add(new Journey(legs));
         });
 
