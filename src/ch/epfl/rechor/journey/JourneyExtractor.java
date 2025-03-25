@@ -49,7 +49,7 @@ public class JourneyExtractor {
             if(currentDepStationId!=currentArrStationId){
                 legs.add(createFootLeg(profile, currentDepStationId, currentArrStationId, createTime(depTime, date), transfers));
             }
-            
+
             // Crétaion des legs pour chaque changement dans le critère
             for (int i = 0; i <= changes(criteria); i++) {
                 int depStopId = connections.depStopId(connectionID);
