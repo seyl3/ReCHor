@@ -11,15 +11,16 @@ import java.util.List;
 import static ch.epfl.rechor.Bits32_24_8.*;
 import static ch.epfl.rechor.journey.PackedCriteria.*;
 
-public final class JourneyExtractor {
+public class JourneyExtractor {
 
     private JourneyExtractor(){}
 
-    public  List<Journey> journeys(Profile profile, int depStationId) {
+    public  static List<Journey> journeys(Profile profile, int depStationId) {
+        // on build journeys en fonction de la station de départ, tout en donnant les infos de profile necessaires
         return buildJourneys(profile, depStationId, profile.arrStationId(), profile.forStation(depStationId));
     }
 
-    private  List<Journey> buildJourneys(Profile profile, int currentDepStationId, int arrStationId, ParetoFront pf) {
+    private  static List<Journey> buildJourneys(Profile profile, int currentDepStationId, int arrStationId, ParetoFront pf) {
         List<Journey> journeys = new ArrayList<>();
 
         TimeTable fileTimeTable = profile.timeTable();
@@ -33,20 +34,23 @@ public final class JourneyExtractor {
         Transfers transfers = fileTimeTable.transfers();
 
         pf.forEach((long criteria) -> {
+            // pour chaque critère on va créer un voyage (commençant par une liste de legs)
             List<Journey.Leg> legs = new ArrayList<>();
 
-            int depTime = depMins(criteria);
-            int connectionID = unpack24(payload(criteria));
-            int nbOfIntermediateStops = unpack8(payload(criteria));
 
-            int firstStopId = connections.depStopId(connectionID);
-            int currentArrStationId = platforms.stationId(firstStopId);
+            int depTime = depMins(criteria); // prendre le deptime du voyage
+            int connectionID = unpack24(payload(criteria)); // prendre la connection ID
+            int nbOfIntermediateStops = unpack8(payload(criteria)); // prendre le nombre de intermediate Stops
 
+            int firstStopId = connections.depStopId(connectionID); // first Stop Id mis à jour en fonction du critère
+            int currentArrStationId = platforms.stationId(firstStopId); // la station d'où commence le voyage
+
+            // Si on n'est pas au bon endroit on se déplace
             if(currentDepStationId!=currentArrStationId){
                 legs.add(createFootLeg(profile, currentDepStationId, currentArrStationId, createTime(depTime, date), transfers));
             }
-
-
+            
+            // Crétaion des legs pour chaque changement dans le critère
             for (int i = 0; i <= changes(criteria); i++) {
                 int depStopId = connections.depStopId(connectionID);
                 int arrStopId = connections.arrStopId(connectionID);
@@ -109,7 +113,7 @@ public final class JourneyExtractor {
         return journeys;
     }
 
-    private Journey.Leg.Foot createFootLeg(Profile profile, int fromStationId, int toStationId, LocalDateTime depTime, Transfers transfers) {
+    private static Journey.Leg.Foot createFootLeg(Profile profile, int fromStationId, int toStationId, LocalDateTime depTime, Transfers transfers) {
         Stations stations = profile.timeTable().stations();
         Platforms platforms = profile.timeTable().platforms();
 
@@ -121,11 +125,11 @@ public final class JourneyExtractor {
         return new Journey.Leg.Foot(depStop, depTime, arrStop, arrTime);
     }
 
-    private Stop createStop(Stations stations, Platforms platforms, int stopId) {
+    private static Stop createStop(Stations stations, Platforms platforms, int stopId) {
         return new Stop(stations.name(platforms.stationId(stopId)), platforms.name(stopId), stations.longitude(platforms.stationId(stopId)), stations.latitude(platforms.stationId(stopId)));
     }
 
-    private LocalDateTime createTime(int timeAfterMidnight, LocalDate date) {
+    private static LocalDateTime createTime(int timeAfterMidnight, LocalDate date) {
         return date.atStartOfDay().plusMinutes(timeAfterMidnight);
     }
 }
