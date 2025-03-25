@@ -53,9 +53,9 @@ final class SignatureChecks_6 {
         v20.setForTrip(v14, v21);
     }
 
-//    void checkJourneyExtractor() {
-//        v22 = ch.epfl.rechor.journey.JourneyExtractor.journeys(v17, v14);
-//    }
+    void checkJourneyExtractor() {
+        v22 = ch.epfl.rechor.journey.JourneyExtractor.journeys(v17, v14);
+   }
 
     ch.epfl.rechor.timetable.mapped.FileTimeTable v01;
     java.lang.Object v02;
