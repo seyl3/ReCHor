@@ -5,9 +5,9 @@ Submit.java
 # Ignore time-table data files
 /timetable/
 
-# Ignore all submition files
+# Ignore all submission files
 /submissions/
-/sigcheck/
+ /src/ch/epfl/sigcheck/
 
 # Common Java gitignore patterns
 # Compiled class file
@@ -41,6 +41,7 @@ replay_pid*
 .idea/dictionaries
 .idea/vcs.xml
 .idea/jsLibraryMappings.xml
+/.idea/
 
 # Mac OS files
 .DS_Store
