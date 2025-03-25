@@ -5,7 +5,7 @@ Submit.java
 # Ignore time-table data files
 /timetable/
 
-# Ignore all submition files
+# Ignore all submission files
 /submissions/
 /src/ch/epfl/sigcheck/
 
@@ -41,6 +41,7 @@ replay_pid*
 .idea/dictionaries
 .idea/vcs.xml
 .idea/jsLibraryMappings.xml
+#/.idea/
 
 # Mac OS files
 .DS_Store
