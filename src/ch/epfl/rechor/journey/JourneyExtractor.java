@@ -30,6 +30,7 @@ public final class JourneyExtractor {
         Routes routes = fileTimeTable.routes();
         Stations stations = fileTimeTable.stations();
         Platforms platforms = fileTimeTable.platforms();
+        Transfers transfers = fileTimeTable.transfers();
 
         pf.forEach((long criteria) -> {
             List<Journey.Leg> legs = new ArrayList<>();
@@ -42,7 +43,7 @@ public final class JourneyExtractor {
             int currentArrStationId = platforms.stationId(firstStopId);
 
             if(currentDepStationId!=currentArrStationId){
-                legs.add(createFootLeg(profile, currentDepStationId, currentArrStationId, date.atStartOfDay().plusMinutes(depTime)));
+                legs.add(createFootLeg(profile, currentDepStationId, currentArrStationId, createTime(depTime, date), transfers));
             }
 
 
@@ -82,7 +83,7 @@ public final class JourneyExtractor {
 
                 if (currentArrStationId != arrStationId) {
                     ParetoFront nextParetoFront = profile.forStation(currentArrStationId);
-                    legs.add(createFootLeg(profile, currentArrStationId, arrStationId, tripArrTime));
+                    legs.add(createFootLeg(profile, currentArrStationId, arrStationId, tripArrTime,transfers));
 
                     List<Journey> nextJourneys = buildJourneys(profile, currentArrStationId, arrStationId, nextParetoFront);
                     for (Journey nextJourney : nextJourneys) {
@@ -90,7 +91,6 @@ public final class JourneyExtractor {
                         combinedLegs.addAll(nextJourney.legs());
                         journeys.add(new Journey(combinedLegs));
                     }
-                    return ;
 
                 } else {
 
@@ -109,14 +109,16 @@ public final class JourneyExtractor {
         return journeys;
     }
 
-    private Journey.Leg.Foot createFootLeg(Profile profile, int fromStationId, int toStationId, LocalDateTime depTime) {
+    private Journey.Leg.Foot createFootLeg(Profile profile, int fromStationId, int toStationId, LocalDateTime depTime, Transfers transfers) {
         Stations stations = profile.timeTable().stations();
         Platforms platforms = profile.timeTable().platforms();
 
         Stop depStop = createStop(stations, platforms, fromStationId);
         Stop arrStop = createStop(stations, platforms, toStationId);
 
-        return new Journey.Leg.Foot(depStop, depTime, arrStop, depTime.plusMinutes(5)); // Comment connaitre la durée de la marche???
+        LocalDateTime arrTime = depTime.plusMinutes(transfers.minutesBetween(fromStationId, toStationId));
+
+        return new Journey.Leg.Foot(depStop, depTime, arrStop, arrTime);
     }
 
     private Stop createStop(Stations stations, Platforms platforms, int stopId) {
