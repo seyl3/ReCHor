@@ -129,4 +129,10 @@ public class JourneyExtractor {
     private static LocalDateTime createTime(int timeAfterMidnight, LocalDate date) {
         return date.atStartOfDay().plusMinutes(timeAfterMidnight);
     }
+
+    private static List<Journey.Leg> createLegs() {
+        List<Journey.Leg> legs = new ArrayList<>();
+
+        return legs;
+    }
 }
