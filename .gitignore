@@ -7,7 +7,7 @@ Submit.java
 
 # Ignore all submission files
 /submissions/
- /src/ch/epfl/sigcheck/
+/src/ch/epfl/sigcheck/
 
 # Common Java gitignore patterns
 # Compiled class file
@@ -41,7 +41,7 @@ replay_pid*
 .idea/dictionaries
 .idea/vcs.xml
 .idea/jsLibraryMappings.xml
-/.idea/
+#/.idea/
 
 # Mac OS files
 .DS_Store
