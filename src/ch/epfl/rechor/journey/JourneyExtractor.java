@@ -1,22 +1,19 @@
 package ch.epfl.rechor.journey;
 
+import static ch.epfl.rechor.Bits32_24_8.*;
+import static ch.epfl.rechor.journey.PackedCriteria.*;
 import ch.epfl.rechor.timetable.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import static ch.epfl.rechor.Bits32_24_8.*;
-import static ch.epfl.rechor.journey.PackedCriteria.*;
-
 public class JourneyExtractor {
 
     private JourneyExtractor(){}
 
     public  static List<Journey> journeys(Profile profile, int depStationId) {
-        // on build journeys en fonction de la station de départ, tout en donnant les infos de profile necessaires
         return buildJourneys(profile, depStationId, profile.arrStationId(), profile.forStation(depStationId));
     }
 
