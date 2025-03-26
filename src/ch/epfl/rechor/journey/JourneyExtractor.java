@@ -91,17 +91,18 @@ public class JourneyExtractor {
 
                 if (currentStationId != arrStationId) {
                     legs.add(createFootLeg(profile, currentStationId, arrStationId, tripArrTime,transfers));
-
+                    // Accès aux données concernant la prochaine station / la prochaine étape du voyage
                     ParetoFront nextStationFront = profile.forStation(currentStationId);
                     remainingChanges--;
                     long nextCriteria = nextStationFront.get(targetArrTime, remainingChanges);
+                    // actualisation des données nécessaires
                     depTime = depMins(nextCriteria);
                     connectionID = unpack24(payload(nextCriteria));
                     nbOfIntermediateStops = unpack8(payload(nextCriteria));
                     firstStopId = connections.depStopId(connectionID);
                     currentStationId = platforms.stationId(firstStopId);
 
-                    
+
                 } else {
 
                     journeys.add(new Journey(legs));
@@ -110,7 +111,7 @@ public class JourneyExtractor {
                 }
             }
 
-            // Etape à pied initiale si nécessaire
+            // Etape à pied finale si nécessaire
             if(currentStationId!=arrStationId){
                 legs.add(createFootLeg(profile, currentStationId, arrStationId, createTime(depTime, date), transfers));
             }
@@ -125,6 +126,7 @@ public class JourneyExtractor {
 
         return journeys;
     }
+
 
     private static Journey.Leg.Foot createFootLeg(Profile profile, int fromStationId, int toStationId, LocalDateTime depTime, Transfers transfers) {
         Stations stations = profile.timeTable().stations();
@@ -144,11 +146,5 @@ public class JourneyExtractor {
 
     private static LocalDateTime createTime(int timeAfterMidnight, LocalDate date) {
         return date.atStartOfDay().plusMinutes(timeAfterMidnight);
-    }
-
-    private static List<Journey.Leg> createLegs() {
-        List<Journey.Leg> legs = new ArrayList<>();
-
-        return legs;
     }
 }
