@@ -14,8 +14,7 @@ public class JourneyExtractor {
     private JourneyExtractor(){}
 
 
-
-    private  static List<Journey> journeys(Profile profile, int depStationId ){
+    public  static List<Journey> journeys(Profile profile, int depStationId ){
         List<Journey> journeys = new ArrayList<>();
 
         int arrStationId = profile.arrStationId();
