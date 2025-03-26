@@ -13,42 +13,49 @@ public class JourneyExtractor {
 
     private JourneyExtractor(){}
 
-    public  static List<Journey> journeys(Profile profile, int depStationId) {
-        return buildJourneys(profile, depStationId, profile.arrStationId(), profile.forStation(depStationId));
-    }
 
-    private  static List<Journey> buildJourneys(Profile profile, int currentDepStationId, int arrStationId, ParetoFront pf) {
+
+    private  static List<Journey> journeys(Profile profile, int depStationId ){
         List<Journey> journeys = new ArrayList<>();
 
-        TimeTable fileTimeTable = profile.timeTable();
+        int arrStationId = profile.arrStationId();
+        ParetoFront initialPf= profile.forStation(depStationId);
+        TimeTable tt = profile.timeTable();
         LocalDate date = profile.date();
 
-        Connections connections = fileTimeTable.connectionsFor(date);
-        Trips trips = fileTimeTable.tripsFor(date);
-        Routes routes = fileTimeTable.routes();
-        Stations stations = fileTimeTable.stations();
-        Platforms platforms = fileTimeTable.platforms();
-        Transfers transfers = fileTimeTable.transfers();
+        // Récupération des données nécessaires
+        Connections connections = tt.connectionsFor(date);
+        Trips trips = tt.tripsFor(date);
+        Routes routes = tt.routes();
+        Stations stations = tt.stations();
+        Platforms platforms = tt.platforms();
+        Transfers transfers = tt.transfers();
 
-        pf.forEach((long criteria) -> {
+
+        initialPf.forEach((long criteria) -> {
             // pour chaque critère on va créer un voyage (commençant par une liste de legs)
             List<Journey.Leg> legs = new ArrayList<>();
 
 
-            int depTime = depMins(criteria); // prendre le deptime du voyage
-            int connectionID = unpack24(payload(criteria)); // prendre la connection ID
-            int nbOfIntermediateStops = unpack8(payload(criteria)); // prendre le nombre de intermediate Stops
+            int depTime = depMins(criteria);
+            int targetArrTime = arrMins(criteria);
+            int remainingChanges = changes(criteria);
 
-            int firstStopId = connections.depStopId(connectionID); // first Stop Id mis à jour en fonction du critère
-            int currentArrStationId = platforms.stationId(firstStopId); // la station d'où commence le voyage
+            int connectionID = unpack24(payload(criteria));
+            int nbOfIntermediateStops = unpack8(payload(criteria));
 
-            // Si on n'est pas au bon endroit on se déplace
-            if(currentDepStationId!=currentArrStationId){
-                legs.add(createFootLeg(profile, currentDepStationId, currentArrStationId, createTime(depTime, date), transfers));
+            int firstStopId = connections.depStopId(connectionID);
+            int currentStationId = depStationId;
+            int firstStationID = platforms.stationId(firstStopId);
+
+            // Etape à pied initiale si nécessaire
+            if(currentStationId!=firstStationID){
+                legs.add(createFootLeg(profile, currentStationId, firstStationID, createTime(depTime, date), transfers));
+                currentStationId = firstStationID;
             }
 
             // Crétaion des legs pour chaque changement dans le critère
-            for (int i = 0; i <= changes(criteria); i++) {
+            while(remainingChanges>=0){
                 int depStopId = connections.depStopId(connectionID);
                 int arrStopId = connections.arrStopId(connectionID);
                 int tripId = connections.tripId(connectionID);
@@ -79,20 +86,22 @@ public class JourneyExtractor {
                 Journey.Leg leg = new Journey.Leg.Transport(depStop, tripDepTime, arrStop, tripArrTime, intermediateStops, vehicle, route, destination);
                 legs.add(leg);
 
-                currentArrStationId = platforms.stationId(arrStopId);
+                currentStationId = platforms.stationId(arrStopId);
 
 
-                if (currentArrStationId != arrStationId) {
-                    ParetoFront nextParetoFront = profile.forStation(currentArrStationId);
-                    legs.add(createFootLeg(profile, currentArrStationId, arrStationId, tripArrTime,transfers));
+                if (currentStationId != arrStationId) {
+                    legs.add(createFootLeg(profile, currentStationId, arrStationId, tripArrTime,transfers));
 
-                    List<Journey> nextJourneys = buildJourneys(profile, currentArrStationId, arrStationId, nextParetoFront);
-                    for (Journey nextJourney : nextJourneys) {
-                        List<Journey.Leg> combinedLegs = new ArrayList<>(legs);
-                        combinedLegs.addAll(nextJourney.legs());
-                        journeys.add(new Journey(combinedLegs));
-                    }
+                    ParetoFront nextStationFront = profile.forStation(currentStationId);
+                    remainingChanges--;
+                    long nextCriteria = nextStationFront.get(targetArrTime, remainingChanges);
+                    depTime = depMins(nextCriteria);
+                    connectionID = unpack24(payload(nextCriteria));
+                    nbOfIntermediateStops = unpack8(payload(nextCriteria));
+                    firstStopId = connections.depStopId(connectionID);
+                    currentStationId = platforms.stationId(firstStopId);
 
+                    
                 } else {
 
                     journeys.add(new Journey(legs));
@@ -100,6 +109,13 @@ public class JourneyExtractor {
 
                 }
             }
+
+            // Etape à pied initiale si nécessaire
+            if(currentStationId!=arrStationId){
+                legs.add(createFootLeg(profile, currentStationId, arrStationId, createTime(depTime, date), transfers));
+            }
+
+
 
         });
 
