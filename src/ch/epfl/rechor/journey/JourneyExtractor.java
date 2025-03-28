@@ -59,7 +59,6 @@ public class JourneyExtractor {
             // Pour chaque critère, on crée un nouveau voyage avec une liste d'étapes vide
             List<Journey.Leg> legs = new ArrayList<>();
 
-            try {
                 // Extraction des informations du critère
                 int depTime = depMins(criteria);              // Heure de départ en minutes
                 int targetArrTime = arrMins(criteria);        // Heure d'arrivée cible en minutes
@@ -86,13 +85,11 @@ public class JourneyExtractor {
                 int firstStationID = tt.stationId(firstStopId);
 
                 // Détermination si un transfert à pied initial est nécessaire
-                // Trois cas possibles:
+                // Deux cas possibles:
                 // 1. La station de départ n'est pas la même que la station de la première connexion
                 // 2. Le premier arrêt est un quai (et non une station)
-                // 3. Cas spécial pour les tests (firstStopId == 0)
-                boolean needsInitialFootTransfer = currentStationId != firstStationID || 
-                                                  tt.isPlatformId(firstStopId) ||
-                                                  (tt instanceof TimeTable && firstStopId == 0);
+                boolean needsInitialFootTransfer = currentStationId != firstStationID ||
+                                                  tt.isPlatformId(firstStopId);
                 
                 // Ajout d'une étape à pied initiale si nécessaire
                 if (needsInitialFootTransfer) {
@@ -225,16 +222,15 @@ public class JourneyExtractor {
                 }
 
                 // Gestion du transfert à pied final si nécessaire
-                // Pour la plupart des tests, ajouter un transfert à pied final uniquement si nécessaire
-                // Mais pour le test de connexion unique, ne jamais ajouter de transfert à pied à la fin
-                boolean needsFinalFootTransfer = currentStationId != arrStationId && 
-                                                 remainingChanges < 0 && 
-                                                 !legs.isEmpty();
-                                                     
-                if (needsFinalFootTransfer) {
-                    // Ajout du transfert à pied final
-                    legs.add(createFootLeg(profile, currentStationId, arrStationId, createTime(depTime, date), transfers));
-                }
+                // Ajout d'une étape à pied si la dernière étape n'est pas déjà une étape à pied
+                // Et si nous ne sommes pas déjà à la destination
+            boolean lastLegIsFoot = !legs.isEmpty() && legs.get(legs.size() - 1) instanceof Journey.Leg.Foot;
+            boolean alreadyAtDestination = currentStationId == arrStationId;
+            boolean needsFinalFootTransfer = !alreadyAtDestination && !lastLegIsFoot;
+
+            if (needsFinalFootTransfer) {
+                legs.add(createFootLeg(profile, currentStationId, arrStationId, createTime(depTime, date), transfers));
+            }
 
                 // Ajout du voyage uniquement si nous avons des étapes valides
                 // Le voyage doit avoir au moins une étape, et soit:
@@ -243,11 +239,6 @@ public class JourneyExtractor {
                 if (!legs.isEmpty() && (legs.size() == 1 || legs.get(0) instanceof Journey.Leg.Transport)) {
                     journeys.add(new Journey(legs));
                 }
-
-            } catch (IllegalArgumentException e) {
-                // Journalisation pour le débogage mais continuer le traitement des autres entrées
-                System.err.println("Error extracting journey: " + e.getMessage());
-            }
 
         });
 

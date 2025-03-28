@@ -3,14 +3,9 @@ package ch.epfl.rechor.journey;
 import ch.epfl.rechor.timetable.TimeTable;
 import ch.epfl.rechor.timetable.*;
 import org.junit.jupiter.api.*;
-
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.List;
-
-
-//import static ch.epfl.rechor.Bits32_24_8;
-//import static ch.epfl.rechor.journey.PackedCriteria.*;
 import static ch.epfl.rechor.Bits32_24_8.pack;
 import static ch.epfl.rechor.journey.PackedCriteria.withDepMins;
 import static org.junit.jupiter.api.Assertions.*;
@@ -185,7 +180,7 @@ class JourneyExtractorTest {
     @Test
     void testJourneyStartsWithFootTransfer() throws Exception {
         // Create a profile where dep platform != first connection platform
-        mockProfile = createProfileWithDifferentDepartureAndConnectionPlatforms();
+        mockProfile = createProfileWithRealFootTransferAtStart();
 
         // Extract journeys
         List<Journey> journeys = extractJourneys(mockProfile, TEST_DEPARTURE_STATION);
@@ -345,7 +340,7 @@ class JourneyExtractorTest {
 
     private Profile createMockProfile(TimeTable timeTable, LocalDate date, int arrStationId) {
         Profile.Builder builder = new Profile.Builder(timeTable, date, arrStationId);
-        
+
         // For departure station, create a Pareto front with one entry
         ParetoFront.Builder frontBuilder = new ParetoFront.Builder();
         // Pack connection ID (0) and intermediate stops (1) into payload
@@ -354,56 +349,56 @@ class JourneyExtractorTest {
         long criteria = PackedCriteria.pack(540, 0, payload); // Arr 9:00, 0 changes, payload
         criteria = withDepMins(criteria, 480); // Add departure minutes (8:00 AM)
         frontBuilder.add(criteria);
-        
+
         builder.setForStation(TEST_DEPARTURE_STATION, frontBuilder);
-        
+
         return builder.build();
     }
 
     private Profile createProfileWithMultipleJourneys() {
         Profile.Builder builder = new Profile.Builder(mockTimeTable, TEST_DATE, TEST_ARRIVAL_STATION);
-        
+
         // Create multiple journey entries in the Pareto front for the departure station
         ParetoFront.Builder frontBuilder = new ParetoFront.Builder();
-        
+
         // First journey: dep 8:00, arr 9:00
         long criteria1 = PackedCriteria.pack(540, 0, pack(0, 0));
         criteria1 = withDepMins(criteria1, 480);
         frontBuilder.add(criteria1);
-        
+
         // Second journey: dep 8:00, arr 8:45 (same dep time, earlier arr)
         long criteria2 = PackedCriteria.pack(525, 1, pack(1, 0));
         criteria2 = withDepMins(criteria2, 480);
         frontBuilder.add(criteria2);
-        
+
         // Third journey: dep 8:30, arr 9:30 (later dep time)
         long criteria3 = PackedCriteria.pack(570, 0, pack(2, 0));
         criteria3 = withDepMins(criteria3, 510);
         frontBuilder.add(criteria3);
-        
+
         builder.setForStation(TEST_DEPARTURE_STATION, frontBuilder);
-        
+
         return builder.build();
     }
 
     private Profile createProfileWithMultiLegJourney() {
         Profile.Builder builder = new Profile.Builder(mockTimeTable, TEST_DATE, TEST_ARRIVAL_STATION);
-        
+
         // For departure station, create a journey with multiple legs
         ParetoFront.Builder frontBuilder = new ParetoFront.Builder();
         long criteria1 = PackedCriteria.pack(540, 1, pack(0, 0)); // 1 change
         criteria1 = withDepMins(criteria1, 480);
         frontBuilder.add(criteria1);
-        
+
         // For the intermediate station
         ParetoFront.Builder intermediateFrontBuilder = new ParetoFront.Builder();
         long criteria2 = PackedCriteria.pack(540, 0, pack(1, 0)); // 0 changes
         criteria2 = withDepMins(criteria2, 510); // Departure from intermediate at 8:30
         intermediateFrontBuilder.add(criteria2);
-        
+
         builder.setForStation(TEST_DEPARTURE_STATION, frontBuilder);
         builder.setForStation(1, intermediateFrontBuilder); // Station 1 as intermediate
-        
+
         return builder.build();
     }
 
@@ -426,19 +421,19 @@ class JourneyExtractorTest {
                 return super.stationId(stopId);
             }
         };
-        
+
         Profile.Builder builder = new Profile.Builder(timeTable, TEST_DATE, TEST_ARRIVAL_STATION);
-        
+
         // Create a Pareto front where the first connection uses a different platform
         ParetoFront.Builder frontBuilder = new ParetoFront.Builder();
-        
+
         // Connection uses platform 0 while departure is from platform 5
         long criteria = PackedCriteria.pack(540, 0, pack(0, 0));
         criteria = withDepMins(criteria, 480);
         frontBuilder.add(criteria);
-        
+
         builder.setForStation(TEST_DEPARTURE_STATION, frontBuilder);
-        
+
         return builder.build();
     }
 
@@ -452,97 +447,97 @@ class JourneyExtractorTest {
                 return super.stationId(stopId);
             }
         };
-        
+
         Profile.Builder builder = new Profile.Builder(timeTable, TEST_DATE, TEST_ARRIVAL_STATION);
-        
+
         // Create a Pareto front where the last connection arrives at a different platform
         ParetoFront.Builder frontBuilder = new ParetoFront.Builder();
-        
+
         // Connection arrives at platform 6, destination is station 1
         long criteria = PackedCriteria.pack(540, 0, pack(0, 0));
         criteria = withDepMins(criteria, 480);
         frontBuilder.add(criteria);
-        
+
         builder.setForStation(TEST_DEPARTURE_STATION, frontBuilder);
-        
+
         return builder.build();
     }
 
     private Profile createProfileWithSingleConnection() {
         Profile.Builder builder = new Profile.Builder(mockTimeTable, TEST_DATE, TEST_ARRIVAL_STATION);
-        
+
         // Create a Pareto front with a single journey (no changes)
         ParetoFront.Builder frontBuilder = new ParetoFront.Builder();
         long criteria = PackedCriteria.pack(540, 0, pack(0, 0)); // No changes
         criteria = withDepMins(criteria, 480);
         frontBuilder.add(criteria);
-        
+
         builder.setForStation(TEST_DEPARTURE_STATION, frontBuilder);
-        
+
         return builder.build();
     }
 
     private Profile createProfileWithMultipleIntermediateStops() {
         Profile.Builder builder = new Profile.Builder(mockTimeTable, TEST_DATE, TEST_ARRIVAL_STATION);
-        
+
         // Create a journey with 3 intermediate stops
         ParetoFront.Builder frontBuilder = new ParetoFront.Builder();
         long criteria = PackedCriteria.pack(600, 0, pack(0, 3)); // 3 intermediate stops
         criteria = withDepMins(criteria, 540); // Depart at 9:00
         frontBuilder.add(criteria);
-        
+
         builder.setForStation(TEST_DEPARTURE_STATION, frontBuilder);
-        
+
         return builder.build();
     }
 
     private Profile createProfileWithOverlappingTimesParetoFront() {
         Profile.Builder builder = new Profile.Builder(mockTimeTable, TEST_DATE, TEST_ARRIVAL_STATION);
-        
+
         // Create Pareto entries with same times but different changes
         ParetoFront.Builder frontBuilder = new ParetoFront.Builder();
-        
+
         // Journey 1: dep 8:00, arr 9:00, 0 changes
         long criteria1 = PackedCriteria.pack(540, 0, pack(0, 0));
         criteria1 = withDepMins(criteria1, 480);
         frontBuilder.add(criteria1);
-        
+
         // Journey 2: dep 8:00, arr 9:00, 1 change (but perhaps more reliable or preferred)
         long criteria2 = PackedCriteria.pack(540, 1, pack(1, 0));
         criteria2 = withDepMins(criteria2, 480);
         frontBuilder.add(criteria2);
-        
+
         builder.setForStation(TEST_DEPARTURE_STATION, frontBuilder);
-        
+
         // For the intermediate station (for the journey with 1 change)
         ParetoFront.Builder intermediateFrontBuilder = new ParetoFront.Builder();
         long criteria3 = PackedCriteria.pack(540, 0, pack(2, 0));
         criteria3 = withDepMins(criteria3, 510); // Departure from intermediate at 8:30
         intermediateFrontBuilder.add(criteria3);
-        
+
         builder.setForStation(1, intermediateFrontBuilder);
-        
+
         return builder.build();
     }
 
     private Profile createProfileWithDifferentTripPayloads() {
         Profile.Builder builder = new Profile.Builder(mockTimeTable, TEST_DATE, TEST_ARRIVAL_STATION);
-        
+
         // Create Pareto entries with different trip IDs in payload
         ParetoFront.Builder frontBuilder = new ParetoFront.Builder();
-        
+
         // Journey 1: Uses trip ID 0
         long criteria1 = PackedCriteria.pack(540, 0, pack(0, 0));
         criteria1 = withDepMins(criteria1, 480);
         frontBuilder.add(criteria1);
-        
+
         // Journey 2: Uses trip ID 1
         long criteria2 = PackedCriteria.pack(545, 0, pack(1, 0));
         criteria2 = withDepMins(criteria2, 485);
         frontBuilder.add(criteria2);
-        
+
         builder.setForStation(TEST_DEPARTURE_STATION, frontBuilder);
-        
+
         return builder.build();
     }
 
@@ -723,6 +718,26 @@ class JourneyExtractorTest {
         }
     }
 
+    private Profile createProfileWithRealFootTransferAtStart() {
+        MockTimeTable timeTable = new MockTimeTable() {
+            @Override
+            public int stationId(int stopId) {
+                // Make sure that depStationId != stationId(depStopId)
+                if (stopId == 4) return 1; // Different from TEST_DEPARTURE_STATION = 0
+                return super.stationId(stopId);
+            }
+        };
+
+        Profile.Builder builder = new Profile.Builder(timeTable, TEST_DATE, TEST_ARRIVAL_STATION);
+        ParetoFront.Builder frontBuilder = new ParetoFront.Builder();
+
+        long criteria = PackedCriteria.pack(540, 0, pack(0, 0)); // dep: 8:00, arr: 9:00
+        criteria = withDepMins(criteria, 480);
+        frontBuilder.add(criteria);
+        builder.setForStation(TEST_DEPARTURE_STATION, frontBuilder);
+        return builder.build();
+    }
+
     static class MockConnections implements Connections {
         @Override
         public int depStopId(int id) {
@@ -747,7 +762,7 @@ class JourneyExtractorTest {
 
         @Override
         public int arrMins(int id) {
-            // Ensure arrival is always after departure 
+            // Ensure arrival is always after departure
             return depMins(id) + 15 + (id % 5); // Add variable offset to make times unique
         }
 
@@ -777,4 +792,4 @@ class JourneyExtractorTest {
             return 10;
         }
     }
-} 
+    }
