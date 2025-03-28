@@ -1,3 +1,26 @@
 {
-    "java.debug.settings.onBuildFailureProceed": true
+    "java.debug.settings.onBuildFailureProceed": true,
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "lib/junit-platform-console-standalone-1.12.0.jar"
+    ],
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.completion.favoriteStaticMembers": [
+        "org.junit.jupiter.api.Assertions.*",
+        "org.junit.Assert.*",
+        "org.junit.Assume.*",
+        "org.junit.jupiter.api.Assumptions.*",
+        "org.junit.jupiter.api.DynamicContainer.*",
+        "org.junit.jupiter.api.DynamicTest.*"
+    ],
+    "java.test.config": {
+        "workingDirectory": "${workspaceFolder}"
+    },
+    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m",
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+    },
+    "java.format.settings.url": ".vscode/java-formatter.xml",
+    "java.test.defaultConfig": "junit",
+    "java.errors.incompleteClasspath.severity": "ignore"
 }
