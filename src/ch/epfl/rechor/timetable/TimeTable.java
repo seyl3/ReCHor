@@ -68,7 +68,7 @@ public interface TimeTable {
      * @return {@code true} si l'index correspond à une gare, {@code false} sinon.
      */
     default boolean isStationId(int stopId) {
-        return (stopId < stations().size() && stopId>=0);
+        return (stopId < stations().size() && stopId >= 0);
     }
 
     /**

@@ -6,15 +6,39 @@ package ch.epfl.sigcheck;
 // étape du projet sont corrects.
 
 final class SignatureChecks_6 {
-    private SignatureChecks_6() {}
+    ch.epfl.rechor.timetable.mapped.FileTimeTable v01;
+    java.lang.Object v02;
+    java.nio.file.Path v03;
+    java.util.List<java.lang.String> v04;
+    ch.epfl.rechor.timetable.Stations v05;
+    ch.epfl.rechor.timetable.StationAliases v06;
+    ch.epfl.rechor.timetable.Platforms v07;
+    ch.epfl.rechor.timetable.Routes v08;
+    ch.epfl.rechor.timetable.Transfers v09;
+    ch.epfl.rechor.timetable.TimeTable v10;
+    java.time.LocalDate v11;
+    ch.epfl.rechor.timetable.Connections v12;
+    boolean v13;
+    int v14;
+    java.lang.String v15;
+    ch.epfl.rechor.timetable.Trips v16;
+    ch.epfl.rechor.journey.Profile v17;
+    java.util.List<ch.epfl.rechor.journey.ParetoFront> v18;
+    ch.epfl.rechor.journey.ParetoFront v19;
+    ch.epfl.rechor.journey.Profile.Builder v20;
+    ch.epfl.rechor.journey.ParetoFront.Builder v21;
+    java.util.List<ch.epfl.rechor.journey.Journey> v22;
+    private SignatureChecks_6() {
+    }
 
     void checkFileTimeTable() {
-        v02 = (java.lang.Record) v01;
-        v02 = (ch.epfl.rechor.timetable.TimeTable) v01;
+        v02 = v01;
+        v02 = v01;
         v01 = new ch.epfl.rechor.timetable.mapped.FileTimeTable(v03, v04, v05, v06, v07, v08, v09);
         try {
             v10 = ch.epfl.rechor.timetable.mapped.FileTimeTable.in(v03);
-        } catch (java.io.IOException e) {}
+        } catch (java.io.IOException e) {
+        }
         v12 = v01.connectionsFor(v11);
         v03 = v01.directory();
         v13 = v01.equals(v02);
@@ -30,7 +54,7 @@ final class SignatureChecks_6 {
     }
 
     void checkProfile() {
-        v02 = (java.lang.Record) v17;
+        v02 = v17;
         v17 = new ch.epfl.rechor.journey.Profile(v10, v11, v14, v18);
         v14 = v17.arrStationId();
         v12 = v17.connections();
@@ -55,28 +79,5 @@ final class SignatureChecks_6 {
 
     void checkJourneyExtractor() {
         v22 = ch.epfl.rechor.journey.JourneyExtractor.journeys(v17, v14);
-   }
-
-    ch.epfl.rechor.timetable.mapped.FileTimeTable v01;
-    java.lang.Object v02;
-    java.nio.file.Path v03;
-    java.util.List<java.lang.String> v04;
-    ch.epfl.rechor.timetable.Stations v05;
-    ch.epfl.rechor.timetable.StationAliases v06;
-    ch.epfl.rechor.timetable.Platforms v07;
-    ch.epfl.rechor.timetable.Routes v08;
-    ch.epfl.rechor.timetable.Transfers v09;
-    ch.epfl.rechor.timetable.TimeTable v10;
-    java.time.LocalDate v11;
-    ch.epfl.rechor.timetable.Connections v12;
-    boolean v13;
-    int v14;
-    java.lang.String v15;
-    ch.epfl.rechor.timetable.Trips v16;
-    ch.epfl.rechor.journey.Profile v17;
-    java.util.List<ch.epfl.rechor.journey.ParetoFront> v18;
-    ch.epfl.rechor.journey.ParetoFront v19;
-    ch.epfl.rechor.journey.Profile.Builder v20;
-    ch.epfl.rechor.journey.ParetoFront.Builder v21;
-    java.util.List<ch.epfl.rechor.journey.Journey> v22;
+    }
 }

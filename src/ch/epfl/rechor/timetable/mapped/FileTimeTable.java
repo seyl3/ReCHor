@@ -2,8 +2,6 @@ package ch.epfl.rechor.timetable.mapped;
 
 import ch.epfl.rechor.timetable.*;
 
-
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
@@ -12,7 +10,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -29,15 +26,16 @@ import java.util.List;
  * tripsFor et connectionsFor.
  * </p>
  *
- * @param directory Chemin d'accès au dossier contenant les fichiers de données d'horaire
- * @param stringTable Table des chaînes de caractères
- * @param stations Gares indexées
+ * @param directory      Chemin d'accès au dossier contenant les fichiers de données d'horaire
+ * @param stringTable    Table des chaînes de caractères
+ * @param stations       Gares indexées
  * @param stationAliases Noms alternatifs des gares
- * @param platforms Voies/quais indexés
- * @param routes Lignes de transport indexées
- * @param transfers Changements indexés
+ * @param platforms      Voies/quais indexés
+ * @param routes         Lignes de transport indexées
+ * @param transfers      Changements indexés
  */
-public record FileTimeTable(Path directory, List<String> stringTable, Stations stations, StationAliases stationAliases, Platforms platforms, Routes routes, Transfers transfers) implements TimeTable {
+public record FileTimeTable(Path directory, List<String> stringTable, Stations stations, StationAliases stationAliases,
+                            Platforms platforms, Routes routes, Transfers transfers) implements TimeTable {
 
     private static final Charset STRING_CHARSET = StandardCharsets.ISO_8859_1;
 
@@ -75,19 +73,29 @@ public record FileTimeTable(Path directory, List<String> stringTable, Stations s
         ByteBuffer transfersBuffer;
         ByteBuffer stationAliasesBuffer;
 
-        try (FileChannel fileChannel = FileChannel.open(platformsPath)) { platformsBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());}
-        try (FileChannel fileChannel = FileChannel.open(stationsPath)) { stationsBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());}
-        try (FileChannel fileChannel = FileChannel.open(routesPath)) { routesBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());}
-        try (FileChannel fileChannel = FileChannel.open(transfersPath)) { transfersBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());}
-        try (FileChannel fileChannel = FileChannel.open(stationAliasesPath)) { stationAliasesBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());}
+        try (FileChannel fileChannel = FileChannel.open(platformsPath)) {
+            platformsBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+        }
+        try (FileChannel fileChannel = FileChannel.open(stationsPath)) {
+            stationsBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+        }
+        try (FileChannel fileChannel = FileChannel.open(routesPath)) {
+            routesBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+        }
+        try (FileChannel fileChannel = FileChannel.open(transfersPath)) {
+            transfersBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+        }
+        try (FileChannel fileChannel = FileChannel.open(stationAliasesPath)) {
+            stationAliasesBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+        }
 
-        Stations stations = new BufferedStations(stringTable,stationsBuffer);
-        StationAliases stationAliases =  new BufferedStationAliases(stringTable,stationAliasesBuffer);
-        Platforms platforms = new BufferedPlatforms(stringTable,platformsBuffer);
-        Routes routes = new BufferedRoutes(stringTable,routesBuffer);
+        Stations stations = new BufferedStations(stringTable, stationsBuffer);
+        StationAliases stationAliases = new BufferedStationAliases(stringTable, stationAliasesBuffer);
+        Platforms platforms = new BufferedPlatforms(stringTable, platformsBuffer);
+        Routes routes = new BufferedRoutes(stringTable, routesBuffer);
         Transfers transfers = new BufferedTransfers(transfersBuffer);
 
-        return new FileTimeTable(directory,stringTable, stations, stationAliases, platforms, routes, transfers);
+        return new FileTimeTable(directory, stringTable, stations, stationAliases, platforms, routes, transfers);
 
     }
 
@@ -105,13 +113,13 @@ public record FileTimeTable(Path directory, List<String> stringTable, Stations s
      */
     @Override
     public Trips tripsFor(LocalDate date) {
-        try{
+        try {
             Path datePath = directory.resolve(date.toString());
             Path tripsPath = datePath.resolve("trips.bin");
             FileChannel fileChannel = FileChannel.open(tripsPath);
             ByteBuffer buffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
-            return new BufferedTrips(stringTable,buffer);
-        }catch (IOException e){
+            return new BufferedTrips(stringTable, buffer);
+        } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -129,7 +137,7 @@ public record FileTimeTable(Path directory, List<String> stringTable, Stations s
      */
     @Override
     public Connections connectionsFor(LocalDate date) {
-        try{
+        try {
             Path datePath = directory.resolve(date.toString());
             Path connectionsPath = datePath.resolve("connections.bin");
             Path succConnectionsPath = datePath.resolve("connections-succ.bin");
@@ -137,8 +145,8 @@ public record FileTimeTable(Path directory, List<String> stringTable, Stations s
             FileChannel succConnectionsFileChannel = FileChannel.open(succConnectionsPath);
             ByteBuffer connectionsBuffer = connectionsFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, connectionsFileChannel.size());
             ByteBuffer succConnectionsBuffer = succConnectionsFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, succConnectionsFileChannel.size());
-            return new BufferedConnections(connectionsBuffer,succConnectionsBuffer);
-        }catch (IOException e){
+            return new BufferedConnections(connectionsBuffer, succConnectionsBuffer);
+        } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
