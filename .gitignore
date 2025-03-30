@@ -4,6 +4,7 @@ Submit.java
 
 # Ignore time-table data files
 /timetable/
+/timetable 2/
 
 # Ignore all submission files
 /submissions/

@@ -1915,6 +1915,7 @@ Avry-sur-Matran, centre com.
 Avry-sur-Matran, village
 Avry-sur-Matran, école
 Avrée
+Avstrijski Gradec
 Avully, Bachères
 Avully, Eaumorte hameau
 Avully, Gennecy
@@ -3005,6 +3006,7 @@ BAT 3732
 BAT 3733
 BAT 3734
 BAT 3736
+BAT 3739
 BAT 3800
 BAT 3801
 BAT 3820
@@ -9416,6 +9418,7 @@ EXB 81
 EXB 811
 EXT
 EXT 1
+EXT 11
 EXT 15
 EXT 2
 EXT 2027
@@ -9458,6 +9461,7 @@ EXT 30023
 EXT 30025
 EXT 30027
 EXT 30100
+EXT 30168
 EXT 30215
 EXT 30438
 EXT 30504
@@ -9522,9 +9526,11 @@ EXT 31143
 EXT 31144
 EXT 31146
 EXT 31148
+EXT 31149
 EXT 31150
 EXT 31152
 EXT 31153
+EXT 31155
 EXT 31156
 EXT 31159
 EXT 31160
@@ -9643,7 +9649,6 @@ EXT 31459
 EXT 31460
 EXT 31462
 EXT 31466
-EXT 31470
 EXT 31472
 EXT 31475
 EXT 31485
@@ -11616,6 +11621,7 @@ Folgensbourg, Césarhof
 Folgensbourg, Ferrette
 Folsogno-Dissimo
 Fondo del Bosco
+Fons-St-Mamert
 Font, village
 Font, école
 Fontaine-les-Grès Mairie
@@ -13402,6 +13408,7 @@ Gravesano, Istituto Rusca
 Gravesano, Istituto Rusca Nord
 Gravesano, Paese
 Gravesano, Vallone
+Graz Hbf
 Greich
 Greifensee
 Greifensee (See)
@@ -15562,6 +15569,7 @@ IC 31406
 IC 31429
 IC 31431
 IC 31455
+IC 31470
 IC 31482
 IC 31490
 IC 31588
@@ -15723,11 +15731,15 @@ IR 30006
 IR 30008
 IR 30035
 IR 30043
+IR 30071
+IR 30073
+IR 30075
 IR 3013
 IR 30143
 IR 3015
 IR 3016
 IR 3017
+IR 30204
 IR 3022
 IR 3024
 IR 3025
@@ -17503,6 +17515,7 @@ La Joux FR, village
 La Joy-Clinique
 La Joy-Clinique, gare
 La Large-Journée
+La Levade
 La Luette
 La Lécherette, village
 La Lécherette,cont.de la Borne
@@ -23244,6 +23257,7 @@ Noville, Les Saviez
 Noville, Pré des Fourches
 Novéant-sur-Moselle
 Noyers-Pont-Maugis
+Nozières-Brignon
 Noës, Champsabé
 Noës, Ecole
 Noës, Ecossia
@@ -26363,6 +26377,7 @@ Rapperswil BE, Schönbrunnen
 Rapperswil BE, Ziegelei
 Rapperswil SG
 Rapperswil SG (See)
+Rapperswil SG Hochschule (See)
 Rapperswil SG, Attenhoferstr.
 Rapperswil SG, Bahnhof
 Rapperswil SG, Bahnhof Süd
@@ -28321,7 +28336,6 @@ S 30382
 S 30389
 S 30393
 S 30588
-S 30592
 S 30695
 S 30696
 S 30745
@@ -28484,6 +28498,7 @@ S24
 S3
 S4
 S5
+S62
 SBB Kleider und Schuhe
 SBB RailCoaster
 SCO
@@ -31599,6 +31614,7 @@ SN 31049
 SN 31240
 SN 31403
 SN 31432
+SN 31542
 SN 4
 SN 41
 SN 5
@@ -31880,6 +31896,7 @@ Saint-Pierre-de-Chandieu Ronin
 Saint-Pierre-le-Moûtier
 Saint-Pouange Lycée Agricole
 Saint-Priest
+Saint-Péray
 Saint-Quentin-Fallavier
 Saint-Rambert-d'Albon
 Saint-Romain-de-Popey
@@ -34153,6 +34170,7 @@ St-Eloi
 St-Etienne-Châtcrx. G Routière
 St-Florentin ville
 St-Genis, Malivert
+St-Geniès-de-Malgoirès
 St-George, Côte-Malherbe
 St-George, Maison Neuve
 St-George, village
@@ -34859,6 +34877,7 @@ Ste-Croix, poste
 Ste-Croix, rue des Rasses
 Ste-Croix,centre de soins-hôp.
 Ste-Croix-aux-Mines Stimbach
+Ste-Cécile-d'Andorge
 Ste-Marie-aux-M S. Techniques
 Ste-Marie-aux-Mines Mairie
 Ste-Marie-aux-Mines Musées
@@ -35722,6 +35741,7 @@ TX 7338
 TX 7340
 TX 7341
 TX 7342
+TX 7343
 TX 7344
 TX 7345
 TX 7348
