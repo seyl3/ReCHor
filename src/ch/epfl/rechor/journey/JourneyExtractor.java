@@ -105,8 +105,16 @@ public class JourneyExtractor {
                 for (int j = 0; j < nbOfIntermediateStops; j++) {
                     // Récupération des informations sur l'arrêt intermédiaire
                     int interStopId = connections.arrStopId(nextConnectionId);
-                    LocalDateTime interArrTime = createTime(connections.arrMins(nextConnectionId), date);
-                    nextConnectionId = connections.nextConnectionId(nextConnectionId);
+
+                    int tempNextConnectionId = connections.nextConnectionId(nextConnectionId);
+
+                    if (tempNextConnectionId != -1) {
+                        nextConnectionId = tempNextConnectionId;
+                    } else {
+                        // Si pas de connexion suivante, on sort de la boucle
+                        break;
+                    }
+                    LocalDateTime interArrTime = createTime(connections.arrMins(connectionID), date);
                     LocalDateTime interDepTime = createTime(connections.depMins(nextConnectionId), date);
 
                     // Création d'un objet Stop pour la station intermédiaire
@@ -159,11 +167,11 @@ public class JourneyExtractor {
                     // Ajout d'une étape à pied vers la destination finale
                     legs.add(createFootLeg(profile, currentStationId, arrStationId, tripArrTime, transfers));
 
-                    // Si nous avons atteint la destination, on ajoute le voyage et on sort de la boucle
+                    /*// Si nous avons atteint la destination, on ajoute le voyage et on sort de la boucle
                     if (currentStationId == arrStationId) {
                         journeys.add(new Journey(legs));
                         break;
-                    }
+                    }*/
 
                     // Préparation pour la prochaine connexion
                     ParetoFront nextStationFront = profile.forStation(currentStationId);
@@ -171,7 +179,13 @@ public class JourneyExtractor {
 
                     // Protection contre les potentielles exceptions NoSuchElementException
                     long nextCriteria;
-                    nextCriteria = nextStationFront.get(targetArrTime, remainingChanges);
+                    try {
+                        nextCriteria = nextStationFront.get(targetArrTime, remainingChanges);
+                    } catch (NoSuchElementException e) {
+                        // Si aucun critère n'est trouvé, on termine ce voyage
+                        journeys.add(new Journey(legs));
+                        break;
+                    }
 
 
                     // Mise à jour des données pour la prochaine connexion
@@ -212,7 +226,7 @@ public class JourneyExtractor {
             }
 
 
-            journeys.add(new Journey(legs));
+            //journeys.add(new Journey(legs)); => Mis deux fois (already added at 199
 
 
         });

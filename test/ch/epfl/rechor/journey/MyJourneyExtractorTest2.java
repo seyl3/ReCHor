@@ -74,7 +74,7 @@ public class MyJourneyExtractorTest2 {
     private Profile readProfile(TimeTable timeTable, 
                                 LocalDate date, 
                                 int arrStationId) throws IOException {
-        Path path = Path.of("test/ch/epfl/rechor/profile_" + date + "_" + arrStationId + ".txt");
+        Path path = Path.of("profile_" + date + "_" + arrStationId + ".txt");
         try (BufferedReader r = Files.newBufferedReader(path)) {
             Profile.Builder profileB = new Profile.Builder(timeTable, date, arrStationId);
             int stationId = -1;
