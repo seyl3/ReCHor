@@ -226,7 +226,6 @@ public class JourneyExtractor {
             }
 
 
-            //journeys.add(new Journey(legs)); => Mis deux fois (already added at 199
 
 
         });
