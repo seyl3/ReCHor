@@ -80,7 +80,8 @@ public class JourneyExtractor {
 
             // Ajout d'une étape à pied initiale si nécessaire
             if (needsInitialFootTransfer) {
-                legs.add(createFootLeg(profile, currentStationId, firstStationID, createTime(depTime, date), transfers));
+                legs.add(createFootLeg(profile, currentStationId, firstStationID,
+                        createTime(depTime, date), transfers));
                 currentStationId = firstStationID; // Mise à jour de la station courante
             }
 
@@ -106,7 +107,8 @@ public class JourneyExtractor {
                     // Récupération des informations sur l'arrêt intermédiaire
                     int interStopId = connections.arrStopId(nextConnectionId);
 
-                    LocalDateTime interArrTime = createTime(connections.arrMins(nextConnectionId), date);
+                    LocalDateTime interArrTime = createTime(connections.arrMins(nextConnectionId)
+                            , date);
 
                     int tempNextConnectionId = connections.nextConnectionId(nextConnectionId);
                     if (tempNextConnectionId != -1) {
@@ -116,7 +118,8 @@ public class JourneyExtractor {
                         break;
                     }
 
-                    LocalDateTime interDepTime = createTime(connections.depMins(nextConnectionId), date);
+                    LocalDateTime interDepTime = createTime(connections.depMins(nextConnectionId)
+                            , date);
 
                     // Création d'un objet Stop pour la station intermédiaire
                     int stationId = tt.stationId(interStopId);
@@ -125,12 +128,14 @@ public class JourneyExtractor {
                     double longitude = tt.stations().longitude(stationId);
                     double latitude = tt.stations().latitude(stationId);
 
-                    Stop intermediateStop = new Stop(stationName, platformName, longitude, latitude);
+                    Stop intermediateStop = new Stop(stationName, platformName, longitude,
+                            latitude);
 
                     // Gestion des heures d'arrivée/départ pour respecter la contrainte:
                     // l'heure d'arrivée doit être avant l'heure de départ
                     if (interArrTime.isAfter(interDepTime)) {
-                        // Échange des heures pour éviter une exception lors de la création de IntermediateStop
+                        // Échange des heures pour éviter une exception lors de la création de
+                        // IntermediateStop
                         LocalDateTime temp = interArrTime;
                         interArrTime = interDepTime;
                         interDepTime = temp;
@@ -156,7 +161,8 @@ public class JourneyExtractor {
                 Stop arrStop = createStop(tt, stations, platforms, arrStopId);
 
                 // Création et ajout de l'étape de transport
-                Journey.Leg leg = new Journey.Leg.Transport(depStop, tripDepTime, arrStop, tripArrTime, intermediateStops, vehicle, route, destination);
+                Journey.Leg leg = new Journey.Leg.Transport(depStop, tripDepTime, arrStop,
+                        tripArrTime, intermediateStops, vehicle, route, destination);
                 legs.add(leg);
 
                 // Mise à jour de la station courante
@@ -172,7 +178,7 @@ public class JourneyExtractor {
 
 
                     // Protection contre les potentielles exceptions NoSuchElementException
-                    try{
+                    try {
                         long nextCriteria;
 
                         nextCriteria = nextStationFront.get(targetArrTime, remainingChanges);
@@ -185,29 +191,20 @@ public class JourneyExtractor {
                         int nextDepStationId = tt.stationId(nextDepStopId);
 
                         // Ajout d'une étape à pied vers la destination finale
-                        legs.add(createFootLeg(profile, currentStationId, nextDepStationId, tripArrTime, transfers));
+                        legs.add(createFootLeg(profile, currentStationId, nextDepStationId,
+                                tripArrTime, transfers));
 
 
                         // Conversion de l'ID d'arrêt en ID de station
                         currentStationId = nextDepStationId;
 
-                    }catch (NoSuchElementException e) {
+                    } catch (NoSuchElementException e) {
                         // Si aucun critère n'est trouvé, on termine ce voyage
-                        legs.add(createFootLeg(profile, currentStationId,arrStationId, tripArrTime, transfers));
+                        legs.add(createFootLeg(profile, currentStationId, arrStationId,
+                                tripArrTime, transfers));
                         journeys.add(new Journey(legs));
                         break;
                     }
-
-                      // Vérification si un transfert à pied entre connexions est nécessaire
-                      // Cas où l'on passe d'un trajet à un autre et devons marcher entre stations
-//                    int nextDepStopId = connections.depStopId(connectionID);
-//                    int nextDepStationId = tt.stationId(nextDepStopId);
-//
-                      // Ajout d'une étape à pied si les stations diffèrent
-//                    if (currentStationId != nextDepStationId) {
-//                        legs.add(createFootLeg(profile, currentStationId, nextDepStationId, createTime(depTime, date), transfers));
-//                        currentStationId = nextDepStationId;
-//                    }
 
                 } else {
                     // Si nous sommes directement à la station de destination
@@ -215,18 +212,6 @@ public class JourneyExtractor {
                     break;
                 }
             }
-
-           //Gestion du transfert à pied final si nécessaire
-            // Ajout d'une étape à pied si la dernière étape n'est pas déjà une étape à pied
-            // Et si nous ne sommes pas déjà à la destination
-//            boolean alreadyAtDestination = currentStationId == arrStationId;
-//
-//
-//            if (!alreadyAtDestination) {
-//                legs.add(createFootLeg(profile, currentStationId, arrStationId, createTime(depTime, date), transfers));
-//            }
-
-
 
 
         });
@@ -247,7 +232,9 @@ public class JourneyExtractor {
      * @param transfers     Données sur les transferts entre stations
      * @return Une étape à pied (Foot leg)
      */
-    private static Journey.Leg.Foot createFootLeg(Profile profile, int fromStationId, int toStationId, LocalDateTime depTime, Transfers transfers) {
+    private static Journey.Leg.Foot createFootLeg(Profile profile, int fromStationId,
+                                                  int toStationId, LocalDateTime depTime,
+                                                  Transfers transfers) {
         Stations stations = profile.timeTable().stations();
         Platforms platforms = profile.timeTable().platforms();
 
@@ -276,7 +263,8 @@ public class JourneyExtractor {
      * @param stopId    ID de l'arrêt
      * @return Un objet Stop représentant l'arrêt
      */
-    private static Stop createStop(TimeTable tt, Stations stations, Platforms platforms, int stopId) {
+    private static Stop createStop(TimeTable tt, Stations stations, Platforms platforms,
+                                   int stopId) {
         // Utilisation des méthodes de l'interface TimeTable pour gérer les stopIds
         int stationId = tt.stationId(stopId);
         String platformName = tt.platformName(stopId);

@@ -35,7 +35,8 @@ public final class IcalBuilder {
             for (int i = 0; i < value.length(); i += 74) {
                 newValue.append(value, i, Math.min(i + 74, value.length()));
                 if (i + 74 < value.length()) {
-                    newValue.append(CRLF).append(" "); // Ajout d'un espace pour respecter la norme iCalendar
+                    newValue.append(CRLF).append(" "); // Ajout d'un espace pour respecter la
+                    // norme iCalendar
                 }
             }
 
@@ -96,7 +97,8 @@ public final class IcalBuilder {
      * Construit et retourne la chaîne iCalendar complète.
      *
      * @return La représentation sous forme de chaîne du fichier iCalendar généré.
-     * @throws IllegalArgumentException si des composants n'ont pas été fermés correctement ou qu'on essaie de construire un ical vide
+     * @throws IllegalArgumentException si des composants n'ont pas été fermés correctement ou
+     *                                  qu'on essaie de construire un ical vide
      */
     public String build() {
         Preconditions.checkArgument(startedComponents.isEmpty());

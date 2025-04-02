@@ -55,11 +55,13 @@ public final class Submit {
         var token2 = args.length >= 2 ? args[1] : TOKEN_2;
 
         if (token1.length() != TOKEN_LENGTH) {
-            System.err.println("Erreur : vous n'avez correctement défini TOKEN_1 dans Submit.java !");
+            System.err.println("Erreur : vous n'avez correctement défini TOKEN_1 dans Submit.java" +
+                    " !");
             System.exit(1);
         }
         if (token2.length() != TOKEN_LENGTH) {
-            System.err.println("Erreur : vous n'avez correctement défini TOKEN_2 dans Submit.java !");
+            System.err.println("Erreur : vous n'avez correctement défini TOKEN_2 dans Submit.java" +
+                    " !");
             System.exit(1);
         }
 
@@ -72,7 +74,8 @@ public final class Submit {
                 try {
                     Files.createDirectory(submissionsDir);
                 } catch (FileAlreadyExistsException e) {
-                    System.err.printf("Erreur : impossible de créer le dossier %s !\n", submissionsDir);
+                    System.err.printf("Erreur : impossible de créer le dossier %s !\n",
+                            submissionsDir);
                     System.exit(1);
                 }
             }
@@ -92,7 +95,8 @@ public final class Submit {
 
             var zipArchive = createZipArchive(paths);
             var backupName = "%tF_%tH%tM%tS".formatted(
-                    submissionTimeStamp, submissionTimeStamp, submissionTimeStamp, submissionTimeStamp);
+                    submissionTimeStamp, submissionTimeStamp, submissionTimeStamp,
+                    submissionTimeStamp);
             var backupPath = submissionsDir.resolve(backupName + ".zip");
             writeZip(backupPath, zipArchive);
 
@@ -115,14 +119,19 @@ public final class Submit {
                                     validation vous sera communiqué par e-mail, à votre adresse de l'EPFL.
                                     """,
                             subId,
-                            paths.stream().map(Object::toString).collect(Collectors.joining("\n  ")));
+                            paths.stream().map(Object::toString).collect(Collectors.joining("\n  "
+                            )));
                 }
-                case HTTP_ENTITY_TOO_LARGE -> printStream.println("Erreur : l'archive est trop volumineuse !");
-                case HTTP_UNAUTHORIZED -> printStream.println("Erreur : au moins un des jetons est invalide !");
-                case HTTP_BAD_GATEWAY -> printStream.println("Erreur : le serveur de rendu n'est pas actif !");
+                case HTTP_ENTITY_TOO_LARGE ->
+                        printStream.println("Erreur : l'archive est trop volumineuse !");
+                case HTTP_UNAUTHORIZED ->
+                        printStream.println("Erreur : au moins un des jetons est invalide !");
+                case HTTP_BAD_GATEWAY ->
+                        printStream.println("Erreur : le serveur de rendu n'est pas actif !");
                 default -> printStream.printf("Erreur : réponse inattendue (%s)", response);
             }
-            printStream.printf("\nUne copie de sauvegarde de l'archive a été stockée dans :\n  %s\n",
+            printStream.printf("\nUne copie de sauvegarde de l'archive a été stockée dans :\n  " +
+                            "%s\n",
                     projectRoot.relativize(backupPath));
             System.exit(wasCreated ? 0 : 1);
         } catch (IOException | InterruptedException e) {
@@ -132,7 +141,8 @@ public final class Submit {
         }
     }
 
-    private static List<Path> getFileList(HttpClient httpClient) throws IOException, InterruptedException {
+    private static List<Path> getFileList(HttpClient httpClient) throws IOException,
+            InterruptedException {
         var fileListUri = baseUri.resolve("p/f/files-to-submit.txt");
         var httpRequest = HttpRequest.newBuilder(fileListUri)
                 .GET()
@@ -144,7 +154,8 @@ public final class Submit {
                 .toList();
     }
 
-    private static List<Path> filesToSubmit(Path projectRoot, Predicate<Path> keepFile) throws IOException {
+    private static List<Path> filesToSubmit(Path projectRoot, Predicate<Path> keepFile)
+            throws IOException {
         try (var paths = Files.walk(projectRoot)) {
             return paths
                     .filter(Files::isRegularFile)

@@ -28,6 +28,7 @@ final class SignatureChecks_6 {
     ch.epfl.rechor.journey.Profile.Builder v20;
     ch.epfl.rechor.journey.ParetoFront.Builder v21;
     java.util.List<ch.epfl.rechor.journey.Journey> v22;
+
     private SignatureChecks_6() {
     }
 

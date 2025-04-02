@@ -1,7 +1,8 @@
 package ch.epfl.rechor;
 
 /**
- * Classe utilitaire pour manipuler des entiers de 32 bits en les séparanten / les créant à partir de  :
+ * Classe utilitaire pour manipuler des entiers de 32 bits en les séparanten / les créant à
+ * partir de  :
  * - 24 bits de poids fort
  * - 8 bits de poids faible
  */
@@ -12,8 +13,10 @@ public final class Bits32_24_8 {
     /**
      * Combine un entier de 24 bits et un entier de 8 bits en un seul entier de 32 bits.
      *
-     * @param bits24 Partie haute de 24 bits (doit être contenu dans les 24 bits les plus bas d'un entier).
-     * @param bits8  Partie basse de 8 bits (doit être contenu dans les 8 bits les plus bas d'un entier).
+     * @param bits24 Partie haute de 24 bits (doit être contenu dans les 24 bits les plus bas
+     *               d'un entier).
+     * @param bits8  Partie basse de 8 bits (doit être contenu dans les 8 bits les plus bas d'un
+     *               entier).
      * @return Un entier de 32 bits combinant les valeurs de `bits24` et `bits8`.
      * @throws IllegalArgumentException si `bits24` dépasse 24 bits ou si `bits8` dépasse 8 bits.
      */

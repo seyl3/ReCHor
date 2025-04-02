@@ -3,8 +3,10 @@ package ch.epfl.rechor.timetable;
 /**
  * Interface représentant des courses de transport public indexées.
  * <p>
- * Chaque course est associée à une ligne de transport (identifiée par un index) et à une destination finale.
- * Les méthodes de cette interface permettent d'accéder à ces informations en fonction de l'index de la course.
+ * Chaque course est associée à une ligne de transport (identifiée par un index) et à une
+ * destination finale.
+ * Les méthodes de cette interface permettent d'accéder à ces informations en fonction de l'index
+ * de la course.
  * </p>
  */
 public interface Trips extends Indexed {

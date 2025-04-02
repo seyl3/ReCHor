@@ -6,7 +6,8 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
- * La classe BufferedPlatforms implémente l'interface Platforms et permet d'accéder à une table de voies ou quais représentée de manière aplatie.
+ * La classe BufferedPlatforms implémente l'interface Platforms et permet d'accéder à une table
+ * de voies ou quais représentée de manière aplatie.
  * Chaque voie ou quai est représenté par les champs suivants :
  * - NAME_ID : l'identifiant du nom de la voie ou du quai (U16)
  * - STATION_ID : l'identifiant de la gare parente (U16)
@@ -25,7 +26,8 @@ public final class BufferedPlatforms implements Platforms {
      */
     public BufferedPlatforms(List<String> stringTable, ByteBuffer buffer) {
         this.stringTable = List.copyOf(stringTable);
-        this.buffer = new StructuredBuffer(new Structure(Structure.field(NAME_ID, Structure.FieldType.U16)
+        this.buffer = new StructuredBuffer(new Structure(Structure.field(NAME_ID,
+                Structure.FieldType.U16)
                 , Structure.field(STATION_ID, Structure.FieldType.U16))
                 , buffer);
     }

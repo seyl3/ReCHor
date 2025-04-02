@@ -8,7 +8,8 @@ import java.util.UUID;
 
 
 /**
- * Convertisseur permettant de générer un fichier iCalendar (.ics) à partir d'un trajet {@code Journey}.
+ * Convertisseur permettant de générer un fichier iCalendar (.ics) à partir d'un trajet {@code
+ * Journey}.
  */
 public final class JourneyIcalConverter {
     private JourneyIcalConverter() {
@@ -30,7 +31,8 @@ public final class JourneyIcalConverter {
                 .add(IcalBuilder.Name.DTSTAMP, FormatterFr.formatEventTime(LocalDateTime.now()))
                 .add(IcalBuilder.Name.DTSTART, FormatterFr.formatEventTime(journey.depTime()))
                 .add(IcalBuilder.Name.DTEND, FormatterFr.formatEventTime(journey.arrTime()))
-                .add(IcalBuilder.Name.SUMMARY, journey.depStop().name() + " → " + journey.arrStop().name());
+                .add(IcalBuilder.Name.SUMMARY,
+                        journey.depStop().name() + " → " + journey.arrStop().name());
 
         StringBuilder description = new StringBuilder();
         for (int i = 0; i < journey.legs().size(); i++) {

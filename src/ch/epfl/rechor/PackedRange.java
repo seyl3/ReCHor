@@ -1,7 +1,8 @@
 package ch.epfl.rechor;
 
 /**
- * Classe utilitaire permettant d'empaqueter un intervalle de valeurs entières sous la forme d'un entier de 32 bits.
+ * Classe utilitaire permettant d'empaqueter un intervalle de valeurs entières sous la forme d'un
+ * entier de 32 bits.
  * La plage est représentée par :
  * - 24 bits pour le début de l'intervalle (inclus)
  * - 8 bits pour la longueur de l'intervalle
@@ -14,9 +15,11 @@ public final class PackedRange {
      * Encode un intervalle d'entiers sous la forme d'un entier de 32 bits.
      *
      * @param startInclusive Début de l'intervalle (inclus). Doit tenir sur 24 bits.
-     * @param endExclusive   Fin de l'intervalle (exclus). La longueur de l'intervalle doit tenir sur 8 bits.
+     * @param endExclusive   Fin de l'intervalle (exclus). La longueur de l'intervalle doit tenir
+     *                       sur 8 bits.
      * @return Un entier de 32 bits représentant l'intervalle encodé.
-     * @throws IllegalArgumentException si `startInclusive` dépasse 24 bits ou si la longueur de l'intervalle dépasse 8 bits.
+     * @throws IllegalArgumentException si `startInclusive` dépasse 24 bits ou si la longueur de
+     *                                  l'intervalle dépasse 8 bits.
      */
     public static int pack(int startInclusive, int endExclusive) {
         Preconditions.checkArgument(endExclusive >= startInclusive);

@@ -9,7 +9,8 @@ import static java.lang.Math.scalb;
 
 
 /**
- * La classe BufferedStations implémente l'interface Stations et permet d'accéder à une table de gares représentée de manière aplatie.
+ * La classe BufferedStations implémente l'interface Stations et permet d'accéder à une table de
+ * gares représentée de manière aplatie.
  * Chaque gare est représentée par les champs suivants :
  * - NAME_ID : l'identifiant du nom de la gare (U16)
  * - LON : la longitude de la gare (S32)
@@ -31,7 +32,8 @@ public final class BufferedStations implements Stations {
      */
     public BufferedStations(List<String> stringTable, ByteBuffer buffer) {
         this.stringTable = List.copyOf(stringTable);
-        this.buffer = new StructuredBuffer(new Structure(Structure.field(NAME_ID, Structure.FieldType.U16)
+        this.buffer = new StructuredBuffer(new Structure(Structure.field(NAME_ID,
+                Structure.FieldType.U16)
                 , Structure.field(LON, Structure.FieldType.S32)
                 , Structure.field(LAT, Structure.FieldType.S32))
                 , buffer);

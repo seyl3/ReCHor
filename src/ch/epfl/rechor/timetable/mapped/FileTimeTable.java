@@ -21,8 +21,10 @@ import java.util.List;
  * nécessaire, ce qui améliore les performances au démarrage du programme.
  * </p>
  * <p>
- * Les données indépendantes de la date (gares, voies/quais, etc.) sont chargées lors de la création de l'instance,
- * tandis que les données dépendantes de la date (courses, liaisons) sont chargées à la demande via les méthodes
+ * Les données indépendantes de la date (gares, voies/quais, etc.) sont chargées lors de la
+ * création de l'instance,
+ * tandis que les données dépendantes de la date (courses, liaisons) sont chargées à la demande
+ * via les méthodes
  * tripsFor et connectionsFor.
  * </p>
  *
@@ -34,8 +36,10 @@ import java.util.List;
  * @param routes         Lignes de transport indexées
  * @param transfers      Changements indexés
  */
-public record FileTimeTable(Path directory, List<String> stringTable, Stations stations, StationAliases stationAliases,
-                            Platforms platforms, Routes routes, Transfers transfers) implements TimeTable {
+public record FileTimeTable(Path directory, List<String> stringTable, Stations stations,
+                            StationAliases stationAliases,
+                            Platforms platforms, Routes routes,
+                            Transfers transfers) implements TimeTable {
 
     private static final Charset STRING_CHARSET = StandardCharsets.ISO_8859_1;
 
@@ -86,16 +90,19 @@ public record FileTimeTable(Path directory, List<String> stringTable, Stations s
             transfersBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
         }
         try (FileChannel fileChannel = FileChannel.open(stationAliasesPath)) {
-            stationAliasesBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+            stationAliasesBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0,
+                    fileChannel.size());
         }
 
         Stations stations = new BufferedStations(stringTable, stationsBuffer);
-        StationAliases stationAliases = new BufferedStationAliases(stringTable, stationAliasesBuffer);
+        StationAliases stationAliases = new BufferedStationAliases(stringTable,
+                stationAliasesBuffer);
         Platforms platforms = new BufferedPlatforms(stringTable, platformsBuffer);
         Routes routes = new BufferedRoutes(stringTable, routesBuffer);
         Transfers transfers = new BufferedTransfers(transfersBuffer);
 
-        return new FileTimeTable(directory, stringTable, stations, stationAliases, platforms, routes, transfers);
+        return new FileTimeTable(directory, stringTable, stations, stationAliases, platforms,
+                routes, transfers);
 
     }
 
@@ -117,7 +124,8 @@ public record FileTimeTable(Path directory, List<String> stringTable, Stations s
             Path datePath = directory.resolve(date.toString());
             Path tripsPath = datePath.resolve("trips.bin");
             FileChannel fileChannel = FileChannel.open(tripsPath);
-            ByteBuffer buffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+            ByteBuffer buffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0,
+                    fileChannel.size());
             return new BufferedTrips(stringTable, buffer);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -143,8 +151,12 @@ public record FileTimeTable(Path directory, List<String> stringTable, Stations s
             Path succConnectionsPath = datePath.resolve("connections-succ.bin");
             FileChannel connectionsFileChannel = FileChannel.open(connectionsPath);
             FileChannel succConnectionsFileChannel = FileChannel.open(succConnectionsPath);
-            ByteBuffer connectionsBuffer = connectionsFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, connectionsFileChannel.size());
-            ByteBuffer succConnectionsBuffer = succConnectionsFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, succConnectionsFileChannel.size());
+            ByteBuffer connectionsBuffer =
+                    connectionsFileChannel.map(FileChannel.MapMode.READ_ONLY, 0,
+                            connectionsFileChannel.size());
+            ByteBuffer succConnectionsBuffer =
+                    succConnectionsFileChannel.map(FileChannel.MapMode.READ_ONLY, 0,
+                            succConnectionsFileChannel.size());
             return new BufferedConnections(connectionsBuffer, succConnectionsBuffer);
         } catch (IOException e) {
             throw new UncheckedIOException(e);

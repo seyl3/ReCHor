@@ -203,7 +203,8 @@ public class ParetoFront {
                 effectiveLength++;
 
                 // Étape 6 : Décaler les éléments non dominés vers la droite
-                System.arraycopy(front, insertPos, newFront, insertPos + 1, effectiveLength-insertPos-1);
+                System.arraycopy(front, insertPos, newFront, insertPos + 1,
+                effectiveLength-insertPos-1);
 
                 // Étape 7 : Mettre à jour la référence de la frontière
                 front = newFront;
@@ -222,7 +223,8 @@ public class ParetoFront {
 
             // Étape 2 : Trouver la position d'insertion et vérifier si le tuple est dominé
             int insertPos = 0;
-            while (insertPos < effectiveLength && withPayload(front[insertPos], 0) < withPayload(packedTuple, 0)) {
+            while (insertPos < effectiveLength &&
+                    withPayload(front[insertPos], 0) < withPayload(packedTuple, 0)) {
                 insertPos++;
             }
 
@@ -304,12 +306,15 @@ public class ParetoFront {
         }
 
         /**
-         * Vérifie si la frontière donnée en paramètre, après avoir fixé l'heure de départ sur la valeur donné,
-         * est dominée entièrement par la frontière à laquelle on applique l'appel de cette méthode .
+         * Vérifie si la frontière donnée en paramètre, après avoir fixé l'heure de départ sur la
+         * valeur donné,
+         * est dominée entièrement par la frontière à laquelle on applique l'appel de cette
+         * méthode .
          *
          * @param that    Le bâtisseur de la frontière à tester.
          * @param depMins L'heure de départ à fixer.
-         * @return {@code true} si la frontière en cours de construction est dominée entièrement  par l'autre,
+         * @return {@code true} si la frontière en cours de construction est dominée entièrement
+         * par l'autre,
          * sinon {@code false}.
          */
         public boolean fullyDominates(Builder that, int depMins) {

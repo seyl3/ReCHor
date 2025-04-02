@@ -7,7 +7,8 @@ import java.nio.ByteBuffer;
 import java.util.NoSuchElementException;
 
 /**
- * La classe BufferedTransfers implémente l'interface Transfers et permet d'accéder à une table de transferts représentée de manière aplatie.
+ * La classe BufferedTransfers implémente l'interface Transfers et permet d'accéder à une table
+ * de transferts représentée de manière aplatie.
  * Chaque transfert est représenté par les champs suivants :
  * - FROM_STOP_ID : l'identifiant de l'arrêt de départ (U16)
  * - TO_STOP_ID : l'identifiant de l'arrêt d'arrivée (U16)
@@ -28,7 +29,8 @@ public final class BufferedTransfers implements Transfers {
      */
 
     public BufferedTransfers(ByteBuffer buffer) {
-        this.buffer = new StructuredBuffer(new Structure(new Structure.Field(DEP_STATION_ID, Structure.FieldType.U16)
+        this.buffer = new StructuredBuffer(new Structure(new Structure.Field(DEP_STATION_ID,
+                Structure.FieldType.U16)
                 , new Structure.Field(ARR_STATION_ID, Structure.FieldType.U16)
                 , new Structure.Field(TRANSFERS_MINUTES, Structure.FieldType.U8))
                 , buffer);
@@ -39,7 +41,8 @@ public final class BufferedTransfers implements Transfers {
             return;
         }
 
-        // Étape 2 : Trouver l'identifiant de la station d'arrivée maximale pour déterminer la taille du tableau
+        // Étape 2 : Trouver l'identifiant de la station d'arrivée maximale pour déterminer la
+        // taille du tableau
         int maxStationId = 0;
         for (int i = 0; i < this.buffer.size(); i++) {
             int stationId = this.buffer.getU16(ARR_STATION_ID, i);
@@ -48,7 +51,8 @@ public final class BufferedTransfers implements Transfers {
             }
         }
 
-        // Étape 3 : Créer un tableau de taille maxStationId + 1 pour contenir tous les identifiants de station (0 à maxStationId)
+        // Étape 3 : Créer un tableau de taille maxStationId + 1 pour contenir tous les
+        // identifiants de station (0 à maxStationId)
         this.arrivingAt = new int[maxStationId + 1];
 
         // Étape 4 : Regrouper les transferts par identifiant de station d'arrivée
@@ -58,7 +62,8 @@ public final class BufferedTransfers implements Transfers {
         for (int i = 1; i < this.buffer.size(); i++) {
             int stationId = this.buffer.getU16(ARR_STATION_ID, i);
 
-            // Étape 5 : Lorsqu'un identifiant de station différent est trouvé, stocker l'intervalle pour la station précédente
+            // Étape 5 : Lorsqu'un identifiant de station différent est trouvé, stocker
+            // l'intervalle pour la station précédente
             if (stationId != currentStationId) {
                 arrivingAt[currentStationId] = PackedRange.pack(startIndex, i);
                 currentStationId = stationId;
@@ -87,7 +92,8 @@ public final class BufferedTransfers implements Transfers {
 
     @Override
     public int minutesBetween(int depStationId, int arrStationId) {
-        int range = arrivingAt[arrStationId]; // Lève naturellement une IndexOutOfBoundsException, pas besoin de précondition
+        int range = arrivingAt[arrStationId]; // Lève naturellement une
+        // IndexOutOfBoundsException, pas besoin de précondition
         int start = PackedRange.startInclusive(range);
         int end = PackedRange.endExclusive(range) - 1;
 

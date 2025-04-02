@@ -24,7 +24,8 @@ public record Journey(List<Leg> legs) {
      *
      * @param legs la liste d'étapes formant ce voyage
      * @throws NullPointerException     si legs est null
-     * @throws IllegalArgumentException si la liste est vide ou si l'alternance entre Transport et Foot n'est pas respectée
+     * @throws IllegalArgumentException si la liste est vide ou si l'alternance entre Transport
+     *                                  et Foot n'est pas respectée
      */
     public Journey {
         Objects.requireNonNull(legs);
@@ -154,7 +155,8 @@ public record Journey(List<Leg> legs) {
          * @throws NullPointerException     si un des paramètres est null
          * @throws IllegalArgumentException si depTime n'est pas avant ou égale à arrTime
          */
-        record Foot(Stop depStop, LocalDateTime depTime, Stop arrStop, LocalDateTime arrTime) implements Leg {
+        record Foot(Stop depStop, LocalDateTime depTime, Stop arrStop,
+                    LocalDateTime arrTime) implements Leg {
             public Foot {
                 Objects.requireNonNull(depStop);
                 Objects.requireNonNull(depTime);
@@ -169,7 +171,8 @@ public record Journey(List<Leg> legs) {
             }
 
             /**
-             * Indique s'il s'agit d'un simple transfert (même nom pour l'arrêt de départ et d'arrivée).
+             * Indique s'il s'agit d'un simple transfert (même nom pour l'arrêt de départ et
+             * d'arrivée).
              *
              * @return true si les noms sont identiques, false sinon
              */

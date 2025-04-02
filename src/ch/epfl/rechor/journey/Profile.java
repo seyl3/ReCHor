@@ -8,7 +8,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public record Profile(TimeTable timeTable, LocalDate date, int arrStationId, List<ParetoFront> stationFront) {
+public record Profile(TimeTable timeTable, LocalDate date, int arrStationId,
+                      List<ParetoFront> stationFront) {
 
     public Profile {
         stationFront = List.copyOf(stationFront);

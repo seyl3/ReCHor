@@ -6,7 +6,8 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
- * La classe BufferedTrips implémente l'interface Trips et permet d'accéder à une table de trajets représentée de manière aplatie.
+ * La classe BufferedTrips implémente l'interface Trips et permet d'accéder à une table de
+ * trajets représentée de manière aplatie.
  * Chaque trajet est représenté par les champs suivants :
  * - ROUTE_ID : l'identifiant de la route (U16)
  * - DESTINATION_ID : l'identifiant de la destination (U16)
@@ -25,7 +26,8 @@ public final class BufferedTrips implements Trips {
      */
     public BufferedTrips(List<String> stringTable, ByteBuffer buffer) {
         this.stringTable = stringTable;
-        this.buffer = new StructuredBuffer(new Structure(new Structure.Field(ROUTE_ID, Structure.FieldType.U16)
+        this.buffer = new StructuredBuffer(new Structure(new Structure.Field(ROUTE_ID,
+                Structure.FieldType.U16)
                 , new Structure.Field(DESTINATION_ID, Structure.FieldType.U16))
                 , buffer);
     }

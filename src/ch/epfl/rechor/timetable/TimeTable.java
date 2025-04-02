@@ -5,7 +5,8 @@ import java.time.LocalDate;
 /**
  * Interface représentant un horaire de transport public.
  * <p>
- * Un horaire contient des informations sur les gares, les noms alternatifs des gares, les voies/quais,
+ * Un horaire contient des informations sur les gares, les noms alternatifs des gares, les
+ * voies/quais,
  * les lignes de transport, les changements, les courses et les liaisons, toutes indexées.
  * </p>
  */
@@ -78,7 +79,8 @@ public interface TimeTable {
      * @return {@code true} si l'index correspond à une voie/quai, {@code false} sinon.
      */
     default boolean isPlatformId(int platformId) {
-        return (platformId - stations().size() >= 0 && (platformId - stations().size()) < platforms().size());
+        return (platformId - stations().size() >= 0 &&
+                (platformId - stations().size()) < platforms().size());
     }
 
     /**
@@ -87,7 +89,8 @@ public interface TimeTable {
      *
      * @param stopId L'index d'arrêt à vérifier.
      * @return L'index de la gare associée à l'arrêt.
-     * @throws IllegalArgumentException Si l'index d'arrêt ne correspond ni à une gare ni à une voie/quai.
+     * @throws IllegalArgumentException Si l'index d'arrêt ne correspond ni à une gare ni à une
+     *                                  voie/quai.
      */
     default int stationId(int stopId) {
         if (isPlatformId(stopId)) {
@@ -104,7 +107,8 @@ public interface TimeTable {
      *
      * @param stopId L'index d'arrêt à vérifier.
      * @return Le nom de la voie/quai ou {@code null} si l'arrêt est une gare.
-     * @throws IllegalArgumentException Si l'index d'arrêt ne correspond ni à une gare ni à une voie/quai.
+     * @throws IllegalArgumentException Si l'index d'arrêt ne correspond ni à une gare ni à une
+     *                                  voie/quai.
      */
     default String platformName(int stopId) {
         if (isPlatformId(stopId)) {

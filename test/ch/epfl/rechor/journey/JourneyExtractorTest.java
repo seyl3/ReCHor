@@ -125,22 +125,17 @@ class JourneyExtractorTest {
             var sIt = t.intermediateStops().iterator();
             var s = sIt.next();
 
-            System.out.println(s.arrTime());
-            System.out.println(s.stop().name());
+
             assertEquals(d.atTime(10, 33), s.arrTime());
             assertEquals(d.atTime(10, 33), s.depTime());
             assertEquals("Klosters Dorf", s.stop().name());
 
             s = sIt.next();
-            System.out.println(s.arrTime());
-            System.out.println(s.stop().name());
             assertEquals(d.atTime(10, 47), s.arrTime());
             assertEquals(d.atTime(10, 48), s.depTime());
             assertEquals("Küblis", s.stop().name());
 
             s = sIt.next();
-            System.out.println(s.arrTime());
-            System.out.println(s.stop().name());
             assertEquals(d.atTime(10, 54), s.arrTime());
             assertEquals(d.atTime(10, 54), s.depTime());
             assertEquals("Jenaz", s.stop().name());
