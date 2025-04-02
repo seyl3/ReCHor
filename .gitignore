@@ -14,6 +14,8 @@ Submit.java
 # Common Java gitignore patterns
 # Compiled class file
 *.class
+out/
+bin/
 
 # Log file
 *.log
