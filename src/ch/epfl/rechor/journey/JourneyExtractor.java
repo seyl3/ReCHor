@@ -106,15 +106,16 @@ public class JourneyExtractor {
                     // Récupération des informations sur l'arrêt intermédiaire
                     int interStopId = connections.arrStopId(nextConnectionId);
 
-                    int tempNextConnectionId = connections.nextConnectionId(nextConnectionId);
+                    LocalDateTime interArrTime = createTime(connections.arrMins(nextConnectionId), date);
 
+                    int tempNextConnectionId = connections.nextConnectionId(nextConnectionId);
                     if (tempNextConnectionId != -1) {
                         nextConnectionId = tempNextConnectionId;
                     } else {
                         // Si pas de connexion suivante, on sort de la boucle
                         break;
                     }
-                    LocalDateTime interArrTime = createTime(connections.arrMins(connectionID), date);
+
                     LocalDateTime interDepTime = createTime(connections.depMins(nextConnectionId), date);
 
                     // Création d'un objet Stop pour la station intermédiaire
@@ -164,49 +165,49 @@ public class JourneyExtractor {
 
                 // Traitement de l'arrivée et des transferts
                 if (currentStationId != arrStationId) {
-                    // Ajout d'une étape à pied vers la destination finale
-                    legs.add(createFootLeg(profile, currentStationId, arrStationId, tripArrTime, transfers));
-
-                    /*// Si nous avons atteint la destination, on ajoute le voyage et on sort de la boucle
-                    if (currentStationId == arrStationId) {
-                        journeys.add(new Journey(legs));
-                        break;
-                    }*/
+                    remainingChanges--;
 
                     // Préparation pour la prochaine connexion
                     ParetoFront nextStationFront = profile.forStation(currentStationId);
-                    remainingChanges--;
+
 
                     // Protection contre les potentielles exceptions NoSuchElementException
-                    long nextCriteria;
-                    try {
+                    try{
+                        long nextCriteria;
+
                         nextCriteria = nextStationFront.get(targetArrTime, remainingChanges);
-                    } catch (NoSuchElementException e) {
+                        // Mise à jour des données pour la prochaine connexion
+                        depTime = depMins(nextCriteria);
+                        connectionID = unpack24(payload(nextCriteria));
+                        nbOfIntermediateStops = unpack8(payload(nextCriteria));
+
+                        int nextDepStopId = connections.depStopId(connectionID);
+                        int nextDepStationId = tt.stationId(nextDepStopId);
+
+                        // Ajout d'une étape à pied vers la destination finale
+                        legs.add(createFootLeg(profile, currentStationId, nextDepStationId, tripArrTime, transfers));
+
+
+                        // Conversion de l'ID d'arrêt en ID de station
+                        currentStationId = nextDepStationId;
+
+                    }catch (NoSuchElementException e) {
                         // Si aucun critère n'est trouvé, on termine ce voyage
+                        legs.add(createFootLeg(profile, currentStationId,arrStationId, tripArrTime, transfers));
                         journeys.add(new Journey(legs));
                         break;
                     }
 
-
-                    // Mise à jour des données pour la prochaine connexion
-                    depTime = depMins(nextCriteria);
-                    connectionID = unpack24(payload(nextCriteria));
-                    nbOfIntermediateStops = unpack8(payload(nextCriteria));
-                    firstStopId = connections.depStopId(connectionID);
-
-                    // Conversion de l'ID d'arrêt en ID de station
-                    currentStationId = tt.stationId(firstStopId);
-
-                    // Vérification si un transfert à pied entre connexions est nécessaire
-                    // Cas où l'on passe d'un trajet à un autre et devons marcher entre stations
-                    int nextDepStopId = connections.depStopId(connectionID);
-                    int nextDepStationId = tt.stationId(nextDepStopId);
-
-                    // Ajout d'une étape à pied si les stations diffèrent
-                    if (currentStationId != nextDepStationId) {
-                        legs.add(createFootLeg(profile, currentStationId, nextDepStationId, createTime(depTime, date), transfers));
-                        currentStationId = nextDepStationId;
-                    }
+                      // Vérification si un transfert à pied entre connexions est nécessaire
+                      // Cas où l'on passe d'un trajet à un autre et devons marcher entre stations
+//                    int nextDepStopId = connections.depStopId(connectionID);
+//                    int nextDepStationId = tt.stationId(nextDepStopId);
+//
+                      // Ajout d'une étape à pied si les stations diffèrent
+//                    if (currentStationId != nextDepStationId) {
+//                        legs.add(createFootLeg(profile, currentStationId, nextDepStationId, createTime(depTime, date), transfers));
+//                        currentStationId = nextDepStationId;
+//                    }
 
                 } else {
                     // Si nous sommes directement à la station de destination
@@ -215,15 +216,15 @@ public class JourneyExtractor {
                 }
             }
 
-            // Gestion du transfert à pied final si nécessaire
+           //Gestion du transfert à pied final si nécessaire
             // Ajout d'une étape à pied si la dernière étape n'est pas déjà une étape à pied
             // Et si nous ne sommes pas déjà à la destination
-            boolean alreadyAtDestination = currentStationId == arrStationId;
-
-
-            if (!alreadyAtDestination) {
-                legs.add(createFootLeg(profile, currentStationId, arrStationId, createTime(depTime, date), transfers));
-            }
+//            boolean alreadyAtDestination = currentStationId == arrStationId;
+//
+//
+//            if (!alreadyAtDestination) {
+//                legs.add(createFootLeg(profile, currentStationId, arrStationId, createTime(depTime, date), transfers));
+//            }
 
 
 
@@ -254,14 +255,10 @@ public class JourneyExtractor {
         Stop depStop = createStop(profile.timeTable(), stations, platforms, fromStationId);
         Stop arrStop = createStop(profile.timeTable(), stations, platforms, toStationId);
 
-        // Récupération du temps de marche entre stations, avec gestion des erreurs
+        // Récupération du temps de marche entre stations
         int walkingMinutes;
-        try {
-            walkingMinutes = transfers.minutesBetween(fromStationId, toStationId);
-        } catch (NoSuchElementException | IndexOutOfBoundsException e) {
-            // Fallback: utilisation d'un temps de marche par défaut basé sur le nombre de stations
-            walkingMinutes = 5 + Math.abs(fromStationId - toStationId) % 10;
-        }
+        walkingMinutes = transfers.minutesBetween(fromStationId, toStationId);
+
 
         // Calcul de l'heure d'arrivée
         LocalDateTime arrTime = depTime.plusMinutes(walkingMinutes);
