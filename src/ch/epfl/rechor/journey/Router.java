@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.NoSuchElementException;
+
 
 /**
  * Calcule le profil des trajets optimaux pour une date et une station de destination données
@@ -59,13 +59,8 @@ public record Router(TimeTable tt) {
         int destStart = PackedRange.startInclusive(destTransfersRange);
         int destEnd = PackedRange.endExclusive(destTransfersRange);
         for (int i = destStart; i < destEnd; ++i) {
-            try {
-                walkTimeToDest[transfers.depStationId(i)] = transfers.minutes(i);
-            } catch (NoSuchElementException e) {
-                // Ignorer ce transfert s'il n'existe pas dans les données (cas possible ?? ou
-                // bien on fait confiance aux données ?)
-                continue;
-            }
+            walkTimeToDest[transfers.depStationId(i)] = transfers.minutes(i);
+
         }
         // Le temps de marche depuis la destination vers elle-même est de 0.
         if (destinationStationId >= 0 && destinationStationId < stationCount) {
@@ -100,7 +95,7 @@ public record Router(TimeTable tt) {
 
             // Option 2 : Continuer même trajet
             if (tripFronts[tripId] != null && !tripFronts[tripId].isEmpty()) {
-                tripFronts[tripId].forEach(tripCrit -> {
+                tripFronts[tripId].build().forEach(tripCrit -> {
                     int existingPayload = PackedCriteria.payload(tripCrit);
                     int arrMins = PackedCriteria.arrMins(tripCrit);
                     int changes = PackedCriteria.changes(tripCrit);
@@ -113,17 +108,15 @@ public record Router(TimeTable tt) {
             // Option 3 : Changer de véhicule
             if (stationFronts[arrStationId] != null && !stationFronts[arrStationId].isEmpty()) {
                 stationFronts[arrStationId].forEach(stationCrit -> {
-                    try {
-                        int stationDepTime = PackedCriteria.depMins(stationCrit);
-                        if (stationDepTime >= arrTime) {
-                            int arrMins = PackedCriteria.arrMins(stationCrit);
-                            int changes = PackedCriteria.changes(stationCrit) + 1;
-                            int payload = Bits32_24_8.pack(connId, tripPos);
-                            long packedCriteria = PackedCriteria.pack(arrMins, changes, payload);
-                            packedCriteria = PackedCriteria.withDepMins(packedCriteria, depTime);
-                            f.add(packedCriteria);
-                        }
-                    } catch (IllegalArgumentException ignored) {
+                    //System.out.println("Station: " + Long.toUnsignedString(stationCrit));
+                    int stationDepTime = PackedCriteria.depMins(stationCrit);
+                    if (stationDepTime >= arrTime) {
+                        int arrMins = PackedCriteria.arrMins(stationCrit);
+                        int changes = PackedCriteria.changes(stationCrit) + 1;
+                        int payload = Bits32_24_8.pack(connId, tripPos);
+                        long packedCriteria = PackedCriteria.pack(arrMins, changes, payload);
+                        packedCriteria = PackedCriteria.withDepMins(packedCriteria, depTime);
+                        f.add(packedCriteria);
                     }
                 });
             }
@@ -133,11 +126,8 @@ public record Router(TimeTable tt) {
 
             // Ignorer si 'f' est dominée
             if (stationFronts[depStationId] != null) {
-                // Je ne suis pas sur si cette condition est nécessaire, est ce qu'on risque
-                // de rencontrer des critères qui n'ont pas de minutes de départ concrètement ??
-                 // Ajouter les minutes de départ à tous les critères de f
                 ParetoFront.Builder stationFrontWithDepTime = new ParetoFront.Builder();
-                stationFronts[depStationId].forEach(stationCrit -> {
+                stationFronts[depStationId].build().forEach(stationCrit -> {
                     if (!PackedCriteria.hasDepMins(stationCrit)) {
                         stationFrontWithDepTime.add(PackedCriteria.withDepMins(stationCrit, depTime));
                     } else {
@@ -146,7 +136,7 @@ public record Router(TimeTable tt) {
                 });
 
                 ParetoFront.Builder fWithDepTime = new ParetoFront.Builder();
-                f.forEach(fCrit -> {
+                f.build().forEach(fCrit -> {
                     if (!PackedCriteria.hasDepMins(fCrit)) {
                         fWithDepTime.add(PackedCriteria.withDepMins(fCrit, depTime));
                     } else {
@@ -170,15 +160,11 @@ public record Router(TimeTable tt) {
             for (int transferId = start; transferId < end; transferId++) {
                 int walkStartStationId = transfers.depStationId(transferId);
                 int walkDuration;
-                try {
-                    walkDuration = transfers.minutes(transferId);
-                } catch (NoSuchElementException e) {
-                    continue; // Ignorer ce transfert s'il n'existe pas
-                }
+                walkDuration = transfers.minutes(transferId);
                 final int effectiveDepTime = depTime - walkDuration;
 
                 ParetoFront.Builder stationUpdateBuilder = new ParetoFront.Builder();
-                f.forEach(fCrit -> {
+                f.build().forEach(fCrit -> {
                     int arrMins = PackedCriteria.arrMins(fCrit);
                     int changes = PackedCriteria.changes(fCrit);
                     int tripPayload = PackedCriteria.payload(fCrit);
@@ -198,20 +184,15 @@ public record Router(TimeTable tt) {
 
             // Mise à jour frontière de la station de départ elle-même (transfert sur place)
             int selfWalkDuration = 0;
-            try {
-                selfWalkDuration = transfers.minutesBetween(depStationId, depStationId);
-            } catch (NoSuchElementException ignored) {
-                // Ces try catch sont pour les transferts qui n'existent pas, mais sont ils
-                // nécessaires ??
-            }
+            selfWalkDuration = transfers.minutesBetween(depStationId, depStationId);
+
 
             final int selfEffectiveDepTime = depTime - selfWalkDuration;
             ParetoFront.Builder selfUpdateBuilder = new ParetoFront.Builder();
-            f.forEach(fCrit -> {
+            f.build().forEach(fCrit -> {
                 int arrMins = PackedCriteria.arrMins(fCrit);
                 int changes = PackedCriteria.changes(fCrit);
                 int tripPayload = PackedCriteria.payload(fCrit);
-                int connToLeave = Bits32_24_8.unpack24(tripPayload);
                 int posToLeave = Bits32_24_8.unpack8(tripPayload);
                 int stopsToSkip = Math.max(0, posToLeave - tripPos);
                 int finalPayload = Bits32_24_8.pack(connId, stopsToSkip);

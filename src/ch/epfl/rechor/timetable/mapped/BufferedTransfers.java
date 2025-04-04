@@ -9,9 +9,9 @@ import java.util.NoSuchElementException;
  * Implémentation de l'interface Transfers utilisant un buffer pour stocker les données.
  * <p>
  * Format des données :
- * - FROM_STOP_ID : l'identifiant de l'arrêt de départ (U16)
- * - TO_STOP_ID : l'identifiant de l'arrêt d'arrivée (U16)
- * - MIN_TRANSFER_TIME : le temps de transfert minimum en minutes (U16)
+ * - DEP_STATION_ID : l'identifiant de l'arrêt de départ (U16)
+ * - ARR_STATION_ID : l'identifiant de l'arrêt d'arrivée (U16)
+ * - TRANSFERS_MINUTES : le temps de transfert minimum en minutes (U16)
  * </p>
  *
  * @author Sarra Zghal, Elyes Ben Abid
