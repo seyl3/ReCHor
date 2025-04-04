@@ -247,27 +247,7 @@ public class JourneyExtractor {
 
         // Récupération du temps de marche entre stations
         int walkingMinutes;
-        try {
-            walkingMinutes = transfers.minutesBetween(fromStationId, toStationId);
-        } catch (NoSuchElementException e) {
-            // If no transfer data exists, estimate walking time based on distance
-            double fromLat = stations.latitude(fromStationId);
-            double fromLon = stations.longitude(fromStationId);
-            double toLat = stations.latitude(toStationId);
-            double toLon = stations.longitude(toStationId);
-
-            // Haversine formula to calculate distance in km
-            double dLat = Math.toRadians(toLat - fromLat);
-            double dLon = Math.toRadians(toLon - fromLon);
-            double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                    Math.cos(Math.toRadians(fromLat)) * Math.cos(Math.toRadians(toLat)) *
-                            Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            double distanceKm = 6371 * c; // Earth's radius = 6371 km
-
-            // Assume walking speed of 5 km/h = 12 minutes per km
-            walkingMinutes = (int) Math.ceil(distanceKm * 12);
-        }
+        walkingMinutes = transfers.minutesBetween(fromStationId, toStationId);
 
         // Calcul de l'heure d'arrivée
         LocalDateTime arrTime = depTime.plusMinutes(walkingMinutes);
