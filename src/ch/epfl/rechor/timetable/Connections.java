@@ -8,6 +8,9 @@ package ch.epfl.rechor.timetable;
  * une heure de départ et une heure d'arrivée. De plus, chaque liaison
  * appartient à une course et a une position définie dans celle-ci.
  * </p>
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
+ *
  */
 public interface Connections extends Indexed {
     /**

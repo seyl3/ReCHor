@@ -7,6 +7,9 @@ import static java.lang.Integer.toUnsignedLong;
 /**
  * Classe utilitaire permettant de compresser et manipuler des critères de recherche d'itinéraire
  * sous forme d'une valeur long.
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
+ *
  */
 public final class PackedCriteria {
     private PackedCriteria() {

@@ -6,6 +6,9 @@ package ch.epfl.rechor;
  * La plage est représentée par :
  * - 24 bits pour le début de l'intervalle (inclus)
  * - 8 bits pour la longueur de l'intervalle
+ *
+ *  @author Sarra Zghal, Elyes Ben Abid
+ *
  */
 public final class PackedRange {
     private PackedRange() {

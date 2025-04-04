@@ -35,6 +35,9 @@ import java.util.List;
  * @param platforms      Voies/quais indexés
  * @param routes         Lignes de transport indexées
  * @param transfers      Changements indexés
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
+ *
  */
 public record FileTimeTable(Path directory, List<String> stringTable, Stations stations,
                             StationAliases stationAliases,

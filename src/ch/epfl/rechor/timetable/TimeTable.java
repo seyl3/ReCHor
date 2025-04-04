@@ -9,6 +9,9 @@ import java.time.LocalDate;
  * voies/quais,
  * les lignes de transport, les changements, les courses et les liaisons, toutes indexées.
  * </p>
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
+ *
  */
 public interface TimeTable {
     /**

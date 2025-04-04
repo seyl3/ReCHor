@@ -7,6 +7,9 @@ import java.util.ArrayList;
 /**
  * Constructeur d'un fichier iCalendar (format .ics) permettant d'ajouter des événements
  * et de structurer les composants VCALENDAR et VEVENT.
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
+ *
  */
 public final class IcalBuilder {
 

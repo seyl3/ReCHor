@@ -2,19 +2,22 @@ package ch.epfl.rechor.timetable.mapped;
 
 import ch.epfl.rechor.Bits32_24_8;
 import ch.epfl.rechor.timetable.Connections;
-
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 /**
- * La classe BufferedConnections implémente l'interface Connections et permet d'accéder à une
- * table de liaisons représentée de manière aplatie.
- * Chaque liaison est représentée par les champs suivants :
+ * Implémentation de l'interface Connections utilisant un buffer pour stocker les données.
+ * <p>
+ * Format des données :
  * - DEP_STOP_ID : l'identifiant de l'arrêt de départ (U16)
  * - DEP_MINUTES : le temps de départ en minutes (U16)
  * - ARR_STOP_ID : l'identifiant de l'arrêt d'arrivée (U16)
  * - ARR_MINUTES : le temps d'arrivée en minutes (U16)
  * - TRIP_POS_ID : l'identifiant de la course et la position dans la course (S32)
+ * </p>
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
+ *
  */
 public final class BufferedConnections implements Connections {
     private final static int DEP_STOP_ID = 0;

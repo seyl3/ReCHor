@@ -6,6 +6,9 @@ package ch.epfl.rechor.timetable;
  * Chaque gare est identifiée par un index unique et possède un nom, ainsi que des informations
  * géographiques telles que la latitude et la longitude en degrés.
  * </p>
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
+ *
  */
 public interface Stations extends Indexed {
     /**

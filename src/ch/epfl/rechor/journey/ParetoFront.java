@@ -1,9 +1,15 @@
 package ch.epfl.rechor.journey;
 
+import static ch.epfl.rechor.journey.PackedCriteria.arrMins;
+import static ch.epfl.rechor.journey.PackedCriteria.changes;
+import static ch.epfl.rechor.journey.PackedCriteria.depMins;
+import static ch.epfl.rechor.journey.PackedCriteria.dominatesOrIsEqual;
+import static ch.epfl.rechor.journey.PackedCriteria.hasDepMins;
+import static ch.epfl.rechor.journey.PackedCriteria.pack;
+import static ch.epfl.rechor.journey.PackedCriteria.withDepMins;
+import static ch.epfl.rechor.journey.PackedCriteria.withPayload;
 import java.util.NoSuchElementException;
 import java.util.function.LongConsumer;
-
-import static ch.epfl.rechor.journey.PackedCriteria.*;
 
 /**
  * Classe représentant une frontière de Pareto de critères d'optimisation.
@@ -13,6 +19,9 @@ import static ch.epfl.rechor.journey.PackedCriteria.*;
  * informations comme l'heure d'arrivée, le nombre de changements, etc. La classe est
  * immuable et fournit une API permettant de récupérer, manipuler et itérer sur ces tuples.
  * </p>
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
+ *
  */
 public class ParetoFront {
     public static final ParetoFront EMPTY = new ParetoFront(new long[0]);

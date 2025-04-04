@@ -1,10 +1,13 @@
 package ch.epfl.rechor;
 
 /**
- * Classe utilitaire pour manipuler des entiers de 32 bits en les séparanten / les créant à
- * partir de  :
+ * Classe utilitaire pour manipuler des entiers de 32 bits en les séparant / en les créant à
+ * partir des :
  * - 24 bits de poids fort
  * - 8 bits de poids faible
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
+ *
  */
 public final class Bits32_24_8 {
     private Bits32_24_8() {

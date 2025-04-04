@@ -1,16 +1,19 @@
 package ch.epfl.rechor.timetable.mapped;
 
 import ch.epfl.rechor.timetable.Trips;
-
 import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
- * La classe BufferedTrips implémente l'interface Trips et permet d'accéder à une table de
- * trajets représentée de manière aplatie.
- * Chaque trajet est représenté par les champs suivants :
+ * Implémentation de l'interface Trips utilisant un buffer pour stocker les données.
+ * <p>
+ * Format des données :
  * - ROUTE_ID : l'identifiant de la route (U16)
  * - DESTINATION_ID : l'identifiant de la destination (U16)
+ * </p>
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
+ *
  */
 public final class BufferedTrips implements Trips {
     private static final int ROUTE_ID = 0;

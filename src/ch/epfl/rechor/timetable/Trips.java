@@ -8,6 +8,9 @@ package ch.epfl.rechor.timetable;
  * Les méthodes de cette interface permettent d'accéder à ces informations en fonction de l'index
  * de la course.
  * </p>
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
+ *
  */
 public interface Trips extends Indexed {
     /**

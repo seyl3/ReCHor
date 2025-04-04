@@ -11,6 +11,9 @@ import java.util.NoSuchElementException;
  * </p>
  *
  * @see Indexed
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
+ *
  */
 public interface Transfers extends Indexed {
     /**
