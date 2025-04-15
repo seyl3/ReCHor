@@ -19,11 +19,13 @@ public class StopIndex {
 
     public List<String> stopsMatching(String request, int limit) {
         if (request == null || request.isBlank()) return List.of();
-
-        final List<String> stops = Stream.concat(stopsNames.stream(),alternativeNames.values().stream()).toList();
-        Pattern pattern = Pattern.compile( buildRegex(request) , flags);
+        //
         // Étape 1 : découper la requête
-        String [] subRequests = pattern.split("\\s+");
+        Pattern spaceSplitter = Pattern.compile("\\s+"); // un ou plusieurs espaces
+        String[] subRequests = spaceSplitter.split(request.trim());
+
+
+
 
         // Étape 2 : créer les Patterns pour chaque sous-requête
         List<Pattern> subPatterns = Arrays.stream(subRequests)
@@ -34,7 +36,7 @@ public class StopIndex {
         // Étape 3–4 : filtrer les noms (principaux + alternatifs)
         // On filtre tous les noms (noms principaux et alternatifs) qui matchent toutes les sous-requêtes
         return Stream.concat(stopsNames.stream(), alternativeNames.keySet().stream())
-                .filter(name -> subPatterns.stream().allMatch(p -> p.matcher(name).find()))
+                .filter(name -> subPatterns.stream().anyMatch(p -> p.matcher(name).find()))
                 .map(name -> alternativeNames.getOrDefault(name, name)) // remplace le nom alternatif par son nom principal
                 .distinct()
                 .sorted(Comparator.comparingInt((String name) -> -pertinence(name, subRequests))) // tri par pertinence décroissante
