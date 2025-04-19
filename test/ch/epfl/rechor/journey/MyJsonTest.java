@@ -8,14 +8,13 @@ package ch.epfl.rechor.journey;
 import ch.epfl.rechor.Json;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Month;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MyJsonTest {
     static Journey MyExampleJourney() {
@@ -64,75 +63,6 @@ class MyJsonTest {
         return new Journey(List.of(l1, l2, l3, l4, l5));
     }
 
-    @Test
-    void journeyIcalConverterToIcalendarWorks() {
-        var dateFmt = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
-        var vcalendarContext = List.of("VCALENDAR");
-        var veventContext = List.of("VCALENDAR", "VEVENT");
-
-        var actual = JourneyIcalConverter.toIcalendar(MyExampleJourney());
-        var unfoldedActual = actual.replaceAll("\r\n ", "");
-        var context = new ArrayList<String>();
-        var requiredNames = new HashSet<>(
-                Set.of("VERSION", "PRODID", "UID", "DTSTAMP", "DTSTART", "SUMMARY", "DESCRIPTION"));
-
-        for (var line : unfoldedActual.split("\r\n")) {
-            var colonLoc = line.indexOf(':');
-            var name = line.substring(0, colonLoc);
-            var value = line.substring(colonLoc + 1);
-            requiredNames.remove(name);
-            switch (name) {
-                case "BEGIN" ->
-                        context.addLast(value);
-                case "END" -> {
-                    assertFalse(context.isEmpty());
-                    context.removeLast();
-                }
-                case "VERSION" -> {
-                    assertEquals("2.0", value);
-                    assertEquals(vcalendarContext, context);
-                }
-                case "PRODID" -> {
-                    assertEquals("ReCHor", value);
-                    assertEquals(vcalendarContext, context);
-                }
-                case "UID" -> {
-                    assertFalse(value.isBlank());
-                    assertEquals(veventContext, context);
-                }
-                case "DTSTAMP" -> {
-                    var timeStamp = LocalDateTime.parse(value, dateFmt);
-                    var elapsed = Duration.between(timeStamp, LocalDateTime.now()).abs();
-                    assertTrue(elapsed.compareTo(Duration.ofSeconds(10)) < 0);
-                    assertEquals(veventContext, context);
-                }
-                case "DTSTART" -> {
-                    var timeStart = LocalDateTime.parse(value, dateFmt);
-                    assertEquals(MyExampleJourney().depTime(), timeStart);
-                    assertEquals(veventContext, context);
-                }
-                case "DTEND" -> {
-                    var timeEnd = LocalDateTime.parse(value, dateFmt);
-                    assertEquals(MyExampleJourney().arrTime(), timeEnd);
-                    assertEquals(veventContext, context);
-                }
-                case "SUMMARY" -> {
-                    assertEquals("Ecublens VD, EPFL → Romont FR", value);
-                    assertEquals(veventContext, context);
-                }
-                case "DESCRIPTION" -> {
-                    assertEquals(
-                            "16h13 Ecublens VD, EPFL → Renens VD, gare (arr. 16h19)\\n" +
-                                    "trajet à pied (3 min)\\n" +
-                                    "16h26 Renens VD (voie 4) → Lausanne (arr. 16h33 voie 5)\\n" +
-                                    "changement (5 min)\\n" +
-                                    "16h40 Lausanne (voie 1) → Romont FR (arr. 17h13 voie 2)", value);
-                    assertEquals(veventContext, context);
-                }
-            }
-        }
-        assertEquals(Set.of(), requiredNames);
-    }
 
     @Test
     void jNumberToStringReturnsCorrectPrecision() {

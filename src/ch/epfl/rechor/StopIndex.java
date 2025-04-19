@@ -1,31 +1,58 @@
 package ch.epfl.rechor;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+/**
+ * Un index permettant de rechercher des arrêts de transport public par nom de manière flexible.
+ * <p>
+ * La recherche est tolérante aux différences d'accents, de casse (si la requête ne contient pas de majuscules),
+ * à l'ordre des mots, et accepte les noms alternatifs des arrêts.
+ *
+ * @author : Sarra Zghal, Elyes Ben Abid
+ *
+ */
 public class StopIndex {
     private final List<String> stopsNames;
     private final Map<String, String> alternativeNames;
     public static final int flags = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
 
-
+    /**
+     * Construit un index de noms d'arrêts avec leurs noms alternatifs.
+     *
+     * @param stopsNames       la liste des noms principaux d'arrêts à indexer
+     * @param alternativeNames une table associant les noms alternatifs à leur nom principal
+     * @throws NullPointerException si l'un des arguments est nul
+     */
     public StopIndex(List<String> stopsNames, Map<String, String> alternativeNames) {
         this.stopsNames = List.copyOf(stopsNames);
         this.alternativeNames = Map.copyOf(alternativeNames);
-
     }
 
+    /**
+     * Retourne les noms d'arrêts correspondant à la requête donnée, triés par pertinence.
+     * <p>
+     * La requête est découpée en sous-requêtes selon les espaces. Un arrêt correspond s'il contient
+     * toutes les sous-requêtes, en ignorant les accents et la casse. Les noms alternatifs sont
+     * automatiquement convertis en leurs noms principaux dans les résultats.
+     *
+     * @param request la requête de recherche
+     * @param limit   le nombre maximum de résultats à retourner
+     * @return la liste des noms d'arrêts correspondants, triés par pertinence décroissante,
+     *         sans doublons et de taille au plus {@code limit}
+     */
     public List<String> stopsMatching(String request, int limit) {
         if (request == null || request.isBlank()) return List.of();
         //
         // Étape 1 : découper la requête
         Pattern spaceSplitter = Pattern.compile("\\s+"); // un ou plusieurs espaces
         String[] subRequests = spaceSplitter.split(request.trim());
-
-
-
 
         // Étape 2 : créer les Patterns pour chaque sous-requête
         List<Pattern> subPatterns = Arrays.stream(subRequests)
@@ -43,7 +70,6 @@ public class StopIndex {
                 .limit(limit)
                 .toList();
     }
-
 
     private static String buildRegex(String query) {
         final Map<Character,String> equivalences = Map.of('a', "[aáàâä]",
@@ -63,6 +89,23 @@ public class StopIndex {
         }
         return regex.toString();
     }
+
+    /**
+     * Calcule le score de pertinence d'un nom d'arrêt par rapport aux sous-requêtes données.
+     * <p>
+     * Pour chaque sous-requête, le score est calculé comme suit :
+     * <ul>
+     *   <li>Score de base : pourcentage du nom correspondant à la sous-requête</li>
+     *   <li>Multiplicateur ×4 si la sous-requête est au début d'un mot</li>
+     *   <li>Multiplicateur ×2 si la sous-requête est à la fin d'un mot</li>
+     * </ul>
+     * Le score final est la somme des scores de toutes les sous-requêtes.
+     * Seule la première occurrence de chaque sous-requête est considérée.
+     *
+     * @param stopName    le nom de l'arrêt à évaluer
+     * @param subRequests les sous-requêtes à rechercher
+     * @return le score de pertinence total
+     */
     private static int pertinence(String stopName, String[] subRequests) {
         int score = 0;
         for (String subRequest : subRequests) {
@@ -86,5 +129,4 @@ public class StopIndex {
         }
         return score;
     }
-
 }

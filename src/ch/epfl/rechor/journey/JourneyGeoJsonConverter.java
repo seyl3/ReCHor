@@ -1,18 +1,35 @@
 package ch.epfl.rechor.journey;
 
-/*
- * @author : Sarra Zghal, Elyes Ben Abid
- */
-
 import ch.epfl.rechor.Json;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Convertisseur de voyages au format GeoJSON pour visualisation sur carte.
+ * <p>
+ * Cette classe non instanciable permet de convertir un voyage en une représentation
+ * GeoJSON de son tracé, optimisée pour la transmission web.
+ *
+ * @author : Sarra Zghal, Elyes Ben Abid
+ *
+ */
 public final class JourneyGeoJsonConverter {
 
+    private JourneyGeoJsonConverter() {}
+
+    /**
+     * Convertit un voyage en document GeoJSON représentant son tracé.
+     * <p>
+     * Le document généré contient une unique ligne brisée (LineString) passant par tous
+     * les arrêts du voyage. Les coordonnées sont arrondies à 5 décimales (~1m de précision)
+     * et les points successifs sont garantis différents. Le document est minifié (sans
+     * espaces ni retours à la ligne) pour optimiser sa taille.
+     *
+     * @param journey le voyage à convertir
+     * @return le document GeoJSON représentant le tracé du voyage
+     */
     public static Json.JObject toGeoJson(Journey journey) {
         List<Double> unsortedCoordinates = new ArrayList<>();
         List<Json> coordinatesList = new ArrayList<>();

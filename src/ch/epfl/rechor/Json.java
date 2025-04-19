@@ -5,53 +5,74 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+/**
+ * Représente un document JSON.
+ * <p>
+ * Cette interface scellée est implémentée par quatre enregistrements imbriqués
+ * représentant les types de données JSON utiles au projet : tableaux, objets,
+ * chaînes et nombres.
+ *
+ * @author : Sarra Zghal, Elyes Ben Abid
+ *
+ */
 public sealed interface Json {
 
-    record JArray(List<Json> jsons) implements Json {
-        public JArray(List<Json> jsons) {
-            this.jsons = List.copyOf(jsons);
+    /**
+     * Représente un tableau JSON.
+     *
+     * @param elements la liste des éléments du tableau
+     */
+    public record JArray(List<Json> elements) implements Json {
+        public JArray(List<Json> elements) {
+            this.elements = List.copyOf(elements);
         }
 
         @Override
         public String toString() {
-
             StringJoiner sj = new StringJoiner(",", "[", "]");
 
-            for (Json element : jsons) {
+            for (Json element : elements) {
                 sj.add(element.toString());
             }
             return sj.toString();
         }
     }
 
-    record JString(String string) implements Json {
+    /**
+     * Représente un objet JSON, similaire à une table associative.
+     *
+     * @param attributes la table associant des chaînes à des valeurs JSON
+     */
+    public record JObject(Map<String, Json> attributes) implements Json {
         @Override
         public String toString() {
-            return ("\"" + string + "\"");
-        }
-    }
-
-    record JNumber(double number) implements Json {
-        @Override
-        public String toString() {
-            return Double.toString(number);
-        }
-    }
-
-    record JObject(Map<String, Json> map) implements Json {
-
-        @Override
-        public String toString() {
-            return map.entrySet().stream()
-                    .map(e -> "\"" + e.getKey() + "\"" + ":" + e.getValue())
+            return attributes.entrySet().stream()
+                    .map(e -> "\"" + e.getKey().toString() + "\"" + ":" + e.getValue().toString())
                     .collect(Collectors.joining(",", "{", "}"));
         }
+    }
 
-        private static String formatJsonValue(Json value) {
-            return switch (value) {
-                case JString s -> "\"" + s.toString() + "\"";
-                default -> value.toString();
-            };
+    /**
+     * Représente une chaîne de caractères JSON.
+     *
+     * @param value la chaîne de caractères
+     */
+    public record JString(String value) implements Json {
+        @Override
+        public String toString() {
+            return ("\"" + value + "\"");
+        }
+    }
+
+    /**
+     * Représente un nombre JSON.
+     *
+     * @param value la valeur numérique
+     */
+    public record JNumber(double value) implements Json {
+        @Override
+        public String toString() {
+            return Double.toString(value);
         }
     }
 }
