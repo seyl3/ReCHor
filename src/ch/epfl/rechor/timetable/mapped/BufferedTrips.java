@@ -1,6 +1,7 @@
 package ch.epfl.rechor.timetable.mapped;
 
 import ch.epfl.rechor.timetable.Trips;
+
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -13,7 +14,6 @@ import java.util.List;
  * </p>
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public final class BufferedTrips implements Trips {
     private static final int ROUTE_ID = 0;

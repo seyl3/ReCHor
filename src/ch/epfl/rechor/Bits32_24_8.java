@@ -7,7 +7,6 @@ package ch.epfl.rechor;
  * - 8 bits de poids faible
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public final class Bits32_24_8 {
     private Bits32_24_8() {

@@ -5,8 +5,8 @@ import java.time.LocalDate;
 /**
  * Version optimisée de TimeTable qui met en cache les données dépendantes de la date.
  * <p>
- * Cette classe enveloppe un autre TimeTable et garde en mémoire les connexions et 
- * trajets de la dernière date consultée. Cela évite de recharger ces données à 
+ * Cette classe enveloppe un autre TimeTable et garde en mémoire les connexions et
+ * trajets de la dernière date consultée. Cela évite de recharger ces données à
  * chaque appel si la date n'a pas changé.
  * </p>
  * <p>
@@ -15,7 +15,6 @@ import java.time.LocalDate;
  * </p>
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public final class CachedTimeTable implements TimeTable {
 

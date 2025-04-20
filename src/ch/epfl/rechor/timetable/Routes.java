@@ -9,7 +9,6 @@ import ch.epfl.rechor.journey.Vehicle;
  * ainsi qu'un nom.
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public interface Routes extends Indexed {
 

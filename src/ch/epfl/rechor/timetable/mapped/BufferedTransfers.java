@@ -2,6 +2,7 @@ package ch.epfl.rechor.timetable.mapped;
 
 import ch.epfl.rechor.PackedRange;
 import ch.epfl.rechor.timetable.Transfers;
+
 import java.nio.ByteBuffer;
 import java.util.NoSuchElementException;
 
@@ -15,7 +16,6 @@ import java.util.NoSuchElementException;
  * </p>
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public final class BufferedTransfers implements Transfers {
     private final static int DEP_STATION_ID = 0;

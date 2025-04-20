@@ -12,7 +12,6 @@ import java.util.UUID;
  * Journey}.
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public final class JourneyIcalConverter {
     private JourneyIcalConverter() {

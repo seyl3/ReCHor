@@ -15,7 +15,6 @@ import java.util.Objects;
  * </ul>
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public record Stop(String name, String platformName, double longitude, double latitude) {
 

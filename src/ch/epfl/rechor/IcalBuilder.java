@@ -9,7 +9,6 @@ import java.util.ArrayList;
  * et de structurer les composants VCALENDAR et VEVENT.
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public final class IcalBuilder {
 

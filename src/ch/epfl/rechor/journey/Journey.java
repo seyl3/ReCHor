@@ -18,7 +18,6 @@ import java.util.Objects;
  * </ul>
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public record Journey(List<Leg> legs) {
 

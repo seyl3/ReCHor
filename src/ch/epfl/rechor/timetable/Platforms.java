@@ -7,7 +7,6 @@ package ch.epfl.rechor.timetable;
  * qu'un identifiant correspondant à la gare ou station à laquelle il appartient.
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public interface Platforms extends Indexed {
     /**

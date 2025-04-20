@@ -11,7 +11,6 @@ import java.time.LocalDate;
  * </p>
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public interface TimeTable {
     /**

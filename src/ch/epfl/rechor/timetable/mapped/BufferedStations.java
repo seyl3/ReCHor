@@ -1,9 +1,11 @@
 package ch.epfl.rechor.timetable.mapped;
 
 import ch.epfl.rechor.timetable.Stations;
-import static java.lang.Math.scalb;
+
 import java.nio.ByteBuffer;
 import java.util.List;
+
+import static java.lang.Math.scalb;
 
 
 /**
@@ -16,7 +18,6 @@ import java.util.List;
  * </p>
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public final class BufferedStations implements Stations {
     private static final int NAME_ID = 0;

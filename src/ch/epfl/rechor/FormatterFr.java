@@ -13,7 +13,6 @@ import java.time.temporal.ChronoField;
  * Classe utilitaire pour formater les informations liées aux trajets.
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public final class FormatterFr {
     private FormatterFr() {

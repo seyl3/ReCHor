@@ -13,6 +13,10 @@ import java.util.List;
 import static ch.epfl.rechor.gui.VehicleIcons.iconFor;
 
 public class MyVehicleIconTest extends Application {
+    public static void main(String[] args) {
+        launch();
+    }
+
     @Override
     public void start(Stage stage) {
         HBox root = new HBox(10);
@@ -30,9 +34,5 @@ public class MyVehicleIconTest extends Application {
         stage.setScene(scene);
         stage.setTitle("Vehicle Icons Viewer");
         stage.show();
-    }
-
-    public static void main(String[] args) {
-        launch();
     }
 }

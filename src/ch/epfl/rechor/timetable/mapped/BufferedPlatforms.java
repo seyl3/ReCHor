@@ -13,7 +13,6 @@ import java.util.List;
  * - STATION_ID : l'identifiant de la gare parente (U16)
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public final class BufferedPlatforms implements Platforms {
     private static final int NAME_ID = 0;

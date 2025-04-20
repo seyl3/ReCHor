@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
  * chaînes et nombres.
  *
  * @author : Sarra Zghal, Elyes Ben Abid
- *
  */
 public sealed interface Json {
 
@@ -22,7 +21,7 @@ public sealed interface Json {
      *
      * @param elements la liste des éléments du tableau
      */
-    public record JArray(List<Json> elements) implements Json {
+    record JArray(List<Json> elements) implements Json {
         public JArray(List<Json> elements) {
             this.elements = List.copyOf(elements);
         }
@@ -43,11 +42,11 @@ public sealed interface Json {
      *
      * @param attributes la table associant des chaînes à des valeurs JSON
      */
-    public record JObject(Map<String, Json> attributes) implements Json {
+    record JObject(Map<String, Json> attributes) implements Json {
         @Override
         public String toString() {
             return attributes.entrySet().stream()
-                    .map(e -> "\"" + e.getKey().toString() + "\"" + ":" + e.getValue().toString())
+                    .map(e -> "\"" + e.getKey() + "\"" + ":" + e.getValue().toString())
                     .collect(Collectors.joining(",", "{", "}"));
         }
     }
@@ -57,7 +56,7 @@ public sealed interface Json {
      *
      * @param value la chaîne de caractères
      */
-    public record JString(String value) implements Json {
+    record JString(String value) implements Json {
         @Override
         public String toString() {
             return ("\"" + value + "\"");
@@ -69,7 +68,7 @@ public sealed interface Json {
      *
      * @param value la valeur numérique
      */
-    public record JNumber(double value) implements Json {
+    record JNumber(double value) implements Json {
         @Override
         public String toString() {
             return Double.toString(value);

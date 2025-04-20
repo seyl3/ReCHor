@@ -1,6 +1,7 @@
 package ch.epfl.rechor.journey;
 
 import ch.epfl.rechor.Json;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,11 +14,11 @@ import java.util.Map;
  * GeoJSON de son tracé, optimisée pour la transmission web.
  *
  * @author : Sarra Zghal, Elyes Ben Abid
- *
  */
 public final class JourneyGeoJsonConverter {
 
-    private JourneyGeoJsonConverter() {}
+    private JourneyGeoJsonConverter() {
+    }
 
     /**
      * Convertit un voyage en document GeoJSON représentant son tracé.
@@ -50,14 +51,15 @@ public final class JourneyGeoJsonConverter {
 
         coordinates = unsortedCoordinates.stream()
                 .distinct()
-                .map( s -> s * 1e5)
+                .map(s -> s * 1e5)
                 .map(Math::round)
                 .map(s -> s / 1e5)
                 .map(Json.JNumber::new)
                 .toList();
 
         for (int i = 0; i < coordinates.size() - 1; i += 2) {
-            coordinatesList.add(new Json.JArray(List.of(coordinates.get(i), coordinates.get(i + 1))));
+            coordinatesList.add(
+                    new Json.JArray(List.of(coordinates.get(i), coordinates.get(i + 1))));
         }
 
         coordinatesArray = new Json.JArray(coordinatesList);

@@ -1,6 +1,7 @@
 package ch.epfl.rechor.timetable.mapped;
 
 import ch.epfl.rechor.Preconditions;
+
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
@@ -20,7 +21,6 @@ import java.util.Objects;
  * </p>
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public class StructuredBuffer {
     private final Structure structure;
@@ -30,9 +30,10 @@ public class StructuredBuffer {
      * Crée un nouveau buffer structuré.
      *
      * @param structure définit l'organisation des données
-     * @param buffer   contient les données à lire
-     * @throws IllegalArgumentException si la taille du buffer n'est pas un multiple de la taille de la structure
-     * @throws NullPointerException si structure ou buffer est null
+     * @param buffer    contient les données à lire
+     * @throws IllegalArgumentException si la taille du buffer n'est pas un multiple de la taille
+     *                                  de la structure
+     * @throws NullPointerException     si structure ou buffer est null
      */
     public StructuredBuffer(Structure structure, ByteBuffer buffer) {
         Preconditions.checkArgument(buffer.capacity() % structure.totalSize() == 0);

@@ -10,10 +10,8 @@ import java.util.NoSuchElementException;
  * Les changements ne sont possibles qu'entre des gares et non entre des voies ou quais.
  * </p>
  *
- * @see Indexed
- *
  * @author Sarra Zghal, Elyes Ben Abid
- *
+ * @see Indexed
  */
 public interface Transfers extends Indexed {
     /**

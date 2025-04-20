@@ -9,7 +9,6 @@ package ch.epfl.rechor;
  * </p>
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public final class Preconditions {
     // Empêche l'instanciation

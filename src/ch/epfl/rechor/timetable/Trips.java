@@ -10,7 +10,6 @@ package ch.epfl.rechor.timetable;
  * </p>
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public interface Trips extends Indexed {
     /**

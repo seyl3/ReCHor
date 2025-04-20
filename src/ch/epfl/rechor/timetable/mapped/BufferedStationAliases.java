@@ -13,7 +13,6 @@ import java.util.List;
  * - STATION_NAME_ID : l'identifiant du nom de la gare (U16)
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public final class BufferedStationAliases implements StationAliases {
     private static final int ALIAS_ID = 0;

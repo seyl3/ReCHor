@@ -17,7 +17,6 @@ import ch.epfl.rechor.Preconditions;
  * </p>
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public class Structure {
     private final Field[] fields;
@@ -29,7 +28,8 @@ public class Structure {
      * Les champs doivent être fournis dans l'ordre, avec des index consécutifs commençant à 0.
      *
      * @param fields les champs définissant la structure
-     * @throws IllegalArgumentException si la séquence de champs est vide ou si les index ne sont pas consécutifs
+     * @throws IllegalArgumentException si la séquence de champs est vide ou si les index ne sont
+     *                                  pas consécutifs
      */
     public Structure(Field... fields) {
         Preconditions.checkArgument(fields.length != 0 && fields[0].index() == 0);

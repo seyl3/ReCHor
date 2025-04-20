@@ -2,6 +2,7 @@ package ch.epfl.rechor.timetable.mapped;
 
 import ch.epfl.rechor.Bits32_24_8;
 import ch.epfl.rechor.timetable.Connections;
+
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
@@ -17,7 +18,6 @@ import java.nio.IntBuffer;
  * </p>
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public final class BufferedConnections implements Connections {
     private final static int DEP_STOP_ID = 0;

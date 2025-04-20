@@ -9,7 +9,6 @@ import static java.lang.Integer.toUnsignedLong;
  * sous forme d'une valeur long.
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public final class PackedCriteria {
     private PackedCriteria() {

@@ -2,11 +2,8 @@ package ch.epfl.rechor.journey;
 
 import ch.epfl.rechor.Bits32_24_8;
 import ch.epfl.rechor.PackedRange;
-import ch.epfl.rechor.timetable.Connections;
-import ch.epfl.rechor.timetable.Stations;
-import ch.epfl.rechor.timetable.TimeTable;
-import ch.epfl.rechor.timetable.Transfers;
-import ch.epfl.rechor.timetable.Trips;
+import ch.epfl.rechor.timetable.*;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,9 +16,7 @@ import java.util.List;
  *
  * @param tt L'horaire complet contenant toutes les données nécessaires (stations, connexions,
  *           etc.).
- *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public record Router(TimeTable tt) {
 
@@ -129,7 +124,8 @@ public record Router(TimeTable tt) {
                 ParetoFront.Builder stationFrontWithDepTime = new ParetoFront.Builder();
                 stationFronts[depStationId].build().forEach(stationCrit -> {
                     if (!PackedCriteria.hasDepMins(stationCrit)) {
-                        stationFrontWithDepTime.add(PackedCriteria.withDepMins(stationCrit, depTime));
+                        stationFrontWithDepTime.add(
+                                PackedCriteria.withDepMins(stationCrit, depTime));
                     } else {
                         stationFrontWithDepTime.add(stationCrit);
                     }

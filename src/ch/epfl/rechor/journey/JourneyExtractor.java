@@ -19,7 +19,6 @@ import static ch.epfl.rechor.journey.PackedCriteria.*;
  * des étapes de transport et à pied.
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public class JourneyExtractor {
 

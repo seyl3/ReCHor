@@ -1,10 +1,6 @@
 package ch.epfl.rechor;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -12,16 +8,16 @@ import java.util.stream.Stream;
 /**
  * Un index permettant de rechercher des arrêts de transport public par nom de manière flexible.
  * <p>
- * La recherche est tolérante aux différences d'accents, de casse (si la requête ne contient pas de majuscules),
+ * La recherche est tolérante aux différences d'accents, de casse (si la requête ne contient pas
+ * de majuscules),
  * à l'ordre des mots, et accepte les noms alternatifs des arrêts.
  *
  * @author : Sarra Zghal, Elyes Ben Abid
- *
  */
 public class StopIndex {
+    public static final int flags = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
     private final List<String> stopsNames;
     private final Map<String, String> alternativeNames;
-    public static final int flags = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
 
     /**
      * Construit un index de noms d'arrêts avec leurs noms alternatifs.
@@ -35,50 +31,14 @@ public class StopIndex {
         this.alternativeNames = Map.copyOf(alternativeNames);
     }
 
-    /**
-     * Retourne les noms d'arrêts correspondant à la requête donnée, triés par pertinence.
-     * <p>
-     * La requête est découpée en sous-requêtes selon les espaces. Un arrêt correspond s'il contient
-     * toutes les sous-requêtes, en ignorant les accents et la casse. Les noms alternatifs sont
-     * automatiquement convertis en leurs noms principaux dans les résultats.
-     *
-     * @param request la requête de recherche
-     * @param limit   le nombre maximum de résultats à retourner
-     * @return la liste des noms d'arrêts correspondants, triés par pertinence décroissante,
-     *         sans doublons et de taille au plus {@code limit}
-     */
-    public List<String> stopsMatching(String request, int limit) {
-        if (request == null || request.isBlank()) return List.of();
-        //
-        // Étape 1 : découper la requête
-        Pattern spaceSplitter = Pattern.compile("\\s+"); // un ou plusieurs espaces
-        String[] subRequests = spaceSplitter.split(request.trim());
-
-        // Étape 2 : créer les Patterns pour chaque sous-requête
-        List<Pattern> subPatterns = Arrays.stream(subRequests)
-                .map(StopIndex::buildRegex)
-                .map(r -> Pattern.compile(r, flags))
-                .toList();
-
-        // Étape 3–4 : filtrer les noms (principaux + alternatifs)
-        // On filtre tous les noms (noms principaux et alternatifs) qui matchent toutes les sous-requêtes
-        return Stream.concat(stopsNames.stream(), alternativeNames.keySet().stream())
-                .filter(name -> subPatterns.stream().anyMatch(p -> p.matcher(name).find()))
-                .map(name -> alternativeNames.getOrDefault(name, name)) // remplace le nom alternatif par son nom principal
-                .distinct()
-                .sorted(Comparator.comparingInt((String name) -> -pertinence(name, subRequests))) // tri par pertinence décroissante
-                .limit(limit)
-                .toList();
-    }
-
     private static String buildRegex(String query) {
-        final Map<Character,String> equivalences = Map.of('a', "[aáàâä]",
+        final Map<Character, String> equivalences = Map.of('a', "[aáàâä]",
                 'e', "[eéèêë]",
                 'i', "[iíìîï]",
                 'o', "[oóòôö]",
                 'u', "[uúùûü]",
                 'c', "[cç]");
-        StringJoiner regex = new StringJoiner("+","","");
+        StringJoiner regex = new StringJoiner("+", "", "");
         for (char c : query.toCharArray()) {
             char lower = Character.toLowerCase(c);
             if (equivalences.containsKey(lower)) {
@@ -118,7 +78,8 @@ public class StopIndex {
                 int baseScore = (100 * (end - start)) / stopName.length();
 
                 boolean atWordStart = start == 0 || !Character.isLetter(stopName.charAt(start - 1));
-                boolean atWordEnd = end == stopName.length() || !Character.isLetter(stopName.charAt(end));
+                boolean atWordEnd =
+                        end == stopName.length() || !Character.isLetter(stopName.charAt(end));
 
                 int factor = 1;
                 if (atWordStart) factor *= 4;
@@ -128,5 +89,44 @@ public class StopIndex {
             }
         }
         return score;
+    }
+
+    /**
+     * Retourne les noms d'arrêts correspondant à la requête donnée, triés par pertinence.
+     * <p>
+     * La requête est découpée en sous-requêtes selon les espaces. Un arrêt correspond s'il contient
+     * toutes les sous-requêtes, en ignorant les accents et la casse. Les noms alternatifs sont
+     * automatiquement convertis en leurs noms principaux dans les résultats.
+     *
+     * @param request la requête de recherche
+     * @param limit   le nombre maximum de résultats à retourner
+     * @return la liste des noms d'arrêts correspondants, triés par pertinence décroissante,
+     * sans doublons et de taille au plus {@code limit}
+     */
+    public List<String> stopsMatching(String request, int limit) {
+        if (request == null || request.isBlank()) return List.of();
+        //
+        // Étape 1 : découper la requête
+        Pattern spaceSplitter = Pattern.compile("\\s+"); // un ou plusieurs espaces
+        String[] subRequests = spaceSplitter.split(request.trim());
+
+        // Étape 2 : créer les Patterns pour chaque sous-requête
+        List<Pattern> subPatterns = Arrays.stream(subRequests)
+                .map(StopIndex::buildRegex)
+                .map(r -> Pattern.compile(r, flags))
+                .toList();
+
+        // Étape 3–4 : filtrer les noms (principaux + alternatifs)
+        // On filtre tous les noms (noms principaux et alternatifs) qui matchent toutes les
+        // sous-requêtes
+        return Stream.concat(stopsNames.stream(), alternativeNames.keySet().stream())
+                .filter(name -> subPatterns.stream().anyMatch(p -> p.matcher(name).find()))
+                .map(name -> alternativeNames.getOrDefault(name,
+                        name)) // remplace le nom alternatif par son nom principal
+                .distinct()
+                .sorted(Comparator.comparingInt((String name) -> -pertinence(name,
+                        subRequests))) // tri par pertinence décroissante
+                .limit(limit)
+                .toList();
     }
 }

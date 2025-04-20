@@ -2,6 +2,7 @@ package ch.epfl.rechor.timetable.mapped;
 
 import ch.epfl.rechor.journey.Vehicle;
 import ch.epfl.rechor.timetable.Routes;
+
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -14,7 +15,6 @@ import java.util.List;
  * </p>
  *
  * @author Sarra Zghal, Elyes Ben Abid
- *
  */
 public final class BufferedRoutes implements Routes {
     private static final int NAME_ID = 0;
