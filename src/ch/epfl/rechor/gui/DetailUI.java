@@ -166,7 +166,6 @@ public record DetailUI(Node rootNode) {
                                 interCurrentRow++;
                             }
                             interAccordion.getPanes().add(titledGrid);
-                            interAccordion.setExpandedPane(titledGrid);
                             currentRow++;
                         }
 

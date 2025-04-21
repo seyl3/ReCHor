@@ -58,7 +58,8 @@ public class MyDetailUITest extends Application {
                 d.atTime(16, 26),
                 s4,
                 d.atTime(16, 33),
-                List.of(),
+                List.of(new Journey.Leg.IntermediateStop(inter3, d.atTime(16, 50),
+                        d.atTime(16, 52))),
                 Vehicle.TRAIN,
                 "R4",
                 "Bex");
