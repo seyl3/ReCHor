@@ -33,9 +33,9 @@ public final class JourneyGeoJsonConverter {
      */
     public static Json.JObject toGeoJson(Journey journey) {
         List<Double> unsortedCoordinates = new ArrayList<>();
+        List<Json.JNumber> sortedCoordinates;
         List<Json> coordinatesList = new ArrayList<>();
-        List<Json.JNumber> coordinates;
-        Json.JArray coordinatesArray;
+        Json.JArray coordinatesJArray;
 
 
         for (Journey.Leg leg : journey.legs()) {
@@ -49,7 +49,7 @@ public final class JourneyGeoJsonConverter {
             unsortedCoordinates.add(leg.arrStop().latitude());
         }
 
-        coordinates = unsortedCoordinates.stream()
+        sortedCoordinates = unsortedCoordinates.stream()
                 .distinct()
                 .map(s -> s * 1e5)
                 .map(Math::round)
@@ -57,17 +57,17 @@ public final class JourneyGeoJsonConverter {
                 .map(Json.JNumber::new)
                 .toList();
 
-        for (int i = 0; i < coordinates.size() - 1; i += 2) {
+        for (int i = 0; i < sortedCoordinates.size() - 1; i += 2) {
             coordinatesList.add(
-                    new Json.JArray(List.of(coordinates.get(i), coordinates.get(i + 1))));
+                    new Json.JArray(List.of(sortedCoordinates.get(i), sortedCoordinates.get(i + 1))));
         }
 
-        coordinatesArray = new Json.JArray(coordinatesList);
+        coordinatesJArray = new Json.JArray(coordinatesList);
 
         //linkedHashMap permet de garantir que la map a bien le bon ordre qu'est l'ordre d'ajout
         Map<String, Json> orderedMap = new LinkedHashMap<>();
         orderedMap.put("type", new Json.JString("LineString"));
-        orderedMap.put("coordinates", coordinatesArray);
+        orderedMap.put("sortedCoordinates", coordinatesJArray);
 
         return new Json.JObject(orderedMap);
     }

@@ -27,8 +27,8 @@ public class MyDetailUITest extends Application {
     }
 
     private static Journey journeyExample() {
-        var s1 = new Stop("Ecublens VD, EPFL", null, 6.566141, 46.522196);
-        var s2 = new Stop("Renens VD, gare", null, 6.578519, 46.537619);
+        var s1 = new Stop("Ecublens VD, EPFL", "3", 6.566141, 46.522196);
+        var s2 = new Stop("Renens VD, gare", "1", 6.578519, 46.537619);
         var s3 = new Stop("Renens VD", "4", 6.578935, 46.537042);
         var s4 = new Stop("Lausanne", "5", 6.629092, 46.516792);
         var s5 = new Stop("Lausanne", "1", 6.629092, 46.516792);
