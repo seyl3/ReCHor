@@ -13,10 +13,10 @@ import ch.epfl.rechor.journey.Vehicle;
 import javafx.application.Application;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.SplitPane;
-import javafx.geometry.Orientation;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
@@ -47,7 +47,8 @@ public class SummaryUITest extends Application {
 
         var journey1 = new Journey(List.of(
                 new Journey.Leg.Transport(s1, d.atTime(8, 0), s2, d.atTime(8, 6),
-                        List.of(new Journey.Leg.IntermediateStop(inter1, d.atTime(8, 3), d.atTime(8, 4))),
+                        List.of(new Journey.Leg.IntermediateStop(inter1, d.atTime(8, 3),
+                                d.atTime(8, 4))),
                         Vehicle.METRO, "m1", "Renens VD, gare"),
                 new Journey.Leg.Foot(s2, d.atTime(8, 6), s3, d.atTime(8, 10)),
                 new Journey.Leg.Transport(s3, d.atTime(8, 15), s4, d.atTime(8, 25),
@@ -67,8 +68,10 @@ public class SummaryUITest extends Application {
 
         var journey3 = new Journey(List.of(
                 new Journey.Leg.Transport(s1, d.atTime(10, 0), s6, d.atTime(10, 45),
-                        List.of(new Journey.Leg.IntermediateStop(inter3, d.atTime(10, 25), d.atTime(10, 30)),
-                                new Journey.Leg.IntermediateStop(inter4, d.atTime(10, 35), d.atTime(10, 40))),
+                        List.of(new Journey.Leg.IntermediateStop(inter3, d.atTime(10, 25),
+                                        d.atTime(10, 30)),
+                                new Journey.Leg.IntermediateStop(inter4, d.atTime(10, 35),
+                                        d.atTime(10, 40))),
                         Vehicle.TRAIN, "IR15", "Romont"),
                 new Journey.Leg.Foot(s6, d.atTime(10, 45), s5, d.atTime(10, 50)),
                 new Journey.Leg.Transport(s5, d.atTime(10, 55), s7, d.atTime(11, 30),
@@ -146,7 +149,8 @@ public class SummaryUITest extends Application {
 
         // Clear pour faire des test
         Button clearButton = new Button("Change Journeys");
-        clearButton.setOnAction(e -> ((SimpleObjectProperty<List<Journey>>) journeysO).set(List.of(journeyExample())));
+        clearButton.setOnAction(e -> ((SimpleObjectProperty<List<Journey>>) journeysO).set(
+                List.of(journeyExample())));
 
         SplitPane horizontalSplit = new SplitPane();
         horizontalSplit.getItems().addAll(summaryUI.rootNode(), detailUI.rootNode());

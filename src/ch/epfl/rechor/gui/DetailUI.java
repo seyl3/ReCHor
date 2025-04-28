@@ -101,144 +101,146 @@ public record DetailUI(Node rootNode) {
             legsGrid.getChildren().clear();
             annotations.getChildren().clear();
 
-        if (journey.getValue() != null) {
-            noJourney.setVisible(false);
-            withJourney.setVisible(true);
+            if (journey.getValue() != null) {
+                noJourney.setVisible(false);
+                withJourney.setVisible(true);
 
-            int currentRow = 0;
+                int currentRow = 0;
 
-            for (Journey.Leg leg : journey.getValue().legs()) {
-                switch (leg) {
-                    case Journey.Leg.Foot footLeg -> {
-                        Text foot = new Text(formatLeg((Journey.Leg.Foot) leg));
-                        legsGrid.add(foot, 2, currentRow);
-                        setColumnSpan(foot, 2);
-                        currentRow++;
-                    }
-                    case Journey.Leg.Transport transportLeg -> {
-                        int imageSize = 31;
-
-                        // Ajout de l'heure de départ, cercle de départ, nom de la gare et sa
-                        // plateforme
-                        // de départ
-                        Text depTime = new Text(formatTime(leg.depTime()));
-                        depTime.getStyleClass().add("departure");
-                        Text depPlatform = new Text(formatPlatformName(leg.depStop()));
-                        depPlatform.getStyleClass().add("departure");
-                        Text depStation = new Text(leg.depStop().name());
-                        Circle depCircle = new Circle(3, Color.BLACK);
-
-                        legsGrid.add(depTime, 0, currentRow);
-                        legsGrid.add(depCircle, 1, currentRow);
-                        legsGrid.add(depStation, 2, currentRow);
-                        legsGrid.add(depPlatform, 3, currentRow);
-
-                        // Ajout de l'icone du véhicule, et du nom de la destination
-                        ImageView vehicleIcon =
-                                new ImageView(iconFor(((Journey.Leg.Transport) leg).vehicle()));
-                        vehicleIcon.setPreserveRatio(true);
-                        vehicleIcon.setFitWidth(imageSize);
-                        legsGrid.add(vehicleIcon, 0, currentRow + 1);
-                        setHalignment(vehicleIcon, HPos.CENTER);
-
-                        Text transport =
-                                new Text(formatRouteDestination((Journey.Leg.Transport) leg));
-                        legsGrid.add(transport, 2, currentRow + 1);
-                        setColumnSpan(transport, 2);
-
-                        // Ajout d'un menu dépliant, si il y'a des arrêts intermédiaires
-                        if (!leg.intermediateStops().isEmpty()) {
-                            setRowSpan(vehicleIcon, 2);
-
-                            Accordion interAccordion = new Accordion();
-                            legsGrid.add(interAccordion, 2, currentRow + 2);
-                            setColumnSpan(interAccordion, 2);
-
-                            GridPane interGrid = new GridPane();
-                            interGrid.getStyleClass().add("intermediate-stops");
-                            TitledPane titledGrid = new TitledPane(leg.intermediateStops().size() +
-                                    " arrêts, " + formatDuration(leg.duration()),
-                                    interGrid);
-
-                            int interCurrentRow = 0;
-                            for (Journey.Leg.IntermediateStop intermediateStop :
-                                    leg.intermediateStops()) {
-                                Text interArrTime =
-                                        new Text(formatTime(intermediateStop.arrTime()));
-                                interGrid.add(interArrTime, 0, interCurrentRow);
-
-                                Text interDepTime =
-                                        new Text(formatTime(intermediateStop.depTime()));
-                                interGrid.add(interDepTime, 1, interCurrentRow);
-
-                                Text interDepStation =
-                                        new Text(intermediateStop.stop().name());
-                                interGrid.add(interDepStation, 2, interCurrentRow);
-
-                                interCurrentRow++;
-                            }
-                            interAccordion.getPanes().add(titledGrid);
+                for (Journey.Leg leg : journey.getValue().legs()) {
+                    switch (leg) {
+                        case Journey.Leg.Foot footLeg -> {
+                            Text foot = new Text(formatLeg((Journey.Leg.Foot) leg));
+                            legsGrid.add(foot, 2, currentRow);
+                            setColumnSpan(foot, 2);
                             currentRow++;
                         }
+                        case Journey.Leg.Transport transportLeg -> {
+                            int imageSize = 31;
+
+                            // Ajout de l'heure de départ, cercle de départ, nom de la gare et sa
+                            // plateforme
+                            // de départ
+                            Text depTime = new Text(formatTime(leg.depTime()));
+                            depTime.getStyleClass().add("departure");
+                            Text depPlatform = new Text(formatPlatformName(leg.depStop()));
+                            depPlatform.getStyleClass().add("departure");
+                            Text depStation = new Text(leg.depStop().name());
+                            Circle depCircle = new Circle(3, Color.BLACK);
+
+                            legsGrid.add(depTime, 0, currentRow);
+                            legsGrid.add(depCircle, 1, currentRow);
+                            legsGrid.add(depStation, 2, currentRow);
+                            legsGrid.add(depPlatform, 3, currentRow);
+
+                            // Ajout de l'icone du véhicule, et du nom de la destination
+                            ImageView vehicleIcon =
+                                    new ImageView(iconFor(((Journey.Leg.Transport) leg).vehicle()));
+                            vehicleIcon.setPreserveRatio(true);
+                            vehicleIcon.setFitWidth(imageSize);
+                            legsGrid.add(vehicleIcon, 0, currentRow + 1);
+                            setHalignment(vehicleIcon, HPos.CENTER);
+
+                            Text transport =
+                                    new Text(formatRouteDestination((Journey.Leg.Transport) leg));
+                            legsGrid.add(transport, 2, currentRow + 1);
+                            setColumnSpan(transport, 2);
+
+                            // Ajout d'un menu dépliant, si il y'a des arrêts intermédiaires
+                            if (!leg.intermediateStops().isEmpty()) {
+                                setRowSpan(vehicleIcon, 2);
+
+                                Accordion interAccordion = new Accordion();
+                                legsGrid.add(interAccordion, 2, currentRow + 2);
+                                setColumnSpan(interAccordion, 2);
+
+                                GridPane interGrid = new GridPane();
+                                interGrid.getStyleClass().add("intermediate-stops");
+                                TitledPane titledGrid =
+                                        new TitledPane(leg.intermediateStops().size() +
+                                                " arrêts, " + formatDuration(leg.duration()),
+                                                interGrid);
+
+                                int interCurrentRow = 0;
+                                for (Journey.Leg.IntermediateStop intermediateStop :
+                                        leg.intermediateStops()) {
+                                    Text interArrTime =
+                                            new Text(formatTime(intermediateStop.arrTime()));
+                                    interGrid.add(interArrTime, 0, interCurrentRow);
+
+                                    Text interDepTime =
+                                            new Text(formatTime(intermediateStop.depTime()));
+                                    interGrid.add(interDepTime, 1, interCurrentRow);
+
+                                    Text interDepStation =
+                                            new Text(intermediateStop.stop().name());
+                                    interGrid.add(interDepStation, 2, interCurrentRow);
+
+                                    interCurrentRow++;
+                                }
+                                interAccordion.getPanes().add(titledGrid);
+                                currentRow++;
+                            }
 
 
-                        // Ajout de l'heure d'arrivée, cercle d'arrivée, nom de la gare et sa
-                        // plateforme
-                        // d'arrivée
-                        Text arrTime = new Text(formatTime(leg.arrTime()));
-                        Text arrPlatform = new Text(formatPlatformName(leg.arrStop()));
-                        Text arrStation = new Text(leg.arrStop().name());
-                        Circle arrCircle = new Circle(3, Color.BLACK);
+                            // Ajout de l'heure d'arrivée, cercle d'arrivée, nom de la gare et sa
+                            // plateforme
+                            // d'arrivée
+                            Text arrTime = new Text(formatTime(leg.arrTime()));
+                            Text arrPlatform = new Text(formatPlatformName(leg.arrStop()));
+                            Text arrStation = new Text(leg.arrStop().name());
+                            Circle arrCircle = new Circle(3, Color.BLACK);
 
-                        legsGrid.add(arrTime, 0, currentRow + 2);
-                        legsGrid.add(arrCircle, 1, currentRow + 2);
-                        legsGrid.add(arrStation, 2, currentRow + 2);
-                        legsGrid.add(arrPlatform, 3, currentRow + 2);
+                            legsGrid.add(arrTime, 0, currentRow + 2);
+                            legsGrid.add(arrCircle, 1, currentRow + 2);
+                            legsGrid.add(arrStation, 2, currentRow + 2);
+                            legsGrid.add(arrPlatform, 3, currentRow + 2);
 
-                        currentRow = currentRow + 3;
-                        legsGrid.addPair(depCircle, arrCircle);
+                            currentRow = currentRow + 3;
+                            legsGrid.addPair(depCircle, arrCircle);
+                        }
                     }
                 }
-            }
 
-            // pas sur de la valeur nulle, devrait on mettre autre chose ?
+                // pas sur de la valeur nulle, devrait on mettre autre chose ?
 
 
-            // Boutons permettant de télécharger le trajet sous format .ical
-            // et de le visualiser sur internet
-            calendarButton.setOnAction(a -> {
-                FileChooser fileChooser = new FileChooser();
-                fileChooser.setTitle("Choisissez l'emplacement d'enregistrement du fichier.");
-                fileChooser.setInitialFileName("voyage_" + journey.getValue().depTime().format(
-                        DateTimeFormatter.ISO_DATE) + ".ics");
+                // Boutons permettant de télécharger le trajet sous format .ical
+                // et de le visualiser sur internet
+                calendarButton.setOnAction(a -> {
+                    FileChooser fileChooser = new FileChooser();
+                    fileChooser.setTitle("Choisissez l'emplacement d'enregistrement du fichier.");
+                    fileChooser.setInitialFileName("voyage_" + journey.getValue().depTime().format(
+                            DateTimeFormatter.ISO_DATE) + ".ics");
 
-                File selectedFile =
-                        fileChooser.showSaveDialog(calendarButton.getScene().getWindow());
+                    File selectedFile =
+                            fileChooser.showSaveDialog(calendarButton.getScene().getWindow());
 
-                if (selectedFile != null) {
+                    if (selectedFile != null) {
+                        try {
+                            String ical = toIcalendar(journey.getValue());
+
+                            Files.writeString(selectedFile.toPath(), ical,
+                                    StandardOpenOption.CREATE);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
+                });
+
+                mapButton.setOnAction(a -> {
                     try {
-                        String ical = toIcalendar(journey.getValue());
+                        URI targetURL = new URI("https", "umap.osm.ch", "/fr/map",
+                                ("data=" + toGeoJson(journey.getValue())), "null");
 
-                        Files.writeString(selectedFile.toPath(), ical,
-                                StandardOpenOption.CREATE);
-                    } catch (IOException e) {
+                        getDesktop().browse(targetURL);
+                    } catch (IOException | URISyntaxException e) {
                         throw new RuntimeException(e);
                     }
-                }
-
-            });
-
-            mapButton.setOnAction(a -> {
-                try {
-                    URI targetURL = new URI("https", "umap.osm.ch", "/fr/map",
-                            ("data=" + toGeoJson(journey.getValue())), "null");
-
-                    getDesktop().browse(targetURL);
-                } catch (IOException | URISyntaxException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        }});
+                });
+            }
+        });
 
         return new DetailUI(root);
     }
@@ -247,8 +249,7 @@ public record DetailUI(Node rootNode) {
     // Classe interne pour la grille des étapes, permettant de gérer les annotations
     private static final class StepGrid extends GridPane {
         private final List<Pair<Circle, Circle>> circlePairs = new ArrayList<>();
-        private Pane annotationLayer;
-
+        private final Pane annotationLayer;
 
 
         public StepGrid(Pane annotationLayer) {

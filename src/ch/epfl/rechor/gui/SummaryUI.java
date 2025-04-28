@@ -21,10 +21,10 @@ import java.util.List;
 import static ch.epfl.rechor.FormatterFr.*;
 import static ch.epfl.rechor.gui.VehicleIcons.iconFor;
 
-public record SummaryUI(Node rootNode,ObservableValue<Journey> selectedJourneyO) {
+public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO) {
 
     public static SummaryUI create(ObservableValue<List<Journey>> journeyList,
-                              ObservableValue<LocalTime> desiredTime) {
+                                   ObservableValue<LocalTime> desiredTime) {
 
         ListView<Journey> listView = new ListView<>();
         listView.getStylesheets().add("summary.css");
@@ -34,7 +34,8 @@ public record SummaryUI(Node rootNode,ObservableValue<Journey> selectedJourneyO)
             listView.getItems().setAll(newList);
         });
 
-        ObservableValue<Journey> selectedJourney = listView.getSelectionModel().selectedItemProperty();
+        ObservableValue<Journey> selectedJourney =
+                listView.getSelectionModel().selectedItemProperty();
 
         // Sélectionne automatiquement le voyage correspondant a l'heure désirée
         desiredTime.subscribe(newTime -> {
@@ -85,7 +86,8 @@ public record SummaryUI(Node rootNode,ObservableValue<Journey> selectedJourneyO)
                     int depArrCount = 0;
 
                     for (Node node : getChildren()) {
-                        if (node instanceof Circle circle && circle.getStyleClass().contains("dep-arr")) {
+                        if (node instanceof Circle circle &&
+                                circle.getStyleClass().contains("dep-arr")) {
                             // pas sur de ce test d'instance, je peux pas le faire autrement ?
                             if (depArrCount == 0) {
                                 departureCircle = circle;
@@ -106,7 +108,8 @@ public record SummaryUI(Node rootNode,ObservableValue<Journey> selectedJourneyO)
                     }
 
                     for (Node node : getChildren()) {
-                        if (node instanceof Circle circle && circle.getStyleClass().contains("transfer")) {
+                        if (node instanceof Circle circle &&
+                                circle.getStyleClass().contains("transfer")) {
                             double relativePosition = (double) circle.getUserData();
                             double x = 5 + relativePosition * (width - 10);
                             circle.setCenterX(x);
@@ -142,7 +145,7 @@ public record SummaryUI(Node rootNode,ObservableValue<Journey> selectedJourneyO)
         }
 
         @Override
-        protected void updateItem (Journey item, boolean empty) {
+        protected void updateItem(Journey item, boolean empty) {
             super.updateItem(item, empty);
             transferLinePane.getChildren().clear();
             if (empty || item == null) {
@@ -156,9 +159,10 @@ public record SummaryUI(Node rootNode,ObservableValue<Journey> selectedJourneyO)
 
                 Journey.Leg firstLeg = item.legs().getFirst();
 
-                if(firstLeg instanceof Journey.Leg.Transport) {
+                if (firstLeg instanceof Journey.Leg.Transport) {
                     vehicleIcon.setImage(iconFor(((Journey.Leg.Transport) firstLeg).vehicle()));
-                    routeAndDestination.setText(formatRouteDestination((Journey.Leg.Transport) firstLeg));
+                    routeAndDestination.setText(
+                            formatRouteDestination((Journey.Leg.Transport) firstLeg));
                 }
 
                 Line line = new Line(5, 10, 195, 10);
@@ -179,13 +183,13 @@ public record SummaryUI(Node rootNode,ObservableValue<Journey> selectedJourneyO)
                     // nécéssaire ce if ?
                     List<Journey.Leg> legs = item.legs();
                     LocalDateTime departureTime = legs.getFirst().depTime();
-                    LocalDateTime arrivalTime = legs.getLast().arrTime();
                     double totalDurationMinutes = (double) item.duration().toMinutes();
                     // cast ? bonne façon ?
 
                     for (Journey.Leg leg : legs) {
                         if (leg instanceof Journey.Leg.Foot footLeg) {
-                            double minutesFromStart = Duration.between(departureTime, footLeg.depTime()).toMinutes();
+                            double minutesFromStart =
+                                    Duration.between(departureTime, footLeg.depTime()).toMinutes();
                             double relativePosition = minutesFromStart / totalDurationMinutes;
 
                             Circle changeCircle = new Circle(3);
