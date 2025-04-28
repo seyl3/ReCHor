@@ -21,7 +21,7 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
 
-public class MyDetailUITest extends Application {
+public class DetailUITest extends Application {
     public static void main(String[] args) {
         launch(args);
     }

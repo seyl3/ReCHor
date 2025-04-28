@@ -1,0 +1,202 @@
+package ch.epfl.rechor.gui;
+
+import ch.epfl.rechor.journey.Journey;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.Node;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
+import javafx.scene.text.Text;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+
+import static ch.epfl.rechor.FormatterFr.*;
+import static ch.epfl.rechor.gui.VehicleIcons.iconFor;
+
+public record SummaryUI(Node rootNode,ObservableValue<Journey> selectedJourneyO) {
+
+    public static SummaryUI create(ObservableValue<List<Journey>> journeyList,
+                              ObservableValue<LocalTime> desiredTime) {
+
+        ListView<Journey> listView = new ListView<>();
+        listView.getStylesheets().add("summary.css");
+        listView.setCellFactory(lv -> new JourneyCell());
+
+        journeyList.subscribe(newList -> {
+            listView.getItems().setAll(newList);
+        });
+
+        ObservableValue<Journey> selectedJourney = listView.getSelectionModel().selectedItemProperty();
+
+        // Sélectionne automatiquement le voyage correspondant a l'heure désirée
+        desiredTime.subscribe(newTime -> {
+            List<Journey> journeys = listView.getItems();
+            if (journeys.isEmpty()) return;
+
+            for (Journey journey : journeys) {
+                LocalTime departure = journey.depTime().toLocalTime();
+                if (!departure.isBefore(newTime)) {
+                    listView.getSelectionModel().select(journey);
+                    listView.scrollTo(journey);
+                    return;
+                }
+            }
+
+            // Si aucun voyage ne correspond, on prend le dernier
+            listView.getSelectionModel().select(journeys.getLast());
+            listView.scrollTo(journeys.getLast());
+        });
+
+        return new SummaryUI(listView, selectedJourney);
+    }
+
+    private static final class JourneyCell extends ListCell<Journey> {
+        private final BorderPane journey;
+        private final ImageView vehicleIcon;
+        private final Text routeAndDestination;
+        private final Text departureTime;
+        private final Text arrivalTime;
+        private final Text durationTime;
+        private final Pane transferLinePane;
+        private final int imageSize = 20;
+
+        public JourneyCell() {
+            vehicleIcon = new ImageView();
+            routeAndDestination = new Text();
+            departureTime = new Text();
+            arrivalTime = new Text();
+            durationTime = new Text();
+
+            transferLinePane = new Pane() {
+                @Override
+                protected void layoutChildren() {
+                    double width = getWidth();
+
+                    Circle departureCircle = null;
+                    Circle arrivalCircle = null;
+                    int depArrCount = 0;
+
+                    for (Node node : getChildren()) {
+                        if (node instanceof Circle circle && circle.getStyleClass().contains("dep-arr")) {
+                            // pas sur de ce test d'instance, je peux pas le faire autrement ?
+                            if (depArrCount == 0) {
+                                departureCircle = circle;
+                            } else {
+                                arrivalCircle = circle;
+                            }
+                            depArrCount++;
+                        }
+                    }
+
+                    if (departureCircle != null) {
+                        departureCircle.setCenterX(5);
+                        departureCircle.setCenterY(10);
+                    }
+                    if (arrivalCircle != null) {
+                        arrivalCircle.setCenterX(width - 5);
+                        arrivalCircle.setCenterY(10);
+                    }
+
+                    for (Node node : getChildren()) {
+                        if (node instanceof Circle circle && circle.getStyleClass().contains("transfer")) {
+                            double relativePosition = (double) circle.getUserData();
+                            double x = 5 + relativePosition * (width - 10);
+                            circle.setCenterX(x);
+                            circle.setCenterY(10);
+                        }
+                    }
+                }
+            };
+            transferLinePane.setPrefSize(0, 0);
+
+            BorderPane journey = new BorderPane();
+            journey.getStyleClass().add("journey");
+            this.journey = journey;
+
+            HBox route = new HBox();
+            route.getStyleClass().add("route");
+            vehicleIcon.setPreserveRatio(true);
+            vehicleIcon.setFitWidth(imageSize);
+            route.getChildren().addAll(vehicleIcon, routeAndDestination);
+            journey.setTop(route);
+
+            departureTime.getStyleClass().add("departure");
+            journey.setLeft(departureTime);
+
+            journey.setRight(arrivalTime);
+
+            HBox duration = new HBox();
+            duration.getStyleClass().add("duration");
+            duration.getChildren().add(durationTime);
+            journey.setBottom(duration);
+
+            journey.setCenter(transferLinePane);
+        }
+
+        @Override
+        protected void updateItem (Journey item, boolean empty) {
+            super.updateItem(item, empty);
+            transferLinePane.getChildren().clear();
+            if (empty || item == null) {
+                setGraphic(null); // Je pense pas que ça doit rester blanc comme ça
+            } else {
+                setGraphic(journey);
+
+                departureTime.setText(formatTime(item.legs().getFirst().depTime()));
+                arrivalTime.setText(formatTime(item.legs().getLast().arrTime()));
+                durationTime.setText(formatDuration(item.duration()));
+
+                Journey.Leg firstLeg = item.legs().getFirst();
+
+                if(firstLeg instanceof Journey.Leg.Transport) {
+                    vehicleIcon.setImage(iconFor(((Journey.Leg.Transport) firstLeg).vehicle()));
+                    routeAndDestination.setText(formatRouteDestination((Journey.Leg.Transport) firstLeg));
+                }
+
+                Line line = new Line(5, 10, 195, 10);
+                line.endXProperty().bind(transferLinePane.widthProperty().subtract(5));
+                transferLinePane.getChildren().add(line);
+
+                Circle startCircle = new Circle(3);
+                startCircle.getStyleClass().add("dep-arr");
+
+                Circle endCircle = new Circle(3);
+                endCircle.getStyleClass().add("dep-arr");
+
+                transferLinePane.getChildren().add(startCircle);
+                transferLinePane.getChildren().add(endCircle);
+
+                // Ajoute les cercles représentant les étapes à pied
+                if (item != null && !item.legs().isEmpty()) {
+                    // nécéssaire ce if ?
+                    List<Journey.Leg> legs = item.legs();
+                    LocalDateTime departureTime = legs.getFirst().depTime();
+                    LocalDateTime arrivalTime = legs.getLast().arrTime();
+                    double totalDurationMinutes = (double) item.duration().toMinutes();
+                    // cast ? bonne façon ?
+
+                    for (Journey.Leg leg : legs) {
+                        if (leg instanceof Journey.Leg.Foot footLeg) {
+                            double minutesFromStart = Duration.between(departureTime, footLeg.depTime()).toMinutes();
+                            double relativePosition = minutesFromStart / totalDurationMinutes;
+
+                            Circle changeCircle = new Circle(3);
+                            changeCircle.getStyleClass().add("transfer");
+                            changeCircle.setUserData(relativePosition);
+
+                            transferLinePane.getChildren().add(changeCircle);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

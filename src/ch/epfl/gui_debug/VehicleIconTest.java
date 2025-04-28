@@ -12,7 +12,7 @@ import java.util.List;
 
 import static ch.epfl.rechor.gui.VehicleIcons.iconFor;
 
-public class MyVehicleIconTest extends Application {
+public class VehicleIconTest extends Application {
     public static void main(String[] args) {
         launch();
     }
