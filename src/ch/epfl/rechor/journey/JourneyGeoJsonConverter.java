@@ -67,7 +67,7 @@ public final class JourneyGeoJsonConverter {
         //linkedHashMap permet de garantir que la map a bien le bon ordre qu'est l'ordre d'ajout
         Map<String, Json> orderedMap = new LinkedHashMap<>();
         orderedMap.put("type", new Json.JString("LineString"));
-        orderedMap.put("sortedCoordinates", coordinatesJArray);
+        orderedMap.put("coordinates", coordinatesJArray);
 
         return new Json.JObject(orderedMap);
     }
