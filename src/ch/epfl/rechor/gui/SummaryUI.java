@@ -38,6 +38,8 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                 listView.getSelectionModel().selectedItemProperty();
 
         // Sélectionne automatiquement le voyage correspondant a l'heure désirée
+        // est ce que on garde ça en subscribre uniquement du temps ou bien
+        // quand on change de journeys ça doit se faire automatiquement aussi ?
         desiredTime.subscribe(newTime -> {
             List<Journey> journeys = listView.getItems();
             if (journeys.isEmpty()) return;
