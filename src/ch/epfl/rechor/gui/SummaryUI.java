@@ -30,9 +30,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         listView.getStylesheets().add("summary.css");
         listView.setCellFactory(lv -> new JourneyCell());
 
-        journeyList.subscribe(newList -> {
-            listView.getItems().setAll(newList);
-        });
+        journeyList.subscribe(newList -> listView.getItems().setAll(newList));
 
         ObservableValue<Journey> selectedJourney =
                 listView.getSelectionModel().selectedItemProperty();
@@ -64,12 +62,12 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
     private static final class JourneyCell extends ListCell<Journey> {
         private final BorderPane journey;
         private final ImageView vehicleIcon;
+        private final int iconSize = 20;
         private final Text routeAndDestination;
         private final Text departureTime;
         private final Text arrivalTime;
         private final Text durationTime;
         private final Pane transferLinePane;
-        private final int imageSize = 20;
 
         public JourneyCell() {
             vehicleIcon = new ImageView();
@@ -129,7 +127,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
             HBox route = new HBox();
             route.getStyleClass().add("route");
             vehicleIcon.setPreserveRatio(true);
-            vehicleIcon.setFitWidth(imageSize);
+            vehicleIcon.setFitWidth(iconSize);
             route.getChildren().addAll(vehicleIcon, routeAndDestination);
             journey.setTop(route);
 
@@ -181,7 +179,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                 transferLinePane.getChildren().add(endCircle);
 
                 // Ajoute les cercles représentant les étapes à pied
-                if (item != null && !item.legs().isEmpty()) {
+                if (!item.legs().isEmpty()) {
                     // nécéssaire ce if ?
                     List<Journey.Leg> legs = item.legs();
                     LocalDateTime departureTime = legs.getFirst().depTime();
