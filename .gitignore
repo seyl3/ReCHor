@@ -3,14 +3,17 @@ Submit.java
 **/Submit.java
 
 # Ignore time-table data files
+/timetable_12/
+/timetable_13/
+/timetable_14/
+/timetable_15/
+/timetable_16/
+/timetable_17/
+/timetable_18/
 /timetable/
 /timetable 2/
 /timetable 3/
 /timetable 4/
-/timetable_12/
-/timetable_13/
-/timetable_15/
-/timetable_14/
 
 # Ignore all submission files
 /submissions/

@@ -82,7 +82,7 @@ public record Router(TimeTable tt) {
             int walkTime = walkTimeToDest[arrStationId];
             if (walkTime >= 0) {
                 int finalArrTime = arrTime + walkTime;
-                int payload = Bits32_24_8.pack(connId, tripPos);
+                int payload = Bits32_24_8.pack(connId, 0);
                 long packedCriteria = PackedCriteria.pack(finalArrTime, 0, payload);
                 packedCriteria = PackedCriteria.withDepMins(packedCriteria, depTime);
                 f.add(packedCriteria);
@@ -108,7 +108,7 @@ public record Router(TimeTable tt) {
                     if (stationDepTime >= arrTime) {
                         int arrMins = PackedCriteria.arrMins(stationCrit);
                         int changes = PackedCriteria.changes(stationCrit) + 1;
-                        int payload = Bits32_24_8.pack(connId, tripPos);
+                        int payload = Bits32_24_8.pack(connId, 0);
                         long packedCriteria = PackedCriteria.pack(arrMins, changes, payload);
                         packedCriteria = PackedCriteria.withDepMins(packedCriteria, depTime);
                         f.add(packedCriteria);
