@@ -2,6 +2,7 @@ package ch.epfl.rechor;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -12,8 +13,7 @@ import java.util.ArrayList;
  */
 public final class IcalBuilder {
 
-
-    private final ArrayList<Component> startedComponents = new ArrayList<>();
+    private final List<Component> startedComponents = new ArrayList<>();
     private final StringBuilder ical = new StringBuilder();
     private final String CRLF = "\r\n";
 
@@ -37,11 +37,10 @@ public final class IcalBuilder {
             for (int i = 0; i < value.length(); i += 74) {
                 newValue.append(value, i, Math.min(i + 74, value.length()));
                 if (i + 74 < value.length()) {
-                    newValue.append(CRLF).append(" "); // Ajout d'un espace pour respecter la
-                    // norme iCalendar
+                    newValue.append(CRLF).append(" ");
+                    // Ajout d'un espace pour respecter la norme iCalendar
                 }
             }
-
             ical.append(newValue).append(CRLF);
         } else {
             ical.append(name).append(":").append(value).append(CRLF);
@@ -61,8 +60,7 @@ public final class IcalBuilder {
     public IcalBuilder add(Name name, LocalDateTime dateTime) {
         Preconditions.checkArgument(dateTime != null && name != null);
 
-        ical.append(name).append(":").append(FormatterFr.formatEventTime(dateTime)).append(CRLF);
-        return this;
+        return add(name, FormatterFr.formatEventTime(dateTime));
     }
 
     /**

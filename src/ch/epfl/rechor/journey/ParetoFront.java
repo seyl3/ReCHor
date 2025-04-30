@@ -142,9 +142,6 @@ public class ParetoFront {
          * @return Le bâtisseur pour chaîner les appels.
          */
         public Builder clear() {
-            for (int i = 0; i < effectiveLength; i++) {
-                front[i] = 0;
-            }
             effectiveLength = 0;
             return this;
         }

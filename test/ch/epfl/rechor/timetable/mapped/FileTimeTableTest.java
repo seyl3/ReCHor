@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FileTimeTableTest {
     static Path timeTablePath() {
-        var timeTablePath = Path.of("timetable");
+        var timeTablePath = Path.of("timetable_14");
         var maybeTestDataDir = System.getenv("RECHOR_TEST_DATA_DIR");
         return maybeTestDataDir != null
                 ? Path.of(maybeTestDataDir).resolve(timeTablePath)

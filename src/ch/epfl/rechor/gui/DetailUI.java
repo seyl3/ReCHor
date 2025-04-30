@@ -202,8 +202,6 @@ public record DetailUI(Node rootNode) {
                     }
                 }
 
-                // pas sur de la valeur nulle, devrait on mettre autre chose ?
-
 
                 // Boutons permettant de télécharger le trajet sous format .ical
                 // et de le visualiser sur internet
@@ -250,6 +248,7 @@ public record DetailUI(Node rootNode) {
     private static final class StepGrid extends GridPane {
         private final List<Pair<Circle, Circle>> circlePairs = new ArrayList<>();
         private final Pane annotationLayer;
+        private final List<Line> lineList = new ArrayList<>();
 
 
         public StepGrid(Pane annotationLayer) {
@@ -267,7 +266,7 @@ public record DetailUI(Node rootNode) {
         @Override
         protected void layoutChildren() {
             super.layoutChildren();
-            annotationLayer.getChildren().clear();
+            lineList.clear();
 
             for (Pair<Circle, Circle> pair : circlePairs) {
                 Circle start = pair.getKey();
@@ -282,8 +281,10 @@ public record DetailUI(Node rootNode) {
                 line.setStroke(Color.RED);
                 line.setStrokeWidth(2);
 
-                annotationLayer.getChildren().add(line);
+                lineList.add(line);
             }
+
+            annotationLayer.getChildren().setAll(lineList);
         }
     }
 }

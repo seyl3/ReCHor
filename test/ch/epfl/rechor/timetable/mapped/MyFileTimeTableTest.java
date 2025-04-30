@@ -1,13 +1,15 @@
 package ch.epfl.rechor.timetable.mapped;
 
-import ch.epfl.rechor.timetable.*;
+import ch.epfl.rechor.timetable.Connections;
+import ch.epfl.rechor.timetable.Stations;
+import ch.epfl.rechor.timetable.TimeTable;
+import ch.epfl.rechor.timetable.Trips;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,7 +28,7 @@ public class MyFileTimeTableTest {
     @BeforeEach
     public void setUp() throws IOException {
         // Use the actual timetable directory in the project
-        timetablePath = Path.of("timetable");
+        timetablePath = Path.of("timetable_13");
         
         // Skip tests if the timetable directory doesn't exist
         if (!Files.exists(timetablePath)) {
