@@ -101,9 +101,15 @@ public record DetailUI(Node rootNode) {
             legsGrid.getChildren().clear();
             annotations.getChildren().clear();
 
-            if (journey.getValue() != null) {
-                noJourney.setVisible(false);
+            if (journey.getValue() == null) {
+
+                withJourney.setVisible(false);
+                noJourney.setVisible(true);
+
+            } else {
+
                 withJourney.setVisible(true);
+                noJourney.setVisible(false);
 
                 int currentRow = 0;
 
