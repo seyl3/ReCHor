@@ -38,6 +38,8 @@ public final class JourneyGeoJsonConverter {
         Json.JArray coordinatesJArray;
 
 
+
+
         for (Journey.Leg leg : journey.legs()) {
             unsortedCoordinates.add(leg.depStop().longitude());
             unsortedCoordinates.add(leg.depStop().latitude());

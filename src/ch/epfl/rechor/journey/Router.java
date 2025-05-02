@@ -119,6 +119,7 @@ public record Router(TimeTable tt) {
             //  Étape 2b : Optimisation et mise à jour des frontières 
             if (f.isEmpty()) continue;
 
+
             // Ignorer si 'f' est dominée
             if (stationFronts[depStationId] != null) {
                 ParetoFront.Builder stationFrontWithDepTime = new ParetoFront.Builder();
