@@ -21,7 +21,8 @@ public final class PackedCriteria {
     private static final int MINUTES_OFFSET = 240;
 
 
-    private PackedCriteria() {}
+    private PackedCriteria() {
+    }
 
     /**
      * Embpaquette les critères donnés en une valeur long.
@@ -32,9 +33,11 @@ public final class PackedCriteria {
      * @return Une valeur long représentant les critères empaquetés.
      */
     public static long pack(int arrMins, int changes, int payload) {
-        Preconditions.checkArgument((changes >>> CHANGES_MASK_BITS == 0) && (arrMins >= -MINUTES_OFFSET && arrMins < 2880));
+        Preconditions.checkArgument((changes >>> CHANGES_MASK_BITS == 0) &&
+                (arrMins >= -MINUTES_OFFSET && arrMins < 2880));
         int arrMinsConv = arrMins + MINUTES_OFFSET;
-        return ((long) arrMinsConv) << ARRMINS_SHIFT | ((long) changes) << CHANGES_SHIFT | toUnsignedLong(payload);
+        return ((long) arrMinsConv) << ARRMINS_SHIFT | ((long) changes) << CHANGES_SHIFT |
+                toUnsignedLong(payload);
     }
 
     /**

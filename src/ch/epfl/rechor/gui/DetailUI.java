@@ -1,6 +1,7 @@
 package ch.epfl.rechor.gui;
 
 import ch.epfl.rechor.journey.Journey;
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.HPos;
 import javafx.scene.Node;
@@ -56,10 +57,10 @@ public record DetailUI(Node rootNode) {
      * L'interface se met à jour automatiquement lorsque le voyage change.
      * En l'absence de voyage, affiche "Aucun voyage" au centre.
      *
-     * @param journey le voyage à afficher, potentiellement nul
+     * @param journey0 le voyage à afficher, potentiellement nul
      * @return une nouvelle interface détaillée
      */
-    public static DetailUI create(ObservableValue<Journey> journey) {
+    public static DetailUI create(ObservableValue<Journey> journey0) {
         ScrollPane root = new ScrollPane();
         root.setId("detail");
         root.getStylesheets().add("detail.css");
@@ -96,24 +97,22 @@ public record DetailUI(Node rootNode) {
         Button mapButton = new Button("Carte");
         buttons.getChildren().addAll(calendarButton, mapButton);
 
-        journey.subscribe(newJourney -> {
+        noJourney.visibleProperty().bind(
+                Bindings.createBooleanBinding(() -> journey0.getValue() == null, journey0)
+        );
+
+        withJourney.visibleProperty().bind(
+                Bindings.createBooleanBinding(() -> journey0.getValue() != null, journey0)
+        );
+
+        journey0.subscribe(newJourney -> {
             legsGrid.clearPairs();
             legsGrid.getChildren().clear();
-            annotations.getChildren().clear();
 
-            if (journey.getValue() == null) {
-
-                withJourney.setVisible(false);
-                noJourney.setVisible(true);
-
-            } else {
-
-                withJourney.setVisible(true);
-                noJourney.setVisible(false);
-
+            if (journey0.getValue() != null) {
                 int currentRow = 0;
 
-                for (Journey.Leg leg : journey.getValue().legs()) {
+                for (Journey.Leg leg : journey0.getValue().legs()) {
                     switch (leg) {
                         case Journey.Leg.Foot footLeg -> {
                             Text foot = new Text(formatLeg((Journey.Leg.Foot) leg));
@@ -188,7 +187,6 @@ public record DetailUI(Node rootNode) {
                                 currentRow++;
                             }
 
-
                             // Ajout de l'heure d'arrivée, cercle d'arrivée, nom de la gare et sa
                             // plateforme
                             // d'arrivée
@@ -214,7 +212,7 @@ public record DetailUI(Node rootNode) {
                 calendarButton.setOnAction(a -> {
                     FileChooser fileChooser = new FileChooser();
                     fileChooser.setTitle("Choisissez l'emplacement d'enregistrement du fichier.");
-                    fileChooser.setInitialFileName("voyage_" + journey.getValue().depTime().format(
+                    fileChooser.setInitialFileName("voyage_" + journey0.getValue().depTime().format(
                             DateTimeFormatter.ISO_DATE) + ".ics");
 
                     File selectedFile =
@@ -222,22 +220,19 @@ public record DetailUI(Node rootNode) {
 
                     if (selectedFile != null) {
                         try {
-                            String ical = toIcalendar(journey.getValue());
-
+                            String ical = toIcalendar(journey0.getValue());
                             Files.writeString(selectedFile.toPath(), ical,
                                     StandardOpenOption.CREATE);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
                     }
-
                 });
 
                 mapButton.setOnAction(a -> {
                     try {
                         URI targetURL = new URI("https", "umap.osm.ch", "/fr/map",
-                                ("data=" + toGeoJson(journey.getValue())), "null");
-
+                                ("data=" + toGeoJson(journey0.getValue())), "null");
                         getDesktop().browse(targetURL);
                     } catch (IOException | URISyntaxException e) {
                         throw new RuntimeException(e);

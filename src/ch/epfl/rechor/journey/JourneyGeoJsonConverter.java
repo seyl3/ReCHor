@@ -2,8 +2,7 @@ package ch.epfl.rechor.journey;
 
 import ch.epfl.rechor.Json;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,43 +31,33 @@ public final class JourneyGeoJsonConverter {
      * @return le document GeoJSON représentant le tracé du voyage
      */
     public static Json.JObject toGeoJson(Journey journey) {
-        List<Double> unsortedCoordinates = new ArrayList<>();
-        List<Json.JNumber> sortedCoordinates;
-        List<Json> coordinatesList = new ArrayList<>();
-        Json.JArray coordinatesJArray;
 
-
-        for (Journey.Leg leg : journey.legs()) {
-            unsortedCoordinates.add(leg.depStop().longitude());
-            unsortedCoordinates.add(leg.depStop().latitude());
-            for (Journey.Leg.IntermediateStop stops : leg.intermediateStops()) {
-                unsortedCoordinates.add(stops.stop().longitude());
-                unsortedCoordinates.add(stops.stop().latitude());
-            }
-            unsortedCoordinates.add(leg.arrStop().longitude());
-            unsortedCoordinates.add(leg.arrStop().latitude());
-        }
-
-        sortedCoordinates = unsortedCoordinates.stream()
+        List<Json> coordinatePairs = journey.legs().stream()
+                .<Stop>mapMulti((leg, sink) -> {
+                    sink.accept(leg.depStop());
+                    leg.intermediateStops().forEach(s -> sink.accept(s.stop()));
+                    sink.accept(leg.arrStop());
+                })
+                .map(JourneyGeoJsonConverter::createJArray)
                 .distinct()
-                .map(s -> s * 1e5)
-                .map(Math::round)
-                .map(s -> s / 1e5)
-                .map(Json.JNumber::new)
                 .toList();
 
-        for (int i = 0; i < sortedCoordinates.size() - 1; i += 2) {
-            coordinatesList.add(
-                    new Json.JArray(List.of(sortedCoordinates.get(i), sortedCoordinates.get(i + 1))));
-        }
-
-        coordinatesJArray = new Json.JArray(coordinatesList);
-
-        //linkedHashMap permet de garantir que la map a bien le bon ordre qu'est l'ordre d'ajout
-        Map<String, Json> orderedMap = new LinkedHashMap<>();
+        Map<String, Json> orderedMap = new HashMap<>();
         orderedMap.put("type", new Json.JString("LineString"));
-        orderedMap.put("coordinates", coordinatesJArray);
+        orderedMap.put("coordinates", new Json.JArray(coordinatePairs));
 
         return new Json.JObject(orderedMap);
+    }
+
+    // Ajouter commentaire qui dit "méthode intermédiaire ggnngng"
+    private static Json.JNumber roundToJnumber(double number) {
+        return new Json.JNumber((Math.round(number * 1e5) / 1e5));
+    }
+
+    // Ajouter commentaire qui dit "méthode intermédiaire ggnngng"
+    private static Json createJArray(Stop stop) {
+        Json.JNumber lon = roundToJnumber(stop.longitude());
+        Json.JNumber lat = roundToJnumber(stop.latitude());
+        return new Json.JArray(List.of(lon, lat));
     }
 }

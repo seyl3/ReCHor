@@ -150,7 +150,7 @@ public class SummaryUITest extends Application {
         // Clear pour faire des test
         Button clearButton = new Button("Change Journeys");
         clearButton.setOnAction(e -> ((SimpleObjectProperty<List<Journey>>) journeysO).set(
-                List.of(journeyExample())));
+                List.of()));
 
         SplitPane horizontalSplit = new SplitPane();
         horizontalSplit.getItems().addAll(summaryUI.rootNode(), detailUI.rootNode());
