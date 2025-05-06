@@ -5,6 +5,8 @@ package ch.epfl.rechor.timetable;
  * <p>
  * Chaque quai ou voie est identifié par un index unique et possède un nom ainsi
  * qu'un identifiant correspondant à la gare ou station à laquelle il appartient.
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
  */
 public interface Platforms extends Indexed {
     /**

@@ -7,6 +7,8 @@ import ch.epfl.rechor.journey.Vehicle;
  * <p>
  * Chaque ligne de transport est identifiée par un index unique et possède un type de véhicule
  * ainsi qu'un nom.
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
  */
 public interface Routes extends Indexed {
 

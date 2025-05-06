@@ -17,6 +17,8 @@ import static ch.epfl.rechor.journey.PackedCriteria.*;
  * Classe qui extrait des voyages concrets à partir des données de profil.
  * Convertit les critères de la frontière de Pareto en objets Journey avec
  * des étapes de transport et à pied.
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
  */
 public class JourneyExtractor {
 
@@ -245,7 +247,6 @@ public class JourneyExtractor {
         // Récupération du temps de marche entre stations
         int walkingMinutes;
         walkingMinutes = transfers.minutesBetween(fromStationId, toStationId);
-
 
         // Calcul de l'heure d'arrivée
         LocalDateTime arrTime = depTime.plusMinutes(walkingMinutes);

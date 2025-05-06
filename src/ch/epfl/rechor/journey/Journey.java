@@ -16,6 +16,8 @@ import java.util.Objects;
  *   <li>La liste d'étapes n'est pas vide.</li>
  *   <li>Les étapes alternent entre Transport et Foot.</li>
  * </ul>
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
  */
 public record Journey(List<Leg> legs) {
 

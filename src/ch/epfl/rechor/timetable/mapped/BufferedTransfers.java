@@ -7,15 +7,17 @@ import java.nio.ByteBuffer;
 import java.util.NoSuchElementException;
 
 /**
- * La classe BufferedTransfers implémente l'interface Transfers et permet d'accéder à une table
- * de transferts représentée de manière aplatie.
- * Chaque transfert est représenté par les champs suivants :
- * - FROM_STOP_ID : l'identifiant de l'arrêt de départ (U16)
- * - TO_STOP_ID : l'identifiant de l'arrêt d'arrivée (U16)
- * - MIN_TRANSFER_TIME : le temps de transfert minimum en minutes (U16)
+ * Implémentation de l'interface Transfers utilisant un buffer pour stocker les données.
+ * <p>
+ * Format des données :
+ * - DEP_STATION_ID : l'identifiant de l'arrêt de départ (U16)
+ * - ARR_STATION_ID : l'identifiant de l'arrêt d'arrivée (U16)
+ * - TRANSFERS_MINUTES : le temps de transfert minimum en minutes (U16)
+ * </p>
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
  */
 public final class BufferedTransfers implements Transfers {
-
     private final static int DEP_STATION_ID = 0;
     private final static int ARR_STATION_ID = 1;
     private final static int TRANSFERS_MINUTES = 2;

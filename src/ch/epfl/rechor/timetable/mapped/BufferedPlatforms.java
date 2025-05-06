@@ -11,6 +11,8 @@ import java.util.List;
  * Chaque voie ou quai est représenté par les champs suivants :
  * - NAME_ID : l'identifiant du nom de la voie ou du quai (U16)
  * - STATION_ID : l'identifiant de la gare parente (U16)
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
  */
 public final class BufferedPlatforms implements Platforms {
     private static final int NAME_ID = 0;

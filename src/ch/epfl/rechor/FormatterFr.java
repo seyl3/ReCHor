@@ -11,10 +11,11 @@ import java.time.temporal.ChronoField;
 
 /**
  * Classe utilitaire pour formater les informations liées aux trajets.
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
  */
 public final class FormatterFr {
-    private FormatterFr() {
-    }
+    private FormatterFr() {}
 
     /**
      * Formate une durée en une chaîne de caractères.
@@ -32,41 +33,45 @@ public final class FormatterFr {
         }
     }
 
+    private static final DateTimeFormatter TIME_FORMATTER =
+            new DateTimeFormatterBuilder()
+                    .appendValue(ChronoField.HOUR_OF_DAY)
+                    .appendLiteral('h')
+                    .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+                    .toFormatter();
+
     /**
      * Formate un objet {@code LocalDateTime} en une chaîne représentant l'heure.
+     * Construit une instance d'un formatter statique.
      *
      * @param dateTime l'heure à formater
-     * @return l'heure formatée sous forme de chaîne
+     * @return l'heure formatée sous forme de chaîne de charactère de selon le modèle HHhMM
      */
     public static String formatTime(LocalDateTime dateTime) {
-        DateTimeFormatter formatter = new DateTimeFormatterBuilder()
-                .appendValue(ChronoField.HOUR_OF_DAY)
-                .appendLiteral('h')
-                .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
-                .toFormatter();
-        return dateTime.format(formatter);
+        return dateTime.format(TIME_FORMATTER);
     }
 
+
+    private static final DateTimeFormatter EVENT_TIME_FORMATTER =
+            new DateTimeFormatterBuilder()
+                    .appendValue(ChronoField.YEAR)
+                    .appendValue(ChronoField.MONTH_OF_YEAR, 2)
+                    .appendValue(ChronoField.DAY_OF_MONTH, 2)
+                    .appendLiteral('T')
+                    .appendValue(ChronoField.HOUR_OF_DAY, 2)
+                    .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+                    .appendValue(ChronoField.SECOND_OF_MINUTE   , 2)
+                    .toFormatter();
+
     /**
-     * Formate le temps des évnements dans Ical (plus spécifiquement la date+l'heure de la requête,
-     * celle du début du trajet, celle de la fin.)
+     * Formate un objet {@code LocalDateTime} sous le format utilisé par les fichier iCalendar.
+     * Construit une instance d'un formatter statique.
      *
      * @param dateTime
-     * @return une chaine de charactère de l'écriture l'écriture de la date+temps
-     * selon le modèle YYYYMMDDTHHMM00
+     * @return une chaine de charactère de selon le modèle YYYYMMDDTHHMM00
      */
     public static String formatEventTime(LocalDateTime dateTime) {
-        DateTimeFormatter formatter = new DateTimeFormatterBuilder()
-                .appendValue(ChronoField.YEAR)
-                .appendValue(ChronoField.MONTH_OF_YEAR, 2)
-                .appendValue(ChronoField.DAY_OF_MONTH, 2)
-                .appendLiteral('T')
-                .appendValue(ChronoField.HOUR_OF_DAY, 2)
-                .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
-                .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
-                .toFormatter();
-        return dateTime.format(formatter);
-
+        return dateTime.format(EVENT_TIME_FORMATTER);
     }
 
     /**

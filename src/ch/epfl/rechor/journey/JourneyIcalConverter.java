@@ -10,6 +10,8 @@ import java.util.UUID;
 /**
  * Convertisseur permettant de générer un fichier iCalendar (.ics) à partir d'un trajet {@code
  * Journey}.
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
  */
 public final class JourneyIcalConverter {
     private JourneyIcalConverter() {

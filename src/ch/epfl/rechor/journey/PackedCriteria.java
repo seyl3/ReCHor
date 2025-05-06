@@ -7,8 +7,20 @@ import static java.lang.Integer.toUnsignedLong;
 /**
  * Classe utilitaire permettant de compresser et manipuler des critères de recherche d'itinéraire
  * sous forme d'une valeur long.
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
  */
 public final class PackedCriteria {
+
+    private static final int DEPMINS_SHIFT = 51;
+    private static final int ARRMINS_SHIFT = 39;
+    private static final int CHANGES_SHIFT = 32;
+    private static final int ARRMINS_MASK_BITS = 12;
+    private static final int CHANGES_MASK_BITS = 7;
+    private static final int PAYLOAD_MASK_BITS = 32;
+    private static final int MINUTES_OFFSET = 240;
+
+
     private PackedCriteria() {
     }
 
@@ -21,9 +33,11 @@ public final class PackedCriteria {
      * @return Une valeur long représentant les critères empaquetés.
      */
     public static long pack(int arrMins, int changes, int payload) {
-        Preconditions.checkArgument((changes >>> 7 == 0) && (arrMins >= -240 && arrMins < 2880));
-        int arrMinsConv = arrMins + 240;
-        return ((long) arrMinsConv) << 39 | ((long) changes) << 32 | toUnsignedLong(payload);
+        Preconditions.checkArgument((changes >>> CHANGES_MASK_BITS == 0) &&
+                (arrMins >= -MINUTES_OFFSET && arrMins < 2880));
+        int arrMinsConv = arrMins + MINUTES_OFFSET;
+        return ((long) arrMinsConv) << ARRMINS_SHIFT | ((long) changes) << CHANGES_SHIFT |
+                toUnsignedLong(payload);
     }
 
     /**
@@ -33,7 +47,7 @@ public final class PackedCriteria {
      * @return true si les minutes de départ sont présentes, sinon false.
      */
     public static boolean hasDepMins(long criteria) {
-        return !(criteria >>> 51 == 0);
+        return !(criteria >>> DEPMINS_SHIFT == 0);
     }
 
     /**
@@ -45,7 +59,7 @@ public final class PackedCriteria {
      */
     public static int depMins(long criteria) {
         Preconditions.checkArgument(hasDepMins(criteria));
-        return (int) ~(criteria >> 51) - 240;
+        return (int) ~(criteria >> DEPMINS_SHIFT) - MINUTES_OFFSET;
     }
 
     /**
@@ -55,8 +69,8 @@ public final class PackedCriteria {
      * @return Temps d'arrivée en minutes avec minuit comme référence.
      */
     public static int arrMins(long criteria) {
-        long mask = (1L << 12) - 1;
-        return ((int) (criteria >>> 39 & mask)) - 240;
+        long mask = (1L << ARRMINS_MASK_BITS) - 1;
+        return ((int) (criteria >>> ARRMINS_SHIFT & mask)) - MINUTES_OFFSET;
     }
 
     /**
@@ -66,8 +80,8 @@ public final class PackedCriteria {
      * @return Nombre de changements.
      */
     public static int changes(long criteria) {
-        long mask = (1L << 7) - 1;
-        return (int) ((criteria >>> 32) & mask);
+        long mask = (1L << CHANGES_MASK_BITS) - 1;
+        return (int) ((criteria >>> CHANGES_SHIFT) & mask);
     }
 
     /**
@@ -77,7 +91,7 @@ public final class PackedCriteria {
      * @return Valeur du payload.
      */
     public static int payload(long criteria) {
-        long mask = (1L << 32) - 1;
+        long mask = (1L << PAYLOAD_MASK_BITS) - 1;
         return (int) (criteria & mask);
     }
 
@@ -90,8 +104,8 @@ public final class PackedCriteria {
      * @throws IllegalArgumentException si un seul des deux critères possède des minutes de départ.
      */
     public static boolean dominatesOrIsEqual(long criteria1, long criteria2) {
-        Preconditions.checkArgument((hasDepMins(criteria1) && hasDepMins(criteria2)) ||
-                !(hasDepMins(criteria2) && !hasDepMins(criteria1)));
+        Preconditions.checkArgument((hasDepMins(criteria1) && hasDepMins(criteria2)) || !
+         (hasDepMins(criteria2) && !hasDepMins(criteria1)));
 
         int a1 = arrMins(criteria1);
         int a2 = arrMins(criteria2);
@@ -112,7 +126,7 @@ public final class PackedCriteria {
      * @return Nouveaux critères sans les minutes de départ.
      */
     public static long withoutDepMins(long criteria) {
-        long mask = (1L << 51) - 1;
+        long mask = (1L << DEPMINS_SHIFT) - 1;
         return criteria & mask;
     }
 
@@ -125,9 +139,9 @@ public final class PackedCriteria {
      * @throws IllegalArgumentException si depMins1 est hors limites.
      */
     public static long withDepMins(long criteria, int depMins1) {
-        Preconditions.checkArgument(depMins1 >= -240 && depMins1 < 2880);
-        int depMinsConv = ~(depMins1 + 240);
-        long depMins = ((long) depMinsConv) << 51;
+        Preconditions.checkArgument(depMins1 >= -MINUTES_OFFSET && depMins1 < 2880);
+        int depMinsConv = ~(depMins1 + MINUTES_OFFSET);
+        long depMins = ((long) depMinsConv) << DEPMINS_SHIFT;
         return criteria | depMins;
     }
 
@@ -154,7 +168,7 @@ public final class PackedCriteria {
      * @return Nouveaux critères avec le payload modifié.
      */
     public static long withPayload(long criteria, int payload) {
-        long mask = ((1L << 32) - 1) << 32;
+        long mask = ((1L << PAYLOAD_MASK_BITS) - 1) << PAYLOAD_MASK_BITS;
         long withoutPayload = criteria & mask;
         return (withoutPayload | toUnsignedLong(payload));
 

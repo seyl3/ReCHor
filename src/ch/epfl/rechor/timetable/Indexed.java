@@ -7,6 +7,8 @@ package ch.epfl.rechor.timetable;
  * Toute donnée conforme à cette interface est stockée sous forme de tableau et
  * identifiée par un index allant de 0 (inclus) à la taille du tableau (exclue).
  * </p>
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
  */
 public interface Indexed {
 

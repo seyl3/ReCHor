@@ -9,12 +9,15 @@ import static java.lang.Math.scalb;
 
 
 /**
- * La classe BufferedStations implémente l'interface Stations et permet d'accéder à une table de
- * gares représentée de manière aplatie.
- * Chaque gare est représentée par les champs suivants :
+ * Implémentation de l'interface Stations utilisant un buffer pour stocker les données.
+ * <p>
+ * Format des données :
  * - NAME_ID : l'identifiant du nom de la gare (U16)
  * - LON : la longitude de la gare (S32)
  * - LAT : la latitude de la gare (S32)
+ * </p>
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
  */
 public final class BufferedStations implements Stations {
     private static final int NAME_ID = 0;
@@ -37,7 +40,6 @@ public final class BufferedStations implements Stations {
                 , Structure.field(LON, Structure.FieldType.S32)
                 , Structure.field(LAT, Structure.FieldType.S32))
                 , buffer);
-
     }
 
     @Override
@@ -59,6 +61,4 @@ public final class BufferedStations implements Stations {
     public int size() {
         return buffer.size();
     }
-
-
 }

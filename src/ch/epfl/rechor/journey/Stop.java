@@ -13,6 +13,8 @@ import java.util.Objects;
  *   <li>La longitude doit être comprise entre -180 et 180.</li>
  *   <li>La latitude doit être comprise entre -90 et 90.</li>
  * </ul>
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
  */
 public record Stop(String name, String platformName, double longitude, double latitude) {
 

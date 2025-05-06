@@ -1,10 +1,12 @@
 package ch.epfl.rechor;
 
 /**
- * Classe utilitaire pour manipuler des entiers de 32 bits en les séparanten / les créant à
- * partir de  :
+ * Classe utilitaire pour manipuler des entiers de 32 bits en les séparant / en les créant à
+ * partir des :
  * - 24 bits de poids fort
  * - 8 bits de poids faible
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
  */
 public final class Bits32_24_8 {
     private Bits32_24_8() {
@@ -22,6 +24,7 @@ public final class Bits32_24_8 {
      */
     public static int pack(int bits24, int bits8) {
         Preconditions.checkArgument(bits24 >>> 24 == 0 && bits8 >>> 8 == 0);
+
         return (bits24 << 8) | bits8;
     }
 
