@@ -50,7 +50,7 @@ public class SummaryUITest extends Application {
                 new CachedTimeTable(FileTimeTable.in(Path.of("timetable_14")));
         Stations stations = timeTable.stations();
         LocalDate date = LocalDate.of(2025, Month.APRIL, 1);
-        int depStationId = stationId(stations, "Morges, St-Jean sud");
+        int depStationId = stationId(stations, "Denges-Echandens");
         int arrStationId = stationId(stations, "Zürich HB");
         Router router = new Router(timeTable);
         Profile profile = router.profile(date, arrStationId);

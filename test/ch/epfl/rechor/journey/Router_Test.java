@@ -15,7 +15,6 @@ public class Router_Test {
     static int stationId(Stations stations, String stationName) {
         for (int i = 0; i < stations.size(); i++) {
             if (stations.name(i).equals(stationName)) {
-                System.out.println("Index trouvé : " + i);
                 return i;
             }
         }
@@ -31,7 +30,7 @@ public class Router_Test {
         Stations stations = timeTable.stations();
         LocalDate date = LocalDate.of(2025, Month.APRIL, 1);
         int depStationId = stationId(stations, "Ecublens VD, EPFL");
-        int arrStationId = stationId(stations, "Gruyères");
+        int arrStationId = stationId(stations, "Zug");
         Router router = new Router(timeTable);
         Profile profile = router.profile(date, arrStationId);
         Journey journey = JourneyExtractor

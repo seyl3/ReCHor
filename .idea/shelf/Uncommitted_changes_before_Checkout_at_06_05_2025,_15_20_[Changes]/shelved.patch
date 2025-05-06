@@ -1,0 +1,16 @@
+Index: src/ch/epfl/rechor/journey/Router_Test.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package ch.epfl.rechor.journey;\n\nimport ch.epfl.rechor.timetable.CachedTimeTable;\nimport ch.epfl.rechor.timetable.Stations;\nimport ch.epfl.rechor.timetable.TimeTable;\nimport ch.epfl.rechor.timetable.mapped.FileTimeTable;\n\nimport java.io.IOException;\nimport java.nio.file.Path;\nimport java.time.LocalDate;\nimport java.time.Month;\n\npublic class Router_Test {\n\n    static int stationId(Stations stations, String stationName) {\n        for (int i = 0; i < stations.size(); i++) {\n            if (stations.name(i).equals(stationName)) {\n                System.out.println(\"Index trouvé : \" + i);\n                return i;\n            }\n        }\n        return -1;\n\n    }\n\n    public static void main(String[] args) throws IOException {\n        long tStart = System.nanoTime();\n\n        TimeTable timeTable =\n                new CachedTimeTable(FileTimeTable.in(Path.of(\"timetable_14\")));\n        Stations stations = timeTable.stations();\n        LocalDate date = LocalDate.of(2025, Month.APRIL, 1);\n        int depStationId = stationId(stations, \"Ecublens VD, EPFL\");\n        int arrStationId = stationId(stations, \"Gruyères\");\n        Router router = new Router(timeTable);\n        Profile profile = router.profile(date, arrStationId);\n        Journey journey = JourneyExtractor\n                .journeys(profile, depStationId)\n                .get(32);\n        System.out.println(JourneyIcalConverter.toIcalendar(journey));\n\n        double elapsed = (System.nanoTime() - tStart) * 1e-9;\n        System.out.printf(\"Temps écoulé : %.3f s%n\", elapsed);\n    }\n}
+===================================================================
+diff --git a/src/ch/epfl/rechor/journey/Router_Test.java b/src/ch/epfl/rechor/journey/Router_Test.java
+--- a/src/ch/epfl/rechor/journey/Router_Test.java	(revision c1a9b9bd7747b573209a81152b87163cbefd04d9)
++++ b/src/ch/epfl/rechor/journey/Router_Test.java	(date 1746537041416)
+@@ -15,7 +15,6 @@
+     static int stationId(Stations stations, String stationName) {
+         for (int i = 0; i < stations.size(); i++) {
+             if (stations.name(i).equals(stationName)) {
+-                System.out.println("Index trouvé : " + i);
+                 return i;
+             }
+         }
