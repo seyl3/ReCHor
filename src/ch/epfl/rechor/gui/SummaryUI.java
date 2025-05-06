@@ -145,6 +145,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
 
                 Line line = new Line(5, 10, 195, 10);
                 line.endXProperty().bind(transferLinePane.widthProperty().subtract(5));
+                // revoir ça
                 transferLinePane.getChildren().add(line);
 
                 startCircle = new Circle(3);

@@ -1,5 +1,6 @@
 package ch.epfl.rechor.journey;
 
+import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.function.LongConsumer;
 
@@ -105,6 +106,8 @@ public class ParetoFront {
     public static class Builder {
         private int effectiveLength;
         private long[] front;
+        private static final double CAPACITY_FACTOR = 1.5;
+
 
         /**
          * Constructeur qui initialise un bâtisseur avec une frontière vide.
@@ -154,127 +157,46 @@ public class ParetoFront {
          * @param packedTuple Le tuple empaqueté à ajouter.
          * @return Le bâtisseur pour chaîner les appels.
          */
-        /*public Builder add(long packedTuple) {
-            long[] newFront;
 
-            // Étape 1 : Si la frontière est vide, insérer simplement le tuple
-            if (isEmpty()) {
-                effectiveLength++;
-                front[0] = packedTuple;
-                return this;
-            } else {
-                int insertPos = 0;
-
-                // Étape 2 : Trouver la bonne position d’insertion
-                for (int i = 0; i < effectiveLength; i++) {
-                    // Si un tuple existant domine ou est égal au nouveau, ne pas l’ajouter
-                    if (dominatesOrIsEqual(front[i], packedTuple)) {
-                        return this;
-                    }
-
-                    // Mettre à jour la position d’insertion (garder la plus grande position valide)
-                    if (withPayload(packedTuple, 0) > withPayload(front[i], 0)) {
-                        insertPos = i+1;
-                    }
-                }
-
-                // Étape 3 : Redimensionner la liste si sa capacité est atteinte
-                if (effectiveLength == front.length) {
-                    newFront = new long[(int) (front.length * 2)];
-                    System.arraycopy(front, 0, newFront, 0, front.length);
-                } else {
-                    newFront = front.clone();
-                }
-
-                // Étape 4 : compacter le reste de la liste
-                int dst = insertPos;
-                for (int src = insertPos; src < effectiveLength; src += 1) {
-                    if (dominatesOrIsEqual(packedTuple,front[src])) {
-                        effectiveLength--;
-                    }else{
-                        front[dst] = front[src];
-                        dst += 1;
-                    }
-                }
-
-                // Étape 5 : Insérer le nouveau tuple à la bonne position
-                newFront[insertPos] = packedTuple;
-                effectiveLength++;
-
-                // Étape 6 : Décaler les éléments non dominés vers la droite
-                System.arraycopy(front, insertPos, newFront, insertPos + 1,
-                effectiveLength-insertPos-1);
-
-                // Étape 7 : Mettre à jour la référence de la frontière
-                front = newFront;
-            }
-
-            return this;
-        }*/
         public Builder add(long packedTuple) {
-            // Étape 1 : Vérifier si la frontière est vide
-            if (isEmpty()) {
-                ensureCapacity(1);
-                front[0] = packedTuple;
-                effectiveLength = 1;
-                return this;
-            }
+            // 1) filtre / copie en une seule passe
+            int dst = 0;
+            boolean dominatesExisting = false;
 
-            // Étape 2 : Trouver la position d'insertion et vérifier si le tuple est dominé
-            int insertPos = 0;
-            while (insertPos < effectiveLength &&
-                    withPayload(front[insertPos], 0) < withPayload(packedTuple, 0)) {
-                insertPos++;
-            }
+            for (int i = 0; i < effectiveLength; i++) {
+                long current = front[i];
 
-            // Vérifier si un élément existant domine déjà le nouveau tuple
-            for (int i = 0; i < insertPos; i++) {
-                if (dominatesOrIsEqual(front[i], packedTuple)) {
-                    return this; // Ne pas ajouter si dominé
+                // si égal → rien à faire
+                if (current == packedTuple) return this;
+
+                // si cur domine packed → on n'insère rien
+                if (dominatesOrIsEqual(current, packedTuple)) return this;
+
+                // si packed domine cur, on ne recopie pas cur
+                if (!dominatesOrIsEqual(packedTuple, current)) {
+                    front[dst++] = current;
                 }
             }
 
-            // Étape 3 : Compactage - Supprimer les éléments dominés après la position d'insertion
-            int newLength = compact(insertPos, packedTuple);
+            // 2) agrandir si nécessaire
+            ensureCapacity(dst + 1);
 
-            // Étape 4 : Redimensionner si nécessaire
-            ensureCapacity(newLength + 1);
+            // 3) trouver la position d'insertion dans la partie conservée
+            int pos = 0;
+            while (pos < dst && front[pos] < packedTuple) pos++;
 
-            // Étape 5 : Décaler les éléments restants pour faire place au nouvel élément
-            if (insertPos < newLength) {
-                System.arraycopy(front, insertPos, front, insertPos + 1, newLength - insertPos);
-            }
-
-            // Étape 6 : Insérer le nouveau tuple à la bonne position
-            front[insertPos] = packedTuple;
-            effectiveLength = newLength + 1;
-
+            // 4) décaler pour faire de la place et insérer
+            System.arraycopy(front, pos, front, pos + 1, dst - pos);
+            front[pos] = packedTuple;
+            effectiveLength = dst + 1;
             return this;
         }
 
         private void ensureCapacity(int minCapacity) {
             if (front.length < minCapacity) {
-                long[] newFront = new long[Math.max(front.length * 3 / 2, minCapacity)];
-                System.arraycopy(front, 0, newFront, 0, effectiveLength);
-                front = newFront;
+                int newLength = Math.max((int) (front.length * CAPACITY_FACTOR) + 1, minCapacity);
+                front = Arrays.copyOf(front, newLength);
             }
-        }
-
-        /**
-         * Supprime les éléments dominés par `packedTuple` après `insertPos` dans le tableau.
-         *
-         * @param insertPos   la position d'insertion du nouveau tuple.
-         * @param packedTuple le tuple à insérer.
-         * @return la nouvelle taille effective après suppression des dominés.
-         */
-        private int compact(int insertPos, long packedTuple) {
-            int dst = insertPos;
-            for (int src = insertPos; src < effectiveLength; src++) {
-                if (!dominatesOrIsEqual(packedTuple, front[src])) {
-                    front[dst++] = front[src];
-                }
-            }
-            return dst; // Nouvelle taille effective après compactage
         }
 
         /**
@@ -298,8 +220,8 @@ public class ParetoFront {
          * @return Le bâtisseur pour chaîner les appels.
          */
         public Builder addAll(Builder that) {
-            for (long a : that.front) {
-                add(a);
+            for (int i = 0; i < that.effectiveLength; i++) {
+                add(that.front[i]);
             }
             return this;
         }

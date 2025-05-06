@@ -103,7 +103,7 @@ public record DetailUI(Node rootNode) {
 
         withJourney.visibleProperty().bind(
                 Bindings.createBooleanBinding(() -> journey0.getValue() != null, journey0)
-        );
+        ); // peut être a supprimer ? 
 
         journey0.subscribe(newJourney -> {
             legsGrid.clearPairs();
