@@ -145,6 +145,8 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                             formatRouteDestination((Journey.Leg.Transport) firstLeg));
                 } else {
                     vehicleIcon.setImage(iconFor(((Journey.Leg.Transport) item.legs().get(1)).vehicle()));
+                    routeAndDestination.setText(
+                            formatRouteDestination((Journey.Leg.Transport) item.legs().get(1)));
                 }
 
                 //TODO : nettoyer ça, cast un peu degeu non?
