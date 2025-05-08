@@ -70,7 +70,6 @@ public record FileTimeTable(Path directory, List<String> stringTable, Stations s
         Path transfersPath = directory.resolve("transfers.bin");
         Path stationAliasesPath = directory.resolve("station-aliases.bin");
         Path stringsPath = directory.resolve("strings.txt");
-        System.out.println(stringsPath);
         List<String> stringTable = List.copyOf(Files.readAllLines(stringsPath, STRING_CHARSET));
 
         ByteBuffer platformsBuffer = map(platformsPath);
