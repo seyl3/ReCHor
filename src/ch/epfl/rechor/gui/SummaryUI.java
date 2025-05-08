@@ -138,14 +138,20 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                 arrivalTime.setText(formatTime(item.legs().getLast().arrTime()));
                 durationTime.setText(formatDuration(item.duration()));
 
-                Journey.Leg firstLeg = item.legs().getFirst();
-                vehicleIcon.setImage(iconFor(((Journey.Leg.Transport) firstLeg).vehicle()));
-                routeAndDestination.setText(
-                        formatRouteDestination((Journey.Leg.Transport) firstLeg));
+                Journey.Leg firstLeg = item.legs().get(0);
+                if(firstLeg instanceof Journey.Leg.Transport) {
+                    vehicleIcon.setImage(iconFor(((Journey.Leg.Transport) firstLeg).vehicle()));
+                    routeAndDestination.setText(
+                            formatRouteDestination((Journey.Leg.Transport) firstLeg));
+                } else {
+                    vehicleIcon.setImage(iconFor(((Journey.Leg.Transport) item.legs().get(1)).vehicle()));
+                }
+
+                //TODO : nettoyer ça, cast un peu degeu non?
 
                 Line line = new Line(5, 10, 195, 10);
                 line.endXProperty().bind(transferLinePane.widthProperty().subtract(5));
-                // revoir ça
+                //TODO : revoir ça
                 transferLinePane.getChildren().add(line);
 
                 startCircle = new Circle(3);
