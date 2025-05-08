@@ -169,7 +169,9 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                     LocalDateTime departureTime = legs.getFirst().depTime();
                     double totalDurationMinutes = (double) item.duration().toMinutes();
 
-                    for (Journey.Leg leg : legs) {
+                    for(int i = 1; i < legs.size()-1; i++) {
+                        Journey.Leg leg = legs.get(i);
+                        //test de type ?
                         if (leg instanceof Journey.Leg.Foot footLeg) {
                             double minutesFromStart =
                                     Duration.between(departureTime, footLeg.depTime()).toMinutes();
