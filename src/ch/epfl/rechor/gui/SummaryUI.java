@@ -32,31 +32,38 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         listView.getStylesheets().add("summary.css");
         listView.setCellFactory(lv -> new JourneyCell());
 
-        journeyList.subscribe(newList -> listView.getItems().setAll(newList));
+        journeyList.subscribe(newList -> {
+            listView.getItems().setAll(newList);
+            updateSelection(listView, desiredTime);
+        });
 
         ObservableValue<Journey> selectedJourney =
                 listView.getSelectionModel().selectedItemProperty();
 
         // Sélectionne automatiquement le voyage correspondant a l'heure désirée
         desiredTime.subscribe(newTime -> {
-            List<Journey> journeys = listView.getItems();
-            if (journeys.isEmpty()) return;
-
-            for (Journey journey : journeys) {
-                LocalTime departure = journey.depTime().toLocalTime();
-                if (!departure.isBefore(newTime)) {
-                    listView.getSelectionModel().select(journey);
-                    listView.scrollTo(journey);
-                    return;
-                }
-            }
-
-            // Si aucun voyage ne correspond, on prend le dernier
-            listView.getSelectionModel().select(journeys.getLast());
-            listView.scrollTo(journeys.getLast());
+            updateSelection(listView, desiredTime);
         });
 
         return new SummaryUI(listView, selectedJourney);
+    }
+
+    private static void updateSelection(ListView<Journey> listView,
+                                        ObservableValue<LocalTime> desiredTimeO) {
+        List<Journey> journeys = listView.getItems();
+
+        if (journeys.isEmpty()) return;
+
+        LocalTime target = desiredTimeO.getValue();
+        int idx = 0;
+        while (idx < journeys.size() &&
+                journeys.get(idx).depTime().toLocalTime().isBefore(target)) {
+            idx++;
+        }
+        if (idx == journeys.size()) idx--;
+
+        listView.getSelectionModel().select(idx);
+        listView.scrollTo(idx);
     }
 
     private static final class JourneyCell extends ListCell<Journey> {
