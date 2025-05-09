@@ -3,6 +3,7 @@ package ch.epfl.rechor;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -16,7 +17,7 @@ import java.util.stream.Stream;
  */
 public class StopIndex {
     public static final int flags = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
-    private final List<String> stopsNames;
+    private static List<String> stopsNames;
     private final Map<String, String> alternativeNames;
 
     /**
@@ -128,5 +129,10 @@ public class StopIndex {
                         subRequests))) // tri par pertinence décroissante
                 .limit(limit)
                 .toList();
+    }
+
+    public List<String> stopNamesIndex() {
+        List<String> sorted = stopsNames.stream().sorted().toList();
+        return List.copyOf(sorted);
     }
 }
