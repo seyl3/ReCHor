@@ -1,0 +1,19 @@
+Index: src/ch/epfl/rechor/gui/QueryUI.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package ch.epfl.rechor.gui;\n\nimport ch.epfl.rechor.StopIndex;\nimport javafx.beans.value.ObservableValue;\nimport javafx.scene.Node;\nimport javafx.scene.control.*;\nimport javafx.scene.layout.*;\nimport javafx.util.converter.LocalTimeStringConverter;\n\nimport java.time.LocalDate;\nimport java.time.LocalTime;\nimport java.time.format.DateTimeFormatter;\n\npublic record QueryUI(Node rootNode,\n                      ObservableValue<String> depStopO,\n                      ObservableValue<String> arrStopO,\n                      ObservableValue<LocalDate> dateO,\n                      ObservableValue<LocalTime> timeO\n                      ) {\n    public static QueryUI create(StopIndex stopIndex) {\n        VBox root = new VBox();\n        root.getStylesheets().add(\"query.css\");\n\n        HBox search = new HBox();\n        root.getChildren().add(search);\n\n        Label depStop = new Label(\"Départ\\u202f:\");\n        StopField depField = StopField.create(stopIndex);\n        depField.textField().setId(\"depStop\");\n        depField.textField().setPromptText(\"Nom de l'arrêt de départ\");\n        search.getChildren().addAll(depStop, depField.textField());\n\n        Button exchangeB = new Button();\n        search.getChildren().add(exchangeB);\n        exchangeB.setText(\"\\u2194\");\n        exchangeB.setMinWidth(20);\n        exchangeB.setMinHeight(10);\n\n        Label arrStop = new Label(\"Arrivée\\u202f:\");\n        StopField arrField = StopField.create(stopIndex);\n        arrField.textField().setPromptText(\"Nom de l'arrêt d'arrivée\");\n        search.getChildren().addAll(arrStop, arrField.textField());\n\n        exchangeB.setOnAction(e -> {\n            String dep = depField.stopO().getValue();\n            String arr = arrField.stopO().getValue();\n            depField.setTo(arr);\n            arrField.setTo(dep);\n        });\n\n        HBox dateTime = new HBox();\n        root.getChildren().add(dateTime);\n\n        Label date = new Label(\"Date\\u202f:\");\n        DatePicker datePicker = new DatePicker();\n        datePicker.setId(\"date\");\n\n        dateTime.getChildren().addAll(date, datePicker);\n\n        Label time = new Label(\"Heure\\u202f:\");\n        TextField timeField = new TextField();\n        timeField.setId(\"time\");\n\n        DateTimeFormatter formatterDisplay = DateTimeFormatter.ofPattern(\"HH:mm\");\n        DateTimeFormatter formatterParse = DateTimeFormatter.ofPattern(\"[H:mm][HH:mm]\");\n        LocalTimeStringConverter timeConverter = new LocalTimeStringConverter(formatterDisplay, formatterParse);\n        TextFormatter<LocalTime> timeFormatter = new TextFormatter<>(timeConverter);\n        timeField.setTextFormatter(timeFormatter);\n\n        dateTime.getChildren().addAll(time, timeField);\n\n\n        return new QueryUI(root,\n                depField.stopO(),\n                arrField.stopO(),\n                datePicker.valueProperty(),\n                timeFormatter.valueProperty());\n\n\n    }\n\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/ch/epfl/rechor/gui/QueryUI.java b/src/ch/epfl/rechor/gui/QueryUI.java
+--- a/src/ch/epfl/rechor/gui/QueryUI.java	(revision 449640811e384a3d618a5a9e27493c5a82b233dc)
++++ b/src/ch/epfl/rechor/gui/QueryUI.java	(date 1746793586707)
+@@ -33,8 +33,6 @@
+         Button exchangeB = new Button();
+         search.getChildren().add(exchangeB);
+         exchangeB.setText("\u2194");
+-        exchangeB.setMinWidth(20);
+-        exchangeB.setMinHeight(10);
+ 
+         Label arrStop = new Label("Arrivée\u202f:");
+         StopField arrField = StopField.create(stopIndex);

@@ -19,7 +19,7 @@ public record QueryUI(Node rootNode,
                       ) {
     public static QueryUI create(StopIndex stopIndex) {
         VBox root = new VBox();
-        root.getStyleClass().add("query.css");
+        root.getStylesheets().add("query.css");
 
         HBox search = new HBox();
         root.getChildren().add(search);
@@ -30,14 +30,16 @@ public record QueryUI(Node rootNode,
         depField.textField().setPromptText("Nom de l'arrêt de départ");
         search.getChildren().addAll(depStop, depField.textField());
 
+        Button exchangeB = new Button();
+        search.getChildren().add(exchangeB);
+        exchangeB.setText("\u2194");
+
         Label arrStop = new Label("Arrivée\u202f:");
         StopField arrField = StopField.create(stopIndex);
         arrField.textField().setPromptText("Nom de l'arrêt d'arrivée");
         search.getChildren().addAll(arrStop, arrField.textField());
 
-        Button exchangeB = new Button();
-        search.getChildren().add(exchangeB);
-        exchangeB.setText("\u2194");
+
         exchangeB.setOnAction(e -> {
             String dep = depField.stopO().getValue();
             String arr = arrField.stopO().getValue();
@@ -59,11 +61,15 @@ public record QueryUI(Node rootNode,
         TextField timeField = new TextField();
         timeField.setId("time");
 
+
         DateTimeFormatter formatterDisplay = DateTimeFormatter.ofPattern("HH:mm");
         DateTimeFormatter formatterParse = DateTimeFormatter.ofPattern("[H:mm][HH:mm]");
         LocalTimeStringConverter timeConverter = new LocalTimeStringConverter(formatterDisplay, formatterParse);
         TextFormatter<LocalTime> timeFormatter = new TextFormatter<>(timeConverter);
         timeField.setTextFormatter(timeFormatter);
+
+        timeField.setText(LocalTime.now().format(formatterDisplay));
+        datePicker.setValue(LocalDate.now());
 
         dateTime.getChildren().addAll(time, timeField);
 
