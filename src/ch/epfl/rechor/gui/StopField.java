@@ -79,6 +79,8 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
     }
 
     public void setTo(String stopName){
+
         textField.setText(stopName);
+        ((SimpleStringProperty)stopO).set(stopName);
     }
 }
