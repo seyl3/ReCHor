@@ -105,8 +105,10 @@ public class StopIndex {
      * sans doublons et de taille au plus {@code limit}
      */
     public List<String> stopsMatching(String request, int limit) {
-        if (request == null || request.isBlank()) return List.of();
-        //
+        if (request == null || request.isBlank()){
+            return stopsNames.stream().sorted().toList();
+        }
+
         // Étape 1 : découper la requête
         Pattern spaceSplitter = Pattern.compile("\\s+"); // un ou plusieurs espaces
         String[] subRequests = spaceSplitter.split(request.trim());

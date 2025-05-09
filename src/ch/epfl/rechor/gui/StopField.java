@@ -45,18 +45,10 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
         tf.focusedProperty().subscribe(focus->{
             if(focus){
                 popup.show(tf.getScene().getWindow());
+                setListView(stopIndex,tf.textProperty().getValue(),listView);
                 // Mise à jour du contenu de la liste à chaque changement de texte
                 tf.textProperty().subscribe(() -> {
-                    List<String> suggestions = index;
-                    if(tf.textProperty().getValue().isEmpty()){
-                       suggestions = index;
-                    }else{
-                        suggestions = stopIndex.stopsMatching(tf.textProperty().getValue(), 30);
-                    }
-                    listView.getItems().setAll(suggestions);
-                    if (!suggestions.isEmpty()) {
-                        listView.getSelectionModel().selectFirst(); // sélection par défaut
-                    }
+                    setListView(stopIndex,tf.textProperty().getValue(),listView);
                 });
 
                 // Positionnement du popup juste sous le champ textuel
@@ -82,6 +74,14 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
 
 
         return new StopField(tf, stopO);
+    }
+
+    private static void setListView(StopIndex stopIndex, String request, ListView<String> listView){
+        List<String> suggestionss = stopIndex.stopsMatching(request, 30);
+        listView.getItems().setAll(suggestionss);
+        if (!suggestionss.isEmpty()) {
+            listView.getSelectionModel().selectFirst(); // sélection par défaut
+        }
     }
 
     public void setTo(String stopName){
