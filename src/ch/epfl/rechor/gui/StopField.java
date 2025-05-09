@@ -11,6 +11,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Popup;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -21,6 +22,7 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
         StringProperty stopO = new SimpleStringProperty("");
         Popup popup = new Popup();
         popup.setHideOnEscape(false);
+        List<String> index = stopIndex.stopNamesIndex();
         ListView<String> listView = new ListView<>();
         listView.setFocusTraversable(false);
         listView.setMaxHeight(240);
@@ -44,10 +46,14 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
             if(focus){
                 popup.show(tf.getScene().getWindow());
                 // Mise à jour du contenu de la liste à chaque changement de texte
-                tf.textProperty().addListener((__, ___, newText) -> {
-                    List<String> suggestions = stopIndex.stopsMatching(newText, 30);
+                tf.textProperty().subscribe(() -> {
+                    List<String> suggestions = index;
+                    if(tf.textProperty().getValue().isEmpty()){
+                       suggestions = index;
+                    }else{
+                        suggestions = stopIndex.stopsMatching(tf.textProperty().getValue(), 30);
+                    }
                     listView.getItems().setAll(suggestions);
-
                     if (!suggestions.isEmpty()) {
                         listView.getSelectionModel().selectFirst(); // sélection par défaut
                     }
