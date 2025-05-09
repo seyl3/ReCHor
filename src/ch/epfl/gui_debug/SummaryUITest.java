@@ -47,9 +47,9 @@ public class SummaryUITest extends Application {
     public void start(Stage primaryStage) throws Exception {
 
         TimeTable timeTable =
-                new CachedTimeTable(FileTimeTable.in(Path.of("timetable_14")));
+                new CachedTimeTable(FileTimeTable.in(Path.of("timetable_19")));
         Stations stations = timeTable.stations();
-        LocalDate date = LocalDate.of(2025, Month.APRIL, 1);
+        LocalDate date = LocalDate.of(2025, Month.MAY, 8);
         int depStationId = stationId(stations, "Denges-Echandens");
         int arrStationId = stationId(stations, "Zürich HB");
         Router router = new Router(timeTable);
