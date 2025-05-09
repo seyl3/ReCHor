@@ -19,7 +19,7 @@ public record QueryUI(Node rootNode,
                       ) {
     public static QueryUI create(StopIndex stopIndex) {
         VBox root = new VBox();
-        root.getStylesheets().add("query.css");
+        root.getStyleClass().add("query.css");
 
         HBox search = new HBox();
         root.getChildren().add(search);
@@ -30,23 +30,21 @@ public record QueryUI(Node rootNode,
         depField.textField().setPromptText("Nom de l'arrêt de départ");
         search.getChildren().addAll(depStop, depField.textField());
 
-        Button exchangeB = new Button();
-        search.getChildren().add(exchangeB);
-        exchangeB.setText("\u2194");
-        exchangeB.setMinWidth(20);
-        exchangeB.setMinHeight(10);
-
         Label arrStop = new Label("Arrivée\u202f:");
         StopField arrField = StopField.create(stopIndex);
         arrField.textField().setPromptText("Nom de l'arrêt d'arrivée");
         search.getChildren().addAll(arrStop, arrField.textField());
 
+        Button exchangeB = new Button();
+        search.getChildren().add(exchangeB);
+        exchangeB.setText("\u2194");
         exchangeB.setOnAction(e -> {
             String dep = depField.stopO().getValue();
             String arr = arrField.stopO().getValue();
             depField.setTo(arr);
             arrField.setTo(dep);
         });
+
 
         HBox dateTime = new HBox();
         root.getChildren().add(dateTime);

@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static ch.epfl.rechor.FormatterFr.*;
 import static ch.epfl.rechor.gui.VehicleIcons.iconFor;
@@ -169,20 +170,17 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                     LocalDateTime departureTime = legs.getFirst().depTime();
                     double totalDurationMinutes = (double) item.duration().toMinutes();
 
-                    for(int i = 1; i < legs.size()-1; i++) {
-                        Journey.Leg leg = legs.get(i);
-                        //test de type ?
-                        if (leg instanceof Journey.Leg.Foot footLeg) {
-                            double minutesFromStart =
-                                    Duration.between(departureTime, footLeg.depTime()).toMinutes();
-                            double relativePosition = minutesFromStart / totalDurationMinutes;
-
-                            Circle changeCircle = new Circle(3);
-                            changeCircle.getStyleClass().add("transfer");
-                            changeCircle.setUserData(relativePosition);
-                            transferCircles.add(changeCircle);
-                        }
-                    }
+                    IntStream.range(1, legs.size() - 1).mapToObj(legs::get)
+                            .filter(leg -> leg instanceof Journey.Leg.Foot)
+                            .map(leg -> (Journey.Leg.Foot) leg)
+                            .mapToDouble(footLeg -> Duration.between(departureTime, footLeg.depTime()).toMinutes())
+                            .map(minutesFromStart -> minutesFromStart / totalDurationMinutes)
+                            .forEach(relativePosition -> {
+                                Circle changeCircle = new Circle(3);
+                                changeCircle.getStyleClass().add("transfer");
+                                changeCircle.setUserData(relativePosition);
+                                transferCircles.add(changeCircle);
+                            });
                 }
 
                 transferLinePane.getChildren().add(startCircle);
