@@ -69,7 +69,6 @@ public class Main extends Application {
 
                 int depId = stopNames.indexOf(depStopMain);
                 int arrId = stopNames.indexOf(arrStopMain);
-                System.out.println(depId + " " + arrId);
 
                 Profile profile = profileCache
                         .computeIfAbsent(date, d -> new ConcurrentHashMap<>())
