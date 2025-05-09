@@ -15,10 +15,6 @@ import java.util.List;
 
 
 public record StopField(TextField textField, ObservableValue<String> stopO) {
-    public StopField  {
-        stopO = new SimpleStringProperty("");
-
-    }
 
     public static StopField create(StopIndex stopIndex) {
         TextField tf = new TextField();

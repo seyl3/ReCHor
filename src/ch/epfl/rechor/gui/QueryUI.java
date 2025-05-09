@@ -27,21 +27,23 @@ public record QueryUI(Node rootNode,
         Label depStop = new Label("Départ\u202f:");
         StopField depField = StopField.create(stopIndex);
         depField.textField().setId("depStop");
-        TextField depStopField = new TextField();
-        depStopField.setId("depStop");
-        depStopField.setPromptText("Nom de l'arrêt de départ");
-
-        search.getChildren().addAll(depStop, depStopField);
-
-        Button exchangeB = new Button();
-        search.getChildren().add(exchangeB);
+        depField.textField().setPromptText("Nom de l'arrêt de départ");
+        search.getChildren().addAll(depStop, depField.textField());
 
         Label arrStop = new Label("Arrivée\u202f:");
         StopField arrField = StopField.create(stopIndex);
-        TextField arrStopField = new TextField();
-        arrStopField.setPromptText("Nom de l'arrêt d'arrivée");
+        arrField.textField().setPromptText("Nom de l'arrêt d'arrivée");
+        search.getChildren().addAll(arrStop, arrField.textField());
 
-        search.getChildren().addAll(arrStop, arrStopField);
+        Button exchangeB = new Button();
+        search.getChildren().add(exchangeB);
+        exchangeB.setOnAction(e -> {
+            String dep = depField.stopO().getValue();
+            String arr = arrField.stopO().getValue();
+            depField.setTo(arr);
+            arrField.setTo(dep);
+        });
+
 
         HBox dateTime = new HBox();
         root.getChildren().add(dateTime);
