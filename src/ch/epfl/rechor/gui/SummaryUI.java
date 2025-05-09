@@ -38,8 +38,6 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                 listView.getSelectionModel().selectedItemProperty();
 
         // Sélectionne automatiquement le voyage correspondant a l'heure désirée
-        // est ce que on garde ça en subscribre uniquement du temps ou bien
-        // quand on change de journeys ça doit se faire automatiquement aussi ?
         desiredTime.subscribe(newTime -> {
             List<Journey> journeys = listView.getItems();
             if (journeys.isEmpty()) return;
@@ -70,7 +68,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         private final Text arrivalTime;
         private final Text durationTime;
         private final Pane transferLinePane;
-        private final List<Circle> transferCircles = new ArrayList<>();
+        private final List<Circle> transferCircles;
         private Circle startCircle;
         private Circle endCircle;
 
@@ -80,6 +78,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
             departureTime = new Text();
             arrivalTime = new Text();
             durationTime = new Text();
+            transferCircles = new ArrayList<>();
 
             transferLinePane = new Pane() {
                 @Override
@@ -92,7 +91,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                     endCircle.setCenterX(width - 5);
                     endCircle.setCenterY(10);
 
-                    for (Circle circle : transferCircles) {
+                    for(Circle circle : transferCircles) {
                         double relativePosition = (double) circle.getUserData();
                         double x = 5 + relativePosition * (width - 10);
                         circle.setCenterX(x);
@@ -165,7 +164,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
 
                 transferCircles.clear();
 
-                if (!item.legs().isEmpty()) { // vérification utile ?
+//                if (!item.legs().isEmpty()) { // vérification utile ?
                     List<Journey.Leg> legs = item.legs();
                     LocalDateTime departureTime = legs.getFirst().depTime();
                     double totalDurationMinutes = (double) item.duration().toMinutes();
@@ -181,7 +180,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                                 changeCircle.setUserData(relativePosition);
                                 transferCircles.add(changeCircle);
                             });
-                }
+//                }
 
                 transferLinePane.getChildren().add(startCircle);
                 transferLinePane.getChildren().add(endCircle);
