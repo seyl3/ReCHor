@@ -1,6 +1,7 @@
 package ch.epfl.rechor.gui;
 
 import ch.epfl.rechor.journey.Journey;
+import ch.epfl.rechor.journey.Stop;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.HPos;
@@ -24,6 +25,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,6 +98,7 @@ public record DetailUI(Node rootNode) {
         Button calendarButton = new Button("Calendrier");
         Button mapButton = new Button("Carte");
         buttons.getChildren().addAll(calendarButton, mapButton);
+        wireButtons(calendarButton, mapButton, journey0);
 
         noJourney.visibleProperty().bind(
                 Bindings.createBooleanBinding(() -> journey0.getValue() == null, journey0)
@@ -103,7 +106,7 @@ public record DetailUI(Node rootNode) {
 
         withJourney.visibleProperty().bind(
                 Bindings.createBooleanBinding(() -> journey0.getValue() != null, journey0)
-        ); // peut être a supprimer ? 
+        ); // peut être a supprimer ?
 
         journey0.subscribe(newJourney -> {
             legsGrid.clearPairs();
@@ -126,17 +129,7 @@ public record DetailUI(Node rootNode) {
                             // Ajout de l'heure de départ, cercle de départ, nom de la gare et sa
                             // plateforme
                             // de départ
-                            Text depTime = new Text(formatTime(leg.depTime()));
-                            depTime.getStyleClass().add("departure");
-                            Text depPlatform = new Text(formatPlatformName(leg.depStop()));
-                            depPlatform.getStyleClass().add("departure");
-                            Text depStation = new Text(leg.depStop().name());
-                            Circle depCircle = new Circle(3, Color.BLACK);
-
-                            legsGrid.add(depTime, 0, currentRow);
-                            legsGrid.add(depCircle, 1, currentRow);
-                            legsGrid.add(depStation, 2, currentRow);
-                            legsGrid.add(depPlatform, 3, currentRow);
+                            Circle depCircle = addStopRow(legsGrid, currentRow, leg.depTime(), leg.depStop(), true);
 
                             // Ajout de l'icone du véhicule, et du nom de la destination
                             ImageView vehicleIcon =
@@ -190,58 +183,79 @@ public record DetailUI(Node rootNode) {
                             // Ajout de l'heure d'arrivée, cercle d'arrivée, nom de la gare et sa
                             // plateforme
                             // d'arrivée
-                            Text arrTime = new Text(formatTime(leg.arrTime()));
-                            Text arrPlatform = new Text(formatPlatformName(leg.arrStop()));
-                            Text arrStation = new Text(leg.arrStop().name());
-                            Circle arrCircle = new Circle(3, Color.BLACK);
-
-                            legsGrid.add(arrTime, 0, currentRow + 2);
-                            legsGrid.add(arrCircle, 1, currentRow + 2);
-                            legsGrid.add(arrStation, 2, currentRow + 2);
-                            legsGrid.add(arrPlatform, 3, currentRow + 2);
+                            Circle arrCircle = addStopRow(legsGrid, currentRow + 2, leg.arrTime(),
+                                    leg.arrStop(), false);
 
                             currentRow = currentRow + 3;
                             legsGrid.addPair(depCircle, arrCircle);
                         }
                     }
                 }
-
-
-                // Boutons permettant de télécharger le trajet sous format .ical
-                // et de le visualiser sur internet
-                calendarButton.setOnAction(a -> {
-                    FileChooser fileChooser = new FileChooser();
-                    fileChooser.setTitle("Choisissez l'emplacement d'enregistrement du fichier.");
-                    fileChooser.setInitialFileName("voyage_" + journey0.getValue().depTime().format(
-                            DateTimeFormatter.ISO_DATE) + ".ics");
-
-                    File selectedFile =
-                            fileChooser.showSaveDialog(calendarButton.getScene().getWindow());
-
-                    if (selectedFile != null) {
-                        try {
-                            String ical = toIcalendar(journey0.getValue());
-                            Files.writeString(selectedFile.toPath(), ical,
-                                    StandardOpenOption.CREATE);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                });
-
-                mapButton.setOnAction(a -> {
-                    try {
-                        URI targetURL = new URI("https", "umap.osm.ch", "/fr/map",
-                                ("data=" + toGeoJson(journey0.getValue())), "null");
-                        getDesktop().browse(targetURL);
-                    } catch (IOException | URISyntaxException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
             }
         });
 
         return new DetailUI(root);
+    }
+
+    private static Circle addStopRow(GridPane grid,
+                                     int row,
+                                     LocalDateTime time,
+                                     Stop stop,
+                                     boolean isDeparture) {
+
+        Text timeTxt = new Text(formatTime(time));
+        Text platformTxt = new Text(formatPlatformName(stop));
+        Text stationTxt = new Text(stop.name());
+        Circle circle = new Circle(3, Color.BLACK);
+
+        if (isDeparture) {
+            timeTxt.getStyleClass().add("departure");
+            platformTxt.getStyleClass().add("departure");
+        }
+
+        grid.add(timeTxt, 0, row);
+        grid.add(circle, 1, row);
+        grid.add(stationTxt, 2, row);
+        grid.add(platformTxt, 3, row);
+
+        return circle;
+    }
+
+    private static void wireButtons(Button calendarButton,
+                                    Button mapButton,
+                                    ObservableValue<Journey> journeyO) {
+
+        calendarButton.setOnAction(e -> {
+            Journey j = journeyO.getValue();
+            if (j == null) return;
+
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Choisissez l'emplacement d'enregistrement du fichier.");
+            chooser.setInitialFileName(
+                    "voyage_" + j.depTime().format(DateTimeFormatter.ISO_DATE) + ".ics");
+
+            File target = chooser.showSaveDialog(calendarButton.getScene().getWindow());
+            if (target != null) {
+                try {
+                    Files.writeString(target.toPath(), toIcalendar(j), StandardOpenOption.CREATE);
+                } catch (IOException io) {
+                    throw new RuntimeException(io);
+                }
+            }
+        });
+
+        mapButton.setOnAction(e -> {
+            Journey j = journeyO.getValue();
+            if (j == null) return;
+
+            try {
+                URI uri = new URI("https", "umap.osm.ch", "/fr/map",
+                                  "data=" + toGeoJson(j), "null");
+                getDesktop().browse(uri);
+            } catch (IOException | URISyntaxException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
     }
 
 
@@ -289,4 +303,3 @@ public record DetailUI(Node rootNode) {
         }
     }
 }
-
