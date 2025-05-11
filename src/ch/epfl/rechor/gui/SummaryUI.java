@@ -18,13 +18,38 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static ch.epfl.rechor.FormatterFr.*;
 import static ch.epfl.rechor.gui.VehicleIcons.iconFor;
 
+/**
+ * Interface graphique de synthèse des voyages.
+ * <p>
+ * Affiche une liste de voyages sous forme de liste, incluant pour chaque voyage :
+ * <ul>
+ *   <li>heure de départ et d'arrivée</li>
+ *   <li>durée et mode de transport principal</li>
+ *   <li>visuel des transferts à pied sous forme de cercles</li>
+ * </ul>
+ *
+ * La sélection du voyage se fait automatiquement en fonction de l'heure désirée,
+ * et peut être récupérée via la valeur observable fournie.
+ *
+ * @param rootNode          le nœud racine affichant la liste des voyages
+ * @param selectedJourneyO  observable du voyage actuellement sélectionné
+ * @author Sarra Zghal, Elyes Ben Abid
+ */
 public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO) {
 
+    /**
+     * Construit l’UI de la liste de voyages.
+     *
+     * @param journeyList liste observable des voyages à afficher
+     * @param desiredTime heure désirée pour sélectionner automatiquement le voyage le plus proche
+     * @return une instance de SummaryUI
+     */
     public static SummaryUI create(ObservableValue<List<Journey>> journeyList,
                                    ObservableValue<LocalTime> desiredTime) {
 
@@ -32,22 +57,30 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         listView.getStylesheets().add("summary.css");
         listView.setCellFactory(lv -> new JourneyCell());
 
+        // Met à jour le voyage séléctionné
         journeyList.subscribe(newList -> {
             listView.getItems().setAll(newList);
             updateSelection(listView, desiredTime);
         });
 
-        ObservableValue<Journey> selectedJourney =
-                listView.getSelectionModel().selectedItemProperty();
-
-        // Sélectionne automatiquement le voyage correspondant a l'heure désirée
+        // Met à jour et sélectionne automatiquement le voyage correspondant a l'heure désirée
         desiredTime.subscribe(newTime -> {
             updateSelection(listView, desiredTime);
         });
+        ObservableValue<Journey> selectedJourney =
+                listView.getSelectionModel().selectedItemProperty();
 
         return new SummaryUI(listView, selectedJourney);
     }
 
+    /**
+     * Méthode auxiliaire, sélectionne et fait défiler la liste jusqu’au voyage correspondant à
+     * l’heure
+     * désirée.
+     *
+     * @param listView la ListView contenant les voyages
+     * @param desiredTimeO observable de l’heure désirée pour la sélection
+     */
     private static void updateSelection(ListView<Journey> listView,
                                         ObservableValue<LocalTime> desiredTimeO) {
         List<Journey> journeys = listView.getItems();
@@ -66,7 +99,14 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         listView.scrollTo(idx);
     }
 
+    /**
+     * Cellule "customisée" pour afficher un résumé d’un voyage dans la liste.
+     */
     private static final class JourneyCell extends ListCell<Journey> {
+        private static final double HORIZONTAL_MARGIN = 5;
+        private static final double VERTICAL_POSITION = 10;
+        private static final double CIRCLE_RADIUS = 3;
+
         private final BorderPane journey;
         private final ImageView vehicleIcon;
         private final int iconSize = 20;
@@ -78,7 +118,12 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         private final List<Circle> transferCircles;
         private Circle startCircle;
         private Circle endCircle;
+        private final Line backgroundLine;
 
+        /**
+         * Initialise les composants graphiques de la cellule : icône du véhicule,
+         * textes, ligne de transfert et cercles de changement.
+         */
         public JourneyCell() {
             vehicleIcon = new ImageView();
             routeAndDestination = new Text();
@@ -92,21 +137,32 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                 protected void layoutChildren() {
                     double width = getWidth();
 
-                    startCircle.setCenterX(5);
-                    startCircle.setCenterY(10);
+                    startCircle.setCenterX(HORIZONTAL_MARGIN);
+                    startCircle.setCenterY(VERTICAL_POSITION);
 
-                    endCircle.setCenterX(width - 5);
-                    endCircle.setCenterY(10);
+                    endCircle.setCenterX(width - HORIZONTAL_MARGIN);
+                    endCircle.setCenterY(VERTICAL_POSITION);
 
                     for(Circle circle : transferCircles) {
                         double relativePosition = (double) circle.getUserData();
-                        double x = 5 + relativePosition * (width - 10);
+                        double x = HORIZONTAL_MARGIN + relativePosition * (width - 2 * HORIZONTAL_MARGIN);
                         circle.setCenterX(x);
-                        circle.setCenterY(10);
+                        circle.setCenterY(VERTICAL_POSITION);
                     }
                 }
             };
             transferLinePane.setPrefSize(0, 0);
+
+            startCircle = new Circle(CIRCLE_RADIUS);
+            startCircle.getStyleClass().add("dep-arr");
+
+            endCircle = new Circle(CIRCLE_RADIUS);
+            endCircle.getStyleClass().add("dep-arr");
+
+            backgroundLine = new Line(HORIZONTAL_MARGIN, VERTICAL_POSITION, HORIZONTAL_MARGIN, VERTICAL_POSITION);
+            backgroundLine.endXProperty().bind(transferLinePane.widthProperty().subtract(HORIZONTAL_MARGIN));
+
+            transferLinePane.getChildren().addAll(backgroundLine, startCircle, endCircle);
 
             BorderPane journey = new BorderPane();
             journey.getStyleClass().add("journey");
@@ -132,10 +188,18 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
             journey.setCenter(transferLinePane);
         }
 
+        /**
+         * Met à jour l’affichage de la cellule pour chaque item de la liste.
+         * Affiche les heures de départ/arrivée, la durée, l’icône du véhicule,
+         * et les cercles de transfert pour chaque changement.
+         *
+         * @param item  le voyage à afficher dans la cellule
+         * @param empty true si la cellule doit être vide
+         */
         @Override
         protected void updateItem(Journey item, boolean empty) {
             super.updateItem(item, empty);
-            transferLinePane.getChildren().clear();
+            transferLinePane.getChildren().setAll(backgroundLine, startCircle, endCircle);
             if (empty || item == null) {
                 setGraphic(null);
             } else {
@@ -145,34 +209,18 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                 arrivalTime.setText(formatTime(item.legs().getLast().arrTime()));
                 durationTime.setText(formatDuration(item.duration()));
 
-                Journey.Leg firstLeg = item.legs().get(0);
-                if(firstLeg instanceof Journey.Leg.Transport) {
-                    vehicleIcon.setImage(iconFor(((Journey.Leg.Transport) firstLeg).vehicle()));
-                    routeAndDestination.setText(
-                            formatRouteDestination((Journey.Leg.Transport) firstLeg));
-                } else {
-                    vehicleIcon.setImage(iconFor(((Journey.Leg.Transport) item.legs().get(1)).vehicle()));
-                    routeAndDestination.setText(
-                            formatRouteDestination((Journey.Leg.Transport) item.legs().get(1)));
-                }
-
-                //TODO : nettoyer ça, cast un peu degeu non?
-
-                Line line = new Line(5, 10, 195, 10);
-                line.endXProperty().bind(transferLinePane.widthProperty().subtract(5));
-                //TODO : revoir ça
-                transferLinePane.getChildren().add(line);
-
-                startCircle = new Circle(3);
-                startCircle.getStyleClass().add("dep-arr");
-
-                endCircle = new Circle(3);
-                endCircle.getStyleClass().add("dep-arr");
+                List<Journey.Leg> legs = item.legs();
+                Optional<Journey.Leg.Transport> firstTransport = legs.stream()
+                    .filter(Journey.Leg.Transport.class::isInstance)
+                    .map(Journey.Leg.Transport.class::cast)
+                    .findFirst();
+                firstTransport.ifPresent(tleg -> {
+                    vehicleIcon.setImage(iconFor(tleg.vehicle()));
+                    routeAndDestination.setText(formatRouteDestination(tleg));
+                });
 
                 transferCircles.clear();
 
-//                if (!item.legs().isEmpty()) { // vérification utile ?
-                    List<Journey.Leg> legs = item.legs();
                     LocalDateTime departureTime = legs.getFirst().depTime();
                     double totalDurationMinutes = (double) item.duration().toMinutes();
 
@@ -182,15 +230,12 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                             .mapToDouble(footLeg -> Duration.between(departureTime, footLeg.depTime()).toMinutes())
                             .map(minutesFromStart -> minutesFromStart / totalDurationMinutes)
                             .forEach(relativePosition -> {
-                                Circle changeCircle = new Circle(3);
+                                Circle changeCircle = new Circle(CIRCLE_RADIUS);
                                 changeCircle.getStyleClass().add("transfer");
                                 changeCircle.setUserData(relativePosition);
                                 transferCircles.add(changeCircle);
                             });
-//                }
 
-                transferLinePane.getChildren().add(startCircle);
-                transferLinePane.getChildren().add(endCircle);
                 transferLinePane.getChildren().addAll(transferCircles);
             }
         }

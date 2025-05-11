@@ -48,16 +48,26 @@ import static javafx.scene.layout.GridPane.*;
  *   <li>les connexions entre étapes</li>
  * </ul>
  *
+ * Cette interface met à jour automatiquement son affichage en fonction de la valeur observable
+ * du voyage fourni. Elle contient deux enfants principaux : un affichage "aucun voyage" lorsque
+ * aucun voyage n'est sélectionné, et un affichage détaillé lorsque le voyage est présent.
+ *
  * @param rootNode le nœud racine du graphe de scène
  * @author : Sarra Zghal, Elyes Ben Abid
  */
 public record DetailUI(Node rootNode) {
 
+    private static final double STOP_CIRCLE_RADIUS = 3.0;
+    private static final int VEHICLE_ICON_SIZE = 31;
+    private static final double LINE_STROKE_WIDTH = 2.0;
+
     /**
      * Crée une nouvelle interface détaillée pour un voyage observable.
      * <p>
-     * L'interface se met à jour automatiquement lorsque le voyage change.
-     * En l'absence de voyage, affiche "Aucun voyage" au centre.
+     * Cette méthode crée l'interface graphique qui s'adapte automatiquement à la valeur
+     * observable du voyage. Elle lie la visibilité des deux affichages (aucun voyage
+     * et avec voyage) à la présence ou non d'un voyage. Lorsque le voyage change,
+     * l'interface se met à jour pour afficher les détails correspondants.
      *
      * @param journey0 le voyage à afficher, potentiellement nul
      * @return une nouvelle interface détaillée
@@ -106,7 +116,7 @@ public record DetailUI(Node rootNode) {
 
         withJourney.visibleProperty().bind(
                 Bindings.createBooleanBinding(() -> journey0.getValue() != null, journey0)
-        ); // peut être a supprimer ?
+        );
 
         journey0.subscribe(newJourney -> {
             legsGrid.clearPairs();
@@ -124,18 +134,15 @@ public record DetailUI(Node rootNode) {
                             currentRow++;
                         }
                         case Journey.Leg.Transport transportLeg -> {
-                            int imageSize = 31;
-
                             // Ajout de l'heure de départ, cercle de départ, nom de la gare et sa
-                            // plateforme
-                            // de départ
+                            // plateforme de départ
                             Circle depCircle = addStopRow(legsGrid, currentRow, leg.depTime(), leg.depStop(), true);
 
                             // Ajout de l'icone du véhicule, et du nom de la destination
                             ImageView vehicleIcon =
                                     new ImageView(iconFor(((Journey.Leg.Transport) leg).vehicle()));
                             vehicleIcon.setPreserveRatio(true);
-                            vehicleIcon.setFitWidth(imageSize);
+                            vehicleIcon.setFitWidth(VEHICLE_ICON_SIZE);
                             legsGrid.add(vehicleIcon, 0, currentRow + 1);
                             setHalignment(vehicleIcon, HPos.CENTER);
 
@@ -181,8 +188,7 @@ public record DetailUI(Node rootNode) {
                             }
 
                             // Ajout de l'heure d'arrivée, cercle d'arrivée, nom de la gare et sa
-                            // plateforme
-                            // d'arrivée
+                            // plateforme d'arrivée
                             Circle arrCircle = addStopRow(legsGrid, currentRow + 2, leg.arrTime(),
                                     leg.arrStop(), false);
 
@@ -197,6 +203,18 @@ public record DetailUI(Node rootNode) {
         return new DetailUI(root);
     }
 
+    /**
+     * Méthode auxiliaire, ajoute une ligne dans la grille représentant un arrêt avec l'heure, un
+     * cercle,
+     * le nom de la station et le nom de la plateforme.
+     *
+     * @param grid la grille dans laquelle ajouter la ligne
+     * @param row l'indice de la ligne où ajouter les éléments
+     * @param time l'heure à afficher
+     * @param stop l'arrêt (station) concerné
+     * @param isDeparture indique si l'arrêt est un départ (true) ou une arrivée (false)
+     * @return le cercle créé représentant l'arrêt, utilisé pour les annotations graphiques
+     */
     private static Circle addStopRow(GridPane grid,
                                      int row,
                                      LocalDateTime time,
@@ -206,7 +224,7 @@ public record DetailUI(Node rootNode) {
         Text timeTxt = new Text(formatTime(time));
         Text platformTxt = new Text(formatPlatformName(stop));
         Text stationTxt = new Text(stop.name());
-        Circle circle = new Circle(3, Color.BLACK);
+        Circle circle = new Circle(STOP_CIRCLE_RADIUS, Color.BLACK);
 
         if (isDeparture) {
             timeTxt.getStyleClass().add("departure");
@@ -221,6 +239,16 @@ public record DetailUI(Node rootNode) {
         return circle;
     }
 
+    /**
+     * Méthode auxiliaire, connecte les boutons calendrier et carte à leurs actions respectives.
+     * <p>
+     * Le bouton calendrier permet de sauvegarder le voyage au format iCalendar.
+     * Le bouton carte ouvre une carte web avec le trajet au format GeoJSON.
+     *
+     * @param calendarButton le bouton pour exporter le calendrier
+     * @param mapButton le bouton pour afficher la carte
+     * @param journeyO l'observable du voyage utilisé pour récupérer les données
+     */
     private static void wireButtons(Button calendarButton,
                                     Button mapButton,
                                     ObservableValue<Journey> journeyO) {
@@ -259,7 +287,12 @@ public record DetailUI(Node rootNode) {
     }
 
 
-    // Classe interne pour la grille des étapes, permettant de gérer les annotations
+    /**
+     * Grille interne pour afficher les étapes de transport avec des lignes d'annotation.
+     * <p>
+     * Cette classe gère le dessin des lignes rouges reliant les cercles de départ et d'arrivée
+     * des étapes de transport dans l'interface graphique.
+     */
     private static final class StepGrid extends GridPane {
         private final List<Pair<Circle, Circle>> circlePairs = new ArrayList<>();
         private final Pane annotationLayer;
@@ -270,36 +303,58 @@ public record DetailUI(Node rootNode) {
             this.annotationLayer = annotationLayer;
         }
 
+        /**
+         * Ajoute une paire de cercles représentant un départ et une arrivée,
+         * pour dessiner une ligne entre eux.
+         *
+         * @param dep le cercle du point de départ
+         * @param arr le cercle du point d'arrivée
+         */
         public void addPair(Circle dep, Circle arr) {
             circlePairs.add(new Pair<>(dep, arr));
         }
 
+        /**
+         * Vide la liste des paires de cercles, supprimant ainsi les annotations.
+         */
         public void clearPairs() {
             circlePairs.clear();
         }
 
+        /**
+         * Méthode appelée lors de la mise en page des enfants.
+         * <p>
+         * Elle dessine les lignes rouges reliant les paires de cercles sur le calque d'annotation.
+         */
         @Override
         protected void layoutChildren() {
             super.layoutChildren();
             lineList.clear();
 
-            for (Pair<Circle, Circle> pair : circlePairs) {
-                Circle start = pair.getKey();
-                Circle end = pair.getValue();
-
-                double startX = start.getBoundsInParent().getCenterX();
-                double startY = start.getBoundsInParent().getCenterY();
-                double endX = end.getBoundsInParent().getCenterX();
-                double endY = end.getBoundsInParent().getCenterY();
-
-                Line line = new Line(startX, startY, endX, endY);
-                line.setStroke(Color.RED);
-                line.setStrokeWidth(2);
-
-                lineList.add(line);
-            }
+            circlePairs.stream()
+                .map(this::createLine)
+                .forEach(lineList::add);
 
             annotationLayer.getChildren().setAll(lineList);
+        }
+
+        /**
+         * Méthode auxiliaire, crée une ligne rouge reliant deux cercles donnés.
+         *
+         * @param pair la paire de cercles (départ, arrivée)
+         * @return la ligne rouge entre les deux cercles
+         */
+        private Line createLine(Pair<Circle, Circle> pair) {
+            Circle start = pair.getKey();
+            Circle end   = pair.getValue();
+            double startX = start.getBoundsInParent().getCenterX();
+            double startY = start.getBoundsInParent().getCenterY();
+            double endX   = end.getBoundsInParent().getCenterX();
+            double endY   = end.getBoundsInParent().getCenterY();
+            Line line = new Line(startX, startY, endX, endY);
+            line.setStroke(Color.RED);
+            line.setStrokeWidth(LINE_STROKE_WIDTH);
+            return line;
         }
     }
 }

@@ -180,6 +180,7 @@ public class JourneyExtractor {
 
 
                     // Protection contre les potentielles exceptions NoSuchElementException
+                    // nécéssaire ??? 
                     try {
                         long nextCriteria;
 
