@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 
 public class Main extends Application {
-    private ObservableValue<List<Journey>> journeysO;
     private final Map<LocalDate, Map<Integer, Profile>> profileCache = new ConcurrentHashMap<>();
     // Date du voyage -> (l'indice de la station d'arrivée -> le profile)
     public static void main(String[] args) {
@@ -52,7 +51,8 @@ public class Main extends Application {
         Router router = new Router(tt);
 
         // Création de la valeur observable des voyages
-        journeysO = Bindings.createObjectBinding(() -> {
+        // Vérification des paramètres
+        ObservableValue<List<Journey>> journeysO = Bindings.createObjectBinding(() -> {
             String depStop = queryUI.depStopO().getValue();
             String arrStop = queryUI.arrStopO().getValue();
             LocalDate date = queryUI.dateO().getValue();

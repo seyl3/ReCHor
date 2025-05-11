@@ -124,11 +124,9 @@ public class StopIndex {
         // sous-requêtes
         return Stream.concat(stopsNames.stream(), alternativeNames.keySet().stream())
                 .filter(name -> subPatterns.stream().anyMatch(p -> p.matcher(name).find()))
-                .map(name -> alternativeNames.getOrDefault(name,
-                        name)) // remplace le nom alternatif par son nom principal
+                .sorted(Comparator.comparingInt((String name) -> -pertinence(name, subRequests))) // tri par pertinence décroissante
+                .map(name -> alternativeNames.getOrDefault(name, name)) // remplace le nom alternatif par son nom principal
                 .distinct()
-                .sorted(Comparator.comparingInt((String name) -> -pertinence(name,
-                        subRequests))) // tri par pertinence décroissante
                 .limit(limit)
                 .toList();
     }
