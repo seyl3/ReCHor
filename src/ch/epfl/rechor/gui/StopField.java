@@ -14,9 +14,32 @@ import javafx.stage.Popup;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Représente un champ de saisie permettant de sélectionner un arrêt de transport public
+ * à l'aide d'une fenêtre de suggestions interactives.
+ * <p>
+ * Un {@code StopField} associe un champ textuel et une valeur observable contenant le nom
+ * de l'arrêt sélectionné. La valeur observable est mise à jour uniquement lorsque le champ
+ * perd le focus, et contient soit un nom d'arrêt valide, soit la chaîne vide si aucun arrêt
+ * n'est sélectionné.
+ *
+ * @param textField le champ textuel de saisie
+ * @param stopO     la valeur observable représentant l'arrêt sélectionné
+ */
 public record StopField(TextField textField, ObservableValue<String> stopO) {
 
+    /**
+     * Crée un champ de saisie avec fenêtre de suggestions pour la recherche d'arrêts,
+     * en utilisant l'index fourni pour effectuer les correspondances.
+     * <p>
+     * Lorsqu'on clique dans le champ, une liste de suggestions apparaît sous le champ,
+     * et se met à jour dynamiquement selon la saisie. Lorsque le champ perd le focus,
+     * l'élément sélectionné dans la liste est conservé comme valeur choisie.
+     *
+     * @param stopIndex l'index à utiliser pour rechercher les arrêts correspondants
+     * @return une instance de {@code StopField} avec suggestions dynamiques
+     * @throws NullPointerException si {@code stopIndex} est {@code null}
+     */
     public static StopField create(StopIndex stopIndex) {
         TextField tf = new TextField();
         StringProperty stopO = new SimpleStringProperty("");
@@ -41,7 +64,7 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
             listView.scrollTo(listView.getSelectionModel().getSelectedIndex());
         });
 
-        // Ajout d'un listener sur la propriété de focus du champ textuel
+
         tf.focusedProperty().subscribe(focus->{
             if(focus){
                 popup.show(tf.getScene().getWindow());
@@ -75,7 +98,19 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
 
         return new StopField(tf, stopO);
     }
-
+    
+    /**
+     * Met à jour le contenu d'une liste de suggestions d'arrêts en fonction d'une requête utilisateur.
+     * <p>
+     * Cette méthode interroge l'index des arrêts avec la requête donnée et affiche jusqu'à 30
+     * résultats dans la {@code ListView}. Si des suggestions sont trouvées, le premier élément
+     * est automatiquement sélectionné.
+     *
+     * @param stopIndex l'index contenant les noms d'arrêts
+     * @param request   la chaîne de requête saisie par l'utilisateur
+     * @param listView  la liste affichant les suggestions
+     * @throws NullPointerException si l'un des arguments est {@code null}
+     */
     private static void setListView(StopIndex stopIndex, String request, ListView<String> listView){
         List<String> suggestionss = stopIndex.stopsMatching(request, 30);
         listView.getItems().setAll(suggestionss);
@@ -84,6 +119,13 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
         }
     }
 
+    /**
+     * Définit manuellement la valeur du champ textuel et de la valeur observable
+     * à un nom d'arrêt donné.
+     *
+     * @param stopName le nom d'arrêt à associer au champ
+     * @throws NullPointerException si {@code stopName} est {@code null}
+     */
     public void setTo(String stopName){
 
         textField.setText(stopName);

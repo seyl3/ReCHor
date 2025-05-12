@@ -32,6 +32,20 @@ public class StopIndex {
         this.alternativeNames = Map.copyOf(alternativeNames);
     }
 
+    /**
+     * Construit une expression régulière à partir d'une requête textuelle, en tenant compte
+     * des équivalences de caractères accentués / maj-min.
+     * <p>
+     * Chaque caractère de la requête est converti en un groupe d'alternatives s'il existe
+     * dans la table des équivalences.Les groupes sont concaténés pour former une expression
+     * régulière qui matche les chaînes contenant les caractères de la requête dans le bon
+     * ordre.
+     *
+     * @param query la requête = la chaîne de caractères à convertir en expression régulière
+     * @return une expression régulière correspondant à la requête, insensible aux accents
+     * et aux majuscules
+     * @throws NullPointerException si {@code query} est {@code null}
+     */
     private static String buildRegex(String query) {
         final Map<Character, String> equivalences = Map.of('a', "[aáàâä]",
                 'e', "[eéèêë]",
@@ -106,7 +120,7 @@ public class StopIndex {
      */
     public List<String> stopsMatching(String request, int limit) {
         if (request == null || request.isBlank()){
-            return stopsNames.stream().sorted().toList();
+            return stopNamesIndex();
         }
 
         // Étape 1 : découper la requête
@@ -131,6 +145,14 @@ public class StopIndex {
                 .toList();
     }
 
+
+    /**
+     * Retourne les noms principaux d'arrêts dans l'ordre alphabétique.
+     * <p>
+     * L'attribut stopsNames est trié par ordre alphabétique et une copie en est retournée
+     *
+     * @return la liste de tous les noms principaux d'arrêts triés par ordre alphabétique
+     */
     private List<String> stopNamesIndex() {
         List<String> sorted = stopsNames.stream().sorted().toList();
         return List.copyOf(sorted);
