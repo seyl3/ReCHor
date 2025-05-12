@@ -25,6 +25,8 @@ import java.util.List;
  *
  * @param textField le champ textuel de saisie
  * @param stopO     la valeur observable représentant l'arrêt sélectionné
+ *
+ * @author : Sarra Zghal, Elyes Ben Abid
  */
 public record StopField(TextField textField, ObservableValue<String> stopO) {
 
@@ -98,7 +100,7 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
 
         return new StopField(tf, stopO);
     }
-    
+
     /**
      * Met à jour le contenu d'une liste de suggestions d'arrêts en fonction d'une requête utilisateur.
      * <p>
