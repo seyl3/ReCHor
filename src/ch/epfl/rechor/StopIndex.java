@@ -131,7 +131,7 @@ public class StopIndex {
                 .toList();
     }
 
-    public List<String> stopNamesIndex() {
+    private List<String> stopNamesIndex() {
         List<String> sorted = stopsNames.stream().sorted().toList();
         return List.copyOf(sorted);
     }

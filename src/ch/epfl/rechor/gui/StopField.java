@@ -22,7 +22,6 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
         StringProperty stopO = new SimpleStringProperty("");
         Popup popup = new Popup();
         popup.setHideOnEscape(false);
-        List<String> index = stopIndex.stopNamesIndex();
         ListView<String> listView = new ListView<>();
         listView.setFocusTraversable(false);
         listView.setMaxHeight(240);
