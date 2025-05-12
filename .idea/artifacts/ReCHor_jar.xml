@@ -1,0 +1,19 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="ReCHor:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/ReCHor_jar</output-path>
+    <root id="archive" name="ReCHor.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$USER_HOME$/Desktop/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="ReCHor" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../javafx-sdk-21.0.7/lib/javafx-swt.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../javafx-sdk-21.0.7/lib/javafx.base.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../javafx-sdk-21.0.7/lib/javafx.controls.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../javafx-sdk-21.0.7/lib/javafx.fxml.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../javafx-sdk-21.0.7/lib/javafx.graphics.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../javafx-sdk-21.0.7/lib/javafx.media.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../javafx-sdk-21.0.7/lib/javafx.swing.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../javafx-sdk-21.0.7/lib/javafx.web.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
