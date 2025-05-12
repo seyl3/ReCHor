@@ -38,6 +38,7 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
                 listView.getSelectionModel().selectNext();
                 event.consume(); // Empêche le déplacement du curseur dans le texte
             }
+            listView.scrollTo(listView.getSelectionModel().getSelectedIndex());
         });
 
         // Ajout d'un listener sur la propriété de focus du champ textuel
