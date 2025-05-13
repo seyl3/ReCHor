@@ -20,7 +20,7 @@ public class MyStopIndexCompleteTest {
     @BeforeAll
     static void setUp() throws IOException {
 
-        Path timetablePath = Path.of("timetable_20");
+        Path timetablePath = Path.of("timetable");
         TimeTable tt = FileTimeTable.in(timetablePath);
 
         List<String> stopNames = IntStream.range(0, tt.stations().size())

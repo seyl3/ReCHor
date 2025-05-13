@@ -1,9 +1,12 @@
 package ch.epfl.rechor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -53,7 +56,7 @@ public class StopIndex {
                 'o', "[oóòôö]",
                 'u', "[uúùûü]",
                 'c', "[cç]");
-        StringJoiner regex = new StringJoiner("+","","");
+        StringJoiner regex = new StringJoiner("","","");
         for (char c : query.toCharArray()) {
             char lower = Character.toLowerCase(c);
             if (equivalences.containsKey(lower)) {
@@ -113,9 +116,10 @@ public class StopIndex {
                 int end = matcher.end();
                 int baseScore = (100 * (end - start)) / stopName.length();
 
-                boolean atWordStart = start  == 0 || !Character.isLetter(stopName.charAt(start - 1));
+                // Vérification stricte du début de mot
+                boolean atWordStart = start == 0 || !Character.isLetter(stopName.charAt(start - 1));
+                // Vérification stricte de la fin de mot
                 boolean atWordEnd = end == stopName.length() || !Character.isLetter(stopName.charAt(end));
-
 
                 int factor = 1;
                 if (atWordStart) factor *= 4;
