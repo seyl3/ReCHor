@@ -7,7 +7,6 @@ import ch.epfl.rechor.timetable.mapped.FileTimeTable;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
@@ -56,7 +55,7 @@ import java.util.stream.IntStream;
 public class Main extends Application {
     // Date du voyage -> (l'indice de la station d'arrivée -> le profile)
     private final Map<LocalDate, Map<Integer, Profile>> profileCache = new ConcurrentHashMap<>();
-    private ObservableValue<List<Journey>> journeysO = new SimpleObjectProperty<>();
+    private ObservableValue<List<Journey>> journeysO;
 
     /**
      * Point d'entrée principal de l'application ReCHor.
@@ -111,7 +110,7 @@ public class Main extends Application {
 
         // Création de la valeur observable des voyages
         // Vérification des paramètres
-        journeysO = Bindings.createObjectBinding(() -> {
+            journeysO = Bindings.createObjectBinding(() -> {
             String depStop = queryUI.depStopO().getValue();
             String arrStop = queryUI.arrStopO().getValue();
             LocalDate date = queryUI.dateO().getValue();

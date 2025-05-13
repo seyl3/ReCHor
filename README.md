@@ -3,11 +3,15 @@
 ## Overview
 ReCHor (Recherche d'Horaire) is a Java application that helps users find optimal public transportation routes in Switzerland. Similar to websites like cff.ch, search.ch, and bahn.de, ReCHor determines the best way to travel from one stop to another at a given date and time, optimizing for departure/arrival times and minimizing the number of transfers.
 
+## Demo 
+
+<video src="https://github.com/user-attachments/assets/3fc22231-730f-447a-b75e-bc112b056ec7" controls></video>
+
 ## Features
 - **Offline functionality**: Works with pre-downloaded Swiss public transport schedule data, no internet connection required
 - **Multi-criteria optimization**: Simultaneously optimizes departure and arrival times while minimizing transfers
 - **Complete Swiss coverage**: Includes all public transportation options in Switzerland
-- **User-friendly interface**: Simple input of departure, destination, and time preferences
+- **User-friendly interface**: Simple input of departure, destination, and time preferences, with ride visualization and calendar event export
 
 ## How It Works
 ReCHor leverages the official Swiss public transportation timetable data to find optimal routes between any two stops in the Swiss transport network. The application implements advanced search algorithms to analyze possible connections and determine the most efficient routes based on:
@@ -18,7 +22,7 @@ ReCHor leverages the official Swiss public transportation timetable data to find
 
 ## Requirements
 - Java Runtime Environment (JRE) 8 or higher
-- Pre-downloaded Swiss public transport schedule data (instructions for obtaining this data included in the documentation)
+- Pre-downloaded Swiss public transport schedule data
 - Minimum 2GB of RAM recommended
 
 ## Installation
@@ -43,7 +47,7 @@ git clone https://github.com/seyl3/ReCHor.git
 ## Development
 This project was developed as part of an object-oriented programming course using Java, CS-108, at EPFL. It demonstrates the practical application of:
 - Object-oriented design principles
-- Efficient graph algorithms
+- Efficient algorithms
 - Data processing and management
 - User interface design
 
