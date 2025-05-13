@@ -136,7 +136,7 @@ public record DetailUI(Node rootNode) {
                         case Journey.Leg.Transport transportLeg -> {
                             // Ajout de l'heure de départ, cercle de départ, nom de la gare et sa
                             // plateforme de départ
-                            Circle depCircle = addStopRow(legsGrid, currentRow, leg.depTime(), leg.depStop(), true);
+                            Circle depCircle = addRow(legsGrid, currentRow, leg.depTime(), leg.depStop(), true);
 
                             // Ajout de l'icone du véhicule, et du nom de la destination
                             ImageView vehicleIcon =
@@ -189,7 +189,7 @@ public record DetailUI(Node rootNode) {
 
                             // Ajout de l'heure d'arrivée, cercle d'arrivée, nom de la gare et sa
                             // plateforme d'arrivée
-                            Circle arrCircle = addStopRow(legsGrid, currentRow + 2, leg.arrTime(),
+                            Circle arrCircle = addRow(legsGrid, currentRow + 2, leg.arrTime(),
                                     leg.arrStop(), false);
 
                             currentRow = currentRow + 3;
@@ -215,11 +215,11 @@ public record DetailUI(Node rootNode) {
      * @param isDeparture indique si l'arrêt est un départ (true) ou une arrivée (false)
      * @return le cercle créé représentant l'arrêt, utilisé pour les annotations graphiques
      */
-    private static Circle addStopRow(GridPane grid,
-                                     int row,
-                                     LocalDateTime time,
-                                     Stop stop,
-                                     boolean isDeparture) {
+    private static Circle addRow(GridPane grid,
+                                 int row,
+                                 LocalDateTime time,
+                                 Stop stop,
+                                 boolean isDeparture) {
 
         Text timeTxt = new Text(formatTime(time));
         Text platformTxt = new Text(formatPlatformName(stop));
@@ -336,6 +336,7 @@ public record DetailUI(Node rootNode) {
                 .forEach(lineList::add);
 
             annotationLayer.getChildren().setAll(lineList);
+            annotationLayer.getParent().requestLayout();
         }
 
         /**

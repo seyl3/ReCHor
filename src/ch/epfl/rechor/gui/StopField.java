@@ -5,13 +5,12 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Bounds;
-import javafx.scene.control.*;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Popup;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -52,7 +51,28 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
         listView.setMaxHeight(240);
         popup.getContent().add(listView);
 
+        // AJOUT PERSONNEL --- validation par double‑clic ou touche Entrée ---
+        Runnable validateSelection = () -> {
+            String selected = listView.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                stopO.set(selected);
+                tf.setText(selected);
+            }
+            popup.hide();
+            tf.requestFocus();   // rend le focus au champ
+        };
+
+        listView.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2) {
+                validateSelection.run();
+            }
+        });
         tf.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                validateSelection.run();
+                event.consume();
+                return; // nothing else to do
+            }
             int selectedIndex = listView.getSelectionModel().getSelectedIndex();
             if (event.getCode() == KeyCode.UP && selectedIndex > 0) {
                 listView.getSelectionModel().select(selectedIndex - 1);

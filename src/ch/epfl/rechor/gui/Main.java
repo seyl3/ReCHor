@@ -112,9 +112,8 @@ public class Main extends Application {
 
         Router router = new Router(tt);
 
-        // --- Recherche asynchrone des voyages -----------------------------
+        // AJOUT PERSONNEL  --- Recherche asynchrone des voyages -----------------------------
         ObjectProperty<Task<List<Journey>>> currentTask = new SimpleObjectProperty<>();
-
         Runnable launchSearch = () -> {
             String depStop = queryUI.depStopO().getValue();
             String arrStop = queryUI.arrStopO().getValue();
@@ -132,7 +131,7 @@ public class Main extends Application {
                 currentTask.get().cancel();
             }
 
-            // conversion noms → ids (en tenant compte des alias)
+            // conversion noms → ids (en tenant compte des alias)
             String depMain = alternativeNames.getOrDefault(depStop, depStop);
             String arrMain = alternativeNames.getOrDefault(arrStop, arrStop);
             int depId = stopNames.indexOf(depMain);
