@@ -1,13 +1,17 @@
 package ch.epfl.rechor.gui;
 
 import ch.epfl.rechor.StopIndex;
-import ch.epfl.rechor.journey.*;
+import ch.epfl.rechor.journey.Journey;
+import ch.epfl.rechor.journey.JourneyExtractor;
+import ch.epfl.rechor.journey.Profile;
+import ch.epfl.rechor.journey.Router;
 import ch.epfl.rechor.timetable.TimeTable;
 import ch.epfl.rechor.timetable.mapped.FileTimeTable;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
@@ -55,7 +59,7 @@ import java.util.stream.IntStream;
 public class Main extends Application {
     // Date du voyage -> (l'indice de la station d'arrivée -> le profile)
     private final Map<LocalDate, Map<Integer, Profile>> profileCache = new ConcurrentHashMap<>();
-    private ObservableValue<List<Journey>> journeysO;
+    private final SimpleObjectProperty<List<Journey>> journeysO = new SimpleObjectProperty<>(List.of());
 
     /**
      * Point d'entrée principal de l'application ReCHor.
@@ -108,35 +112,62 @@ public class Main extends Application {
 
         Router router = new Router(tt);
 
-        // Création de la valeur observable des voyages
-        // Vérification des paramètres
-            journeysO = Bindings.createObjectBinding(() -> {
+        // --- Recherche asynchrone des voyages -----------------------------
+        ObjectProperty<Task<List<Journey>>> currentTask = new SimpleObjectProperty<>();
+
+        Runnable launchSearch = () -> {
             String depStop = queryUI.depStopO().getValue();
             String arrStop = queryUI.arrStopO().getValue();
             LocalDate date = queryUI.dateO().getValue();
             LocalTime time = queryUI.timeO().getValue();
 
-            // Vérification des paramètres
+            // paramètres incomplets → liste vide et on ne lance rien
             if (depStop.isEmpty() || arrStop.isEmpty() || date == null || time == null) {
-                return List.of();
+                journeysO.set(List.of());
+                return;
             }
 
-            try {
-                String depStopMain = alternativeNames.getOrDefault(depStop, depStop);
-                String arrStopMain = alternativeNames.getOrDefault(arrStop, arrStop);
-
-                int depId = stopNames.indexOf(depStopMain);
-                int arrId = stopNames.indexOf(arrStopMain);
-
-                Profile profile = profileCache
-                        .computeIfAbsent(date, d -> new ConcurrentHashMap<>())
-                        .computeIfAbsent(arrId, id -> router.profile(date, id));
-
-                return JourneyExtractor.journeys(profile, depId);
-            } catch (IllegalArgumentException e) {
-                return List.of();
+            // annule la recherche précédente le cas échéant
+            if (currentTask.get() != null && currentTask.get().isRunning()) {
+                currentTask.get().cancel();
             }
-        }, queryUI.depStopO(), queryUI.arrStopO(), queryUI.dateO(), queryUI.timeO());
+
+            // conversion noms → ids (en tenant compte des alias)
+            String depMain = alternativeNames.getOrDefault(depStop, depStop);
+            String arrMain = alternativeNames.getOrDefault(arrStop, arrStop);
+            int depId = stopNames.indexOf(depMain);
+            int arrId = stopNames.indexOf(arrMain);
+
+            // pas d'arrêt trouvé ?
+            if (depId < 0 || arrId < 0) {
+                journeysO.set(List.of());
+                return;
+            }
+
+            Task<List<Journey>> task = new Task<>() {
+                @Override protected List<Journey> call() {
+                    Profile profile = profileCache
+                            .computeIfAbsent(date, d -> new ConcurrentHashMap<>())
+                            .computeIfAbsent(arrId, id -> router.profile(date, id));
+                    return JourneyExtractor.journeys(profile, depId);
+                }
+            };
+
+            task.setOnSucceeded(e -> journeysO.set(task.getValue()));
+            task.setOnFailed   (e -> journeysO.set(List.of()));
+
+            currentTask.set(task);
+            new Thread(task, "CSA-worker").start();
+        };
+
+        // on relance la recherche dès qu'un paramètre change
+        queryUI.depStopO().addListener((o, oldV, newV) -> launchSearch.run());
+        queryUI.arrStopO().addListener((o, oldV, newV) -> launchSearch.run());
+        queryUI.dateO().addListener    ((o, oldV, newV) -> launchSearch.run());
+        queryUI.timeO().addListener    ((o, oldV, newV) -> launchSearch.run());
+
+        // première recherche (si champs pré‑remplis)
+        launchSearch.run();
 
         SummaryUI summaryUI = SummaryUI.create(journeysO, queryUI.timeO());
         DetailUI detailUI = DetailUI.create(summaryUI.selectedJourneyO());
