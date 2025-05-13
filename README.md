@@ -5,7 +5,7 @@ ReCHor (Recherche d'Horaire) is a Java application that helps users find optimal
 
 ## Demo 
 
-https://github.com/user-attachments/assets/3fc22231-730f-447a-b75e-bc112b056ec7
+<video src="https://github.com/user-attachments/assets/3fc22231-730f-447a-b75e-bc112b056ec7" controls></video>
 
 ## Features
 - **Offline functionality**: Works with pre-downloaded Swiss public transport schedule data, no internet connection required
