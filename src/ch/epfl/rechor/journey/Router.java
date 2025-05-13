@@ -73,18 +73,18 @@ public record Router(TimeTable timeTable) {
             int depMins = connections.depMins(liaisonId);
 
 
-            // OPTION 1:
+            // option 1:
             int walkMin = walkTab[arrStationId];
 
             if (walkMin != -1) {
                 f.add((arrMins + walkMin), 0, liaisonId);
             }
 
-            // OPTION 2:
+            // option 2:
             if (profile.forTrip(tripId) != null) {
                     f.addAll(profile.forTrip(tripId));
             }
-            // OPTION 3:
+            // option 3:
             if (profile.forStation(arrStationId) != null) {
                 profile.forStation(arrStationId).forEach((long t) -> {
                     if (PackedCriteria.depMins(t) >= arrMins) {
@@ -94,9 +94,7 @@ public record Router(TimeTable timeTable) {
                     }
                 });
             }
-            // only update if necessary
             if (!f.isEmpty()) {
-                //update trip pareto front
                 if (profile.forTrip(tripId) == null) {
                     profile.setForTrip(tripId, new ParetoFront.Builder(f));
                 } else { profile.forTrip(tripId).addAll(f); }
