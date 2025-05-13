@@ -101,6 +101,8 @@ public class StopIndex {
                 if (atWordEnd) factor *= 2;
 
                 score += baseScore * factor;
+            }else{
+                return 0;
             }
         }
         return score;
@@ -119,10 +121,6 @@ public class StopIndex {
      * sans doublons et de taille au plus {@code limit}
      */
     public List<String> stopsMatching(String request, int limit) {
-//        if (request == null || request.isBlank()){
-//            return stopNamesIndex();
-//        }
-
         // Étape 1 : découper la requête
         Pattern spaceSplitter = Pattern.compile("\\s+"); // un ou plusieurs espaces
         String[] subRequests = spaceSplitter.split(request.trim());
@@ -138,7 +136,7 @@ public class StopIndex {
         // sous-requêtes
         return Stream.concat(stopsNames.stream(), alternativeNames.keySet().stream())
                 .filter(name -> subPatterns.stream().anyMatch(p -> p.matcher(name).find()))
-                .sorted(Comparator.comparingInt((String name) -> -pertinence(name, subRequests))) // tri par pertinence décroissante
+                .sorted(Comparator.comparingInt((String name) -> pertinence(name, subRequests)).reversed()) // tri par pertinence décroissante
                 .map(name -> alternativeNames.getOrDefault(name, name)) // remplace le nom alternatif par son nom principal
                 .distinct()
                 .limit(limit)

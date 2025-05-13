@@ -88,7 +88,7 @@ public class Main extends Application {
      * @throws IOException si le chargement des données horaires échoue
      */
     public void start(Stage primaryStage) throws IOException {
-        TimeTable tt = FileTimeTable.in(Path.of("timetable_20"));
+        TimeTable tt = FileTimeTable.in(Path.of("timetable_19"));
 
         List<String> stopNames = IntStream.range(0, tt.stations().size())
                 .mapToObj(i -> tt.stations().name(i))
