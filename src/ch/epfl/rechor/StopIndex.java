@@ -53,7 +53,7 @@ public class StopIndex {
                 'o', "[oóòôö]",
                 'u', "[uúùûü]",
                 'c', "[cç]");
-        StringJoiner regex = new StringJoiner("+", "", "");
+        StringJoiner regex = new StringJoiner("", "", "");
         for (char c : query.toCharArray()) {
             char lower = Character.toLowerCase(c);
             if (equivalences.containsKey(lower)) {
