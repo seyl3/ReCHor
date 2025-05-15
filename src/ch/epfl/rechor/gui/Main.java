@@ -61,6 +61,11 @@ public class Main extends Application {
     private final Map<LocalDate, Map<Integer, Profile>> profileCache = new ConcurrentHashMap<>();
     private final SimpleObjectProperty<List<Journey>> journeysO = new SimpleObjectProperty<>(List.of());
 
+    /** Largeur minimale de la fenêtre principale (en px). */
+    private static final double MIN_WINDOW_WIDTH  = 800;
+    /** Hauteur minimale de la fenêtre principale (en px). */
+    private static final double MIN_WINDOW_HEIGHT = 600;
+
     /**
      * Point d'entrée principal de l'application ReCHor.
      * <p>
@@ -173,8 +178,8 @@ public class Main extends Application {
 
 
         primaryStage.setTitle("ReCHor");
-        primaryStage.setMinWidth(800);
-        primaryStage.setMinHeight(600);
+        primaryStage.setMinWidth(MIN_WINDOW_WIDTH);
+        primaryStage.setMinHeight(MIN_WINDOW_HEIGHT);
         BorderPane root = new BorderPane();
         root.setTop(queryUI.rootNode());
         SplitPane splitPane = new SplitPane();
