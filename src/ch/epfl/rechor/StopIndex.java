@@ -1,9 +1,12 @@
 package ch.epfl.rechor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -53,7 +56,7 @@ public class StopIndex {
                 'o', "[oóòôö]",
                 'u', "[uúùûü]",
                 'c', "[cç]");
-        StringJoiner regex = new StringJoiner("", "", "");
+        StringJoiner regex = new StringJoiner("","","");
         for (char c : query.toCharArray()) {
             char lower = Character.toLowerCase(c);
             if (equivalences.containsKey(lower)) {
@@ -64,7 +67,28 @@ public class StopIndex {
         }
         return regex.toString();
     }
+    private static List<Pattern> buildPatterns(String request) {
+        Pattern spaceSplitter = Pattern.compile("\\s+"); // un ou plusieurs espaces
+        String[] subRequests = spaceSplitter.split(request.trim());
 
+        List<Pattern> subPatterns = new ArrayList<>();
+        for(String subRequest : subRequests) {
+            String regex = buildRegex(subRequest);
+            boolean hasUpperCase = false;
+            for(char c : subRequest.toCharArray()) {
+                if (Character.isUpperCase(c)) {
+                    hasUpperCase = true;
+                }
+            }
+            if(hasUpperCase) {
+                subPatterns.add(Pattern.compile(regex));
+            }else{
+                subPatterns.add(Pattern.compile(regex, flags));
+            }
+
+        }
+        return subPatterns;
+    }
     /**
      * Calcule le score de pertinence d'un nom d'arrêt par rapport aux sous-requêtes données.
      * <p>
@@ -78,14 +102,14 @@ public class StopIndex {
      * Seule la première occurrence de chaque sous-requête est considérée.
      *
      * @param stopName    le nom de l'arrêt à évaluer
-     * @param subRequests les sous-requêtes à rechercher
+     * @param subPatterns une liste des sous patterns, correspondant aux sous requêtes
+    // A REMPLIR
      * @return le score de pertinence total
      */
-    private static int pertinence(String stopName, String[] subRequests) {
+    private static int pertinence(String stopName, List<Pattern> subPatterns) {
         int score = 0;
-        for (String subRequest : subRequests) {
-            Pattern pattern = Pattern.compile(buildRegex(subRequest), flags);
-            Matcher matcher = pattern.matcher(stopName);
+        for (Pattern subPatttern : subPatterns ) {
+            Matcher matcher = subPatttern.matcher(stopName);
 
             if (matcher.find()) {
                 int start = matcher.start();
@@ -93,14 +117,13 @@ public class StopIndex {
                 int baseScore = (100 * (end - start)) / stopName.length();
 
                 boolean atWordStart = start == 0 || !Character.isLetter(stopName.charAt(start - 1));
-                boolean atWordEnd =
-                        end == stopName.length() || !Character.isLetter(stopName.charAt(end));
+                boolean atWordEnd = end == stopName.length() || !Character.isLetter(stopName.charAt(end));
 
                 int factor = 1;
                 if (atWordStart) factor *= 4;
                 if (atWordEnd) factor *= 2;
-
                 score += baseScore * factor;
+
             }else{
                 return 0;
             }
@@ -121,22 +144,14 @@ public class StopIndex {
      * sans doublons et de taille au plus {@code limit}
      */
     public List<String> stopsMatching(String request, int limit) {
-        // Étape 1 : découper la requête
-        Pattern spaceSplitter = Pattern.compile("\\s+"); // un ou plusieurs espaces
-        String[] subRequests = spaceSplitter.split(request.trim());
-
-        // Étape 2 : créer les Patterns pour chaque sous-requête
-        List<Pattern> subPatterns = Arrays.stream(subRequests)
-                .map(StopIndex::buildRegex)
-                .map(r -> Pattern.compile(r, flags))
-                .toList();
+        List<Pattern> subPatterns = buildPatterns(request);
 
         // Étape 3–4 : filtrer les noms (principaux + alternatifs)
         // On filtre tous les noms (noms principaux et alternatifs) qui matchent toutes les
         // sous-requêtes
         return Stream.concat(stopsNames.stream(), alternativeNames.keySet().stream())
                 .filter(name -> subPatterns.stream().anyMatch(p -> p.matcher(name).find()))
-                .sorted(Comparator.comparingInt((String name) -> pertinence(name, subRequests)).reversed()) // tri par pertinence décroissante
+                .sorted(Comparator.comparingInt((String name) -> pertinence(name, subPatterns)).reversed()) // tri par pertinence décroissante
                 .map(name -> alternativeNames.getOrDefault(name, name)) // remplace le nom alternatif par son nom principal
                 .distinct()
                 .limit(limit)
@@ -144,15 +159,4 @@ public class StopIndex {
     }
 
 
-    /**
-     * Retourne les noms principaux d'arrêts dans l'ordre alphabétique.
-     * <p>
-     * L'attribut stopsNames est trié par ordre alphabétique et une copie en est retournée
-     *
-     * @return la liste de tous les noms principaux d'arrêts triés par ordre alphabétique
-     */
-    private List<String> stopNamesIndex() {
-        List<String> sorted = stopsNames.stream().sorted().toList();
-        return List.copyOf(sorted);
-    }
 }
