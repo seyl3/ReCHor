@@ -34,6 +34,13 @@ public record QueryUI(Node rootNode,
                       ObservableValue<LocalTime> timeO
                       ) {
 
+    /** Format d'affichage de l'heure (toujours HH:mm). */
+    private static final DateTimeFormatter DISPLAY_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("HH:mm");
+    /** Format(s) d'analyse accepté(s) pour la saisie de l'heure (H:mm ou HH:mm). */
+    private static final DateTimeFormatter PARSE_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("[H:mm][HH:mm]");
+
     /**
      * Crée l'interface graphique de requête, avec les champs nécessaires à la saisie des informations
      * de recherche (départ, arrivée, date, heure).
@@ -91,13 +98,11 @@ public record QueryUI(Node rootNode,
         timeField.setId("time");
 
 
-        DateTimeFormatter formatterDisplay = DateTimeFormatter.ofPattern("HH:mm");
-        DateTimeFormatter formatterParse = DateTimeFormatter.ofPattern("[H:mm][HH:mm]");
-        LocalTimeStringConverter timeConverter = new LocalTimeStringConverter(formatterDisplay, formatterParse);
+        LocalTimeStringConverter timeConverter = new LocalTimeStringConverter(DISPLAY_TIME_FORMATTER, PARSE_TIME_FORMATTER);
         TextFormatter<LocalTime> timeFormatter = new TextFormatter<>(timeConverter);
         timeField.setTextFormatter(timeFormatter);
 
-        timeField.setText(LocalTime.now().format(formatterDisplay));
+        timeField.setText(LocalTime.now().format(DISPLAY_TIME_FORMATTER));
         datePicker.setValue(LocalDate.now());
 
         dateTime.getChildren().addAll(time, timeField);
