@@ -122,7 +122,8 @@ public class Main extends Application {
 
         Router router = new Router(tt);
 
-        // AJOUT PERSONNEL  --- Recherche asynchrone des voyages -----------------------------
+        // AJOUT PERSONNEL : Bonus
+        // --- Recherche asynchrone des voyages
         ObjectProperty<Task<List<Journey>>> currentTask = new SimpleObjectProperty<>();
         Runnable launchSearch = () -> {
             String depStop = queryUI.depStopO().getValue();
@@ -130,7 +131,7 @@ public class Main extends Application {
             LocalDate date = queryUI.dateO().getValue();
             LocalTime time = queryUI.timeO().getValue();
 
-            // paramètres incomplets → liste vide et on ne lance rien
+            // paramètres incomplets -> liste vide et on ne lance rien
             if (depStop.isEmpty() || arrStop.isEmpty() || date == null || time == null) {
                 journeysO.set(List.of());
                 return;
@@ -141,7 +142,7 @@ public class Main extends Application {
                 currentTask.get().cancel();
             }
 
-            // conversion noms → ids (en tenant compte des alias)
+            // conversion noms -> ids (en tenant compte des alias)
             String depMain = alternativeNames.getOrDefault(depStop, depStop);
             String arrMain = alternativeNames.getOrDefault(arrStop, arrStop);
             int depId = stopNames.indexOf(depMain);
