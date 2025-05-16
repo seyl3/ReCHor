@@ -53,13 +53,15 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
 
         // AJOUT PERSONNEL --- validation par double‑clic ou touche Entrée ---
         Runnable validateSelection = () -> {
+            tf.getParent().requestFocus();// retire le focus du champ
             String selected = listView.getSelectionModel().getSelectedItem();
             if (selected != null) {
                 stopO.set(selected);
-                tf.setText(selected);
+                //tf.setText(selected);
             }
             popup.hide();
-            tf.getParent().requestFocus();// rend le focus au champ
+
+
         };
 
         listView.setOnMouseClicked(e -> {

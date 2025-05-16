@@ -50,7 +50,8 @@ public class StopIndex {
      * @throws NullPointerException si {@code query} est {@code null}
      */
     private static String buildRegex(String query) {
-        final Map<Character, String> equivalences = Map.of('a', "[aáàâä]",
+        final Map<Character, String> equivalences = Map.of(
+                'a', "[aáàâä]",
                 'e', "[eéèêë]",
                 'i', "[iíìîï]",
                 'o', "[oóòôö]",
