@@ -84,7 +84,7 @@ public record DetailUI(Node rootNode) {
         noJourney.setId("no-journey");
         mainStack.getChildren().add(noJourney);
 
-        Text noJourneyText = new Text("Aucun voyage.");
+        Text noJourneyText = new Text("Aucun voyage. ☹");
         noJourney.getChildren().add(noJourneyText);
 
         VBox withJourney = new VBox();
