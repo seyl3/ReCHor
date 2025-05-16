@@ -116,8 +116,8 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         private final Text durationTime;
         private final Pane transferLinePane;
         private final List<Circle> transferCircles;
-        private Circle startCircle;
-        private Circle endCircle;
+        private final Circle startCircle;
+        private final Circle endCircle;
         private final Line backgroundLine;
 
         /**
