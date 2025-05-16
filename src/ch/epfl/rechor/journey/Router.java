@@ -24,6 +24,9 @@ import java.util.Arrays;
  */
 public record Router(TimeTable timeTable) {
 
+    /** Implémentation vide utilisée lorsqu'aucun écouteur de progression n'est fourni. */
+    private static final ProgressListener NO_OP = f -> { };
+
     /**
      * Calcule le profil de voyages optimaux permettant de rejoindre la gare d'arrivée spécifiée.
      * <p>
@@ -43,7 +46,10 @@ public record Router(TimeTable timeTable) {
      * @param destinationId l'identifiant de la gare d'arrivée
      * @return un {@link Profile} immuable contenant les frontières de Pareto pour toutes les gares
      */
-    public Profile profile(LocalDate date, int destinationId) {
+    public Profile profile(LocalDate date, int destinationId, ProgressListener progressListener) {
+
+        progressListener.progress(0d);
+
 
         Stations stations = timeTable.stations();
         Transfers transfers = timeTable.transfers();
@@ -131,9 +137,16 @@ public record Router(TimeTable timeTable) {
                     }
                 }
             }
+            progressListener.progress((i + 1) / (double) connections.size());
         }
+        progressListener.progress(1d);
         return profile.build();
     }
+
+    public Profile profile(LocalDate date, int destinationId) {
+        return profile(date, destinationId, NO_OP);
+    }
+
 
     /**
      * Méthode auxiliaire, ajoute a un critère de Pareto existant une nouvelle charge utile

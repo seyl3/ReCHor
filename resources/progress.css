@@ -1,0 +1,17 @@
+/* rail gris (arrière-plan) */
+#loading-bar .track {
+    -fx-background-color: rgba(0,0,0,0.15);
+    -fx-background-radius: 4;
+}
+
+#loading-bar .bar {
+    -fx-background-color: #fa0000;
+    -fx-background-insets: 0;
+    -fx-background-radius: 4;
+}
+
+
+#loading-bar {
+    -fx-pref-width: 220;
+    -fx-pref-height: 6;
+}

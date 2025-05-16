@@ -1,17 +1,14 @@
 package ch.epfl.rechor.gui;
 
 import ch.epfl.rechor.StopIndex;
-import ch.epfl.rechor.journey.Journey;
-import ch.epfl.rechor.journey.JourneyExtractor;
-import ch.epfl.rechor.journey.Profile;
-import ch.epfl.rechor.journey.Router;
+import ch.epfl.rechor.journey.*;
 import ch.epfl.rechor.timetable.TimeTable;
 import ch.epfl.rechor.timetable.mapped.FileTimeTable;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
@@ -63,6 +60,8 @@ public class Main extends Application {
     private final Map<LocalDate, Map<Integer, Profile>> profileCache = new ConcurrentHashMap<>();
     private final SimpleObjectProperty<List<Journey>> journeysO = new SimpleObjectProperty<>(List.of());
     private final SimpleBooleanProperty loadingO = new SimpleBooleanProperty(false);
+    /** Avancement actuel du calcul CSA. */
+    private final ObjectProperty<Number> progressO = new SimpleObjectProperty<>(-1);
 
     /**
      * Largeur minimale de la fenêtre principale (en px).
@@ -159,24 +158,31 @@ public class Main extends Application {
             }
             // Le calcul va être lancé en arrière‑plan → on affiche le spinner
             loadingO.set(true);
+            progressO.set(-1);
 
             Task<List<Journey>> task = new Task<>() {
                 @Override
                 protected List<Journey> call() {
+                    ProgressListener listener = p -> updateProgress(p, 1); // p est déjà entre 0 et 1
                     Profile profile = profileCache
                             .computeIfAbsent(date, d -> new ConcurrentHashMap<>())
-                            .computeIfAbsent(arrId, id -> router.profile(date, id));
+                            .computeIfAbsent(arrId, id -> router.profile(date, id, listener));
                     return JourneyExtractor.journeys(profile, depId);
                 }
             };
+            progressO.bind(task.progressProperty());
 
             task.setOnSucceeded(e -> {
                 journeysO.set(task.getValue());
                 loadingO.set(false);
+                progressO.unbind();
+                progressO.set(1);   // terminé
             });
             task.setOnFailed(e -> {
                 journeysO.set(List.of());
                 loadingO.set(false);
+                progressO.unbind();
+                progressO.set(1);   // terminé
             });
 
             currentTask.set(task);
@@ -192,7 +198,7 @@ public class Main extends Application {
         // première recherche (si champs pré‑remplis)
         launchSearch.run();
 
-        SummaryUI summaryUI = SummaryUI.create(journeysO, queryUI.timeO(), loadingO);
+        SummaryUI summaryUI = SummaryUI.create(journeysO, queryUI.timeO(), loadingO, progressO);
         DetailUI detailUI = DetailUI.create(summaryUI.selectedJourneyO());
 
 

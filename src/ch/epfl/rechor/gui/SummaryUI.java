@@ -1,13 +1,14 @@
 package ch.epfl.rechor.gui;
 
 import ch.epfl.rechor.journey.Journey;
-import javafx.beans.value.ObservableValue;
-import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.value.ObservableBooleanValue;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -57,18 +58,23 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
      */
     public static SummaryUI create(ObservableValue<List<Journey>> journeyList,
                                    ObservableValue<LocalTime> desiredTime,
-                                   ObservableBooleanValue loadingO) {
+                                   ObservableBooleanValue loadingO,
+                                   ObjectProperty<Number> progressO) {
 
         ListView<Journey> listView = new ListView<>();
         listView.getStylesheets().add("summary.css");
         listView.setCellFactory(lv -> new JourneyCell());
 
-        ProgressIndicator indicator = new ProgressIndicator();
-        indicator.setMaxSize(40, 40);
+        ProgressBar progressBar = new ProgressBar();
+        progressBar.setId("loading-bar");
+        progressBar.setPrefWidth(150);
+        progressBar.progressProperty().bind(progressO);
 
-        StackPane stack = new StackPane(listView, indicator);
+        StackPane stack = new StackPane(listView, progressBar);
+        stack.setId("loading-overlay");
+        stack.getStylesheets().add("progress.css");
 
-        indicator.visibleProperty().bind(loadingO);
+        progressBar.visibleProperty().bind(loadingO);
         listView.visibleProperty().bind(Bindings.not(loadingO));
 
         // Met à jour le voyage séléctionné
