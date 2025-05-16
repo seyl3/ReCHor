@@ -5,15 +5,13 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
@@ -65,14 +63,23 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         listView.getStylesheets().add("summary.css");
         listView.setCellFactory(lv -> new JourneyCell());
 
+        VBox loadingOverlay = new VBox();
+        loadingOverlay.setAlignment(Pos.CENTER);
+        loadingOverlay.visibleProperty().bind(loadingO);
+        loadingOverlay.getStylesheets().add("progress.css");
+        loadingOverlay.setId("loading-overlay");
+
+        Text loadingText = new Text("Calcul de trajet en cours...");
+        loadingText.setId("loading-text");
+        loadingOverlay.getChildren().add(loadingText);
+
         ProgressBar progressBar = new ProgressBar();
         progressBar.setId("loading-bar");
         progressBar.setPrefWidth(150);
         progressBar.progressProperty().bind(progressO);
+        loadingOverlay.getChildren().add(progressBar);
 
-        StackPane stack = new StackPane(listView, progressBar);
-        stack.setId("loading-overlay");
-        stack.getStylesheets().add("progress.css");
+        StackPane summaryPane = new StackPane(listView, loadingOverlay);
 
         progressBar.visibleProperty().bind(loadingO);
         listView.visibleProperty().bind(Bindings.not(loadingO));
@@ -90,7 +97,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         ObservableValue<Journey> selectedJourney =
                 listView.getSelectionModel().selectedItemProperty();
 
-        return new SummaryUI(stack, selectedJourney);
+        return new SummaryUI(summaryPane, selectedJourney);
     }
 
     /**
