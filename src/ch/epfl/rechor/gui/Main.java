@@ -11,6 +11,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
@@ -61,6 +62,7 @@ public class Main extends Application {
     // Strcuture dela map (Date du voyage -> (l'indice de la station d'arrivée -> le profile))
     private final Map<LocalDate, Map<Integer, Profile>> profileCache = new ConcurrentHashMap<>();
     private final SimpleObjectProperty<List<Journey>> journeysO = new SimpleObjectProperty<>(List.of());
+    private final SimpleBooleanProperty loadingO = new SimpleBooleanProperty(false);
 
     /**
      * Largeur minimale de la fenêtre principale (en px).
@@ -134,25 +136,29 @@ public class Main extends Application {
             // paramètres incomplets -> liste vide et on ne lance rien
             if (depStop.isEmpty() || arrStop.isEmpty() || date == null || time == null) {
                 journeysO.set(List.of());
+                loadingO.set(false);
                 return;
+            }
+
+            // --- 2) Si le profil est déjà en cache, pas besoin de lancer une tâche asynchrone :
+            String depMain = alternativeNames.getOrDefault(depStop, depStop);
+            String arrMain = alternativeNames.getOrDefault(arrStop, arrStop);
+            int depId = stopNames.indexOf(depMain);
+            int arrId = stopNames.indexOf(arrMain);
+            Map<Integer, Profile> byDate = profileCache.get(date);
+            if (byDate != null && byDate.containsKey(arrId)) {
+                Profile cachedProfile = byDate.get(arrId);
+                journeysO.set(JourneyExtractor.journeys(cachedProfile, depId));
+                loadingO.set(false);
+                return;                     // rien de long : on s'arrête ici
             }
 
             // annule la recherche précédente le cas échéant
             if (currentTask.get() != null && currentTask.get().isRunning()) {
                 currentTask.get().cancel();
             }
-
-            // conversion noms -> ids (en tenant compte des alias)
-            String depMain = alternativeNames.getOrDefault(depStop, depStop);
-            String arrMain = alternativeNames.getOrDefault(arrStop, arrStop);
-            int depId = stopNames.indexOf(depMain);
-            int arrId = stopNames.indexOf(arrMain);
-
-            // pas d'arrêt trouvé ?
-            if (depId < 0 || arrId < 0) {
-                journeysO.set(List.of());
-                return;
-            }
+            // Le calcul va être lancé en arrière‑plan → on affiche le spinner
+            loadingO.set(true);
 
             Task<List<Journey>> task = new Task<>() {
                 @Override
@@ -164,8 +170,14 @@ public class Main extends Application {
                 }
             };
 
-            task.setOnSucceeded(e -> journeysO.set(task.getValue()));
-            task.setOnFailed(e -> journeysO.set(List.of()));
+            task.setOnSucceeded(e -> {
+                journeysO.set(task.getValue());
+                loadingO.set(false);
+            });
+            task.setOnFailed(e -> {
+                journeysO.set(List.of());
+                loadingO.set(false);
+            });
 
             currentTask.set(task);
             new Thread(task, "CSA-worker").start();
@@ -180,7 +192,7 @@ public class Main extends Application {
         // première recherche (si champs pré‑remplis)
         launchSearch.run();
 
-        SummaryUI summaryUI = SummaryUI.create(journeysO, queryUI.timeO());
+        SummaryUI summaryUI = SummaryUI.create(journeysO, queryUI.timeO(), loadingO);
         DetailUI detailUI = DetailUI.create(summaryUI.selectedJourneyO());
 
 

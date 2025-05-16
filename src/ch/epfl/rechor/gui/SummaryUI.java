@@ -2,13 +2,17 @@ package ch.epfl.rechor.gui;
 
 import ch.epfl.rechor.journey.Journey;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.ObservableBooleanValue;
+import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
@@ -48,14 +52,24 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
      *
      * @param journeyList liste observable des voyages à afficher
      * @param desiredTime heure désirée pour sélectionner automatiquement le voyage le plus proche
+     * @param loadingO    observable indiquant si le chargement est en cours
      * @return une instance de SummaryUI
      */
     public static SummaryUI create(ObservableValue<List<Journey>> journeyList,
-                                   ObservableValue<LocalTime> desiredTime) {
+                                   ObservableValue<LocalTime> desiredTime,
+                                   ObservableBooleanValue loadingO) {
 
         ListView<Journey> listView = new ListView<>();
         listView.getStylesheets().add("summary.css");
         listView.setCellFactory(lv -> new JourneyCell());
+
+        ProgressIndicator indicator = new ProgressIndicator();
+        indicator.setMaxSize(40, 40);
+
+        StackPane stack = new StackPane(listView, indicator);
+
+        indicator.visibleProperty().bind(loadingO);
+        listView.visibleProperty().bind(Bindings.not(loadingO));
 
         // Met à jour le voyage séléctionné
         journeyList.subscribe(newList -> {
@@ -70,7 +84,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         ObservableValue<Journey> selectedJourney =
                 listView.getSelectionModel().selectedItemProperty();
 
-        return new SummaryUI(listView, selectedJourney);
+        return new SummaryUI(stack, selectedJourney);
     }
 
     /**
