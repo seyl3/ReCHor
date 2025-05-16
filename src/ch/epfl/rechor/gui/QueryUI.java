@@ -4,6 +4,7 @@ import ch.epfl.rechor.StopIndex;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.converter.LocalTimeStringConverter;
@@ -25,13 +26,15 @@ import java.time.format.DateTimeFormatter;
  * @param arrStopO la valeur observable représentant l'arrêt d'arrivée (valide ou chaîne vide)
  * @param dateO    la valeur observable représentant la date du voyage
  * @param timeO    la valeur observable représentant l'heure de départ du voyage
+ * @param arrivalModeO la valeur observable représentant le mode arrivée/départ
  * @author : Sarra Zghal, Elyes Ben Abid
  */
 public record QueryUI(Node rootNode,
                       ObservableValue<String> depStopO,
                       ObservableValue<String> arrStopO,
                       ObservableValue<LocalDate> dateO,
-                      ObservableValue<LocalTime> timeO
+                      ObservableValue<LocalTime> timeO,
+                      ObservableValue<Boolean> arrivalModeO
 ) {
 
     /**
@@ -101,12 +104,24 @@ public record QueryUI(Node rootNode,
 
         dateTime.getChildren().addAll(time, timeField);
 
+        // Toggle "Départ" / "Arrivée"
+        ToggleButton modeToggle = new ToggleButton("Départ");
+        modeToggle.setOnAction(e -> {
+            if (modeToggle.isSelected()) {
+                modeToggle.setText("Arrivée");
+            } else {
+                modeToggle.setText("Départ");
+            }
+        });
+        dateTime.getChildren().add(modeToggle);
+
 
         return new QueryUI(root,
                 depField.stopO(),
                 arrField.stopO(),
                 datePicker.valueProperty(),
-                timeFormatter.valueProperty());
+                timeFormatter.valueProperty(),
+                modeToggle.selectedProperty());
 
 
     }

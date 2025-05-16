@@ -57,7 +57,8 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
     public static SummaryUI create(ObservableValue<List<Journey>> journeyList,
                                    ObservableValue<LocalTime> desiredTime,
                                    ObservableBooleanValue loadingO,
-                                   ObjectProperty<Number> progressO) {
+                                   ObjectProperty<Number> progressO,
+                                   ObservableValue<Boolean> arrivalO) {
 
         ListView<Journey> listView = new ListView<>();
         listView.getStylesheets().add("summary.css");
@@ -87,13 +88,14 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         // Met à jour le voyage séléctionné
         journeyList.subscribe(newList -> {
             listView.getItems().setAll(newList);
-            updateSelection(listView, desiredTime);
+            updateSelection(listView, desiredTime, arrivalO.getValue());
         });
 
         // Met à jour et sélectionne automatiquement le voyage correspondant a l'heure désirée
         desiredTime.subscribe(newTime -> {
-            updateSelection(listView, desiredTime);
+            updateSelection(listView, desiredTime, arrivalO.getValue());
         });
+        arrivalO.subscribe(v -> updateSelection(listView, desiredTime, v));
         ObservableValue<Journey> selectedJourney =
                 listView.getSelectionModel().selectedItemProperty();
 
@@ -107,9 +109,11 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
      *
      * @param listView     la ListView contenant les voyages
      * @param desiredTimeO observable de l’heure désirée pour la sélection
+     * @param useArrivalTime booléen indiquant s'il faut utiliser l'heure d'arrivée pour la sélection
      */
     private static void updateSelection(ListView<Journey> listView,
-                                        ObservableValue<LocalTime> desiredTimeO) {
+                                        ObservableValue<LocalTime> desiredTimeO,
+                                        boolean useArrivalTime) {
         List<Journey> journeys = listView.getItems();
 
         if (journeys.isEmpty()) return;
@@ -117,7 +121,9 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         LocalTime target = desiredTimeO.getValue();
         int idx = 0;
         while (idx < journeys.size() &&
-                journeys.get(idx).depTime().toLocalTime().isBefore(target)) {
+                (useArrivalTime
+                 ? journeys.get(idx).arrTime().toLocalTime().isBefore(target)
+                 : journeys.get(idx).depTime().toLocalTime().isBefore(target))) {
             idx++;
         }
         if (idx == journeys.size()) idx--;

@@ -198,7 +198,7 @@ public class Main extends Application {
         // première recherche (si champs pré‑remplis)
         launchSearch.run();
 
-        SummaryUI summaryUI = SummaryUI.create(journeysO, queryUI.timeO(), loadingO, progressO);
+        SummaryUI summaryUI = SummaryUI.create(journeysO, queryUI.timeO(), loadingO, progressO,  queryUI.arrivalModeO());
         DetailUI detailUI = DetailUI.create(summaryUI.selectedJourneyO());
 
 
