@@ -59,9 +59,8 @@ public class StopIndex {
                 'c', "[cç]");
         StringJoiner regex = new StringJoiner("","","");
         for (char c : query.toCharArray()) {
-            char lower = Character.toLowerCase(c);
-            if (equivalences.containsKey(lower)) {
-                regex.add(equivalences.get(lower));
+            if (equivalences.containsKey(c)) {
+                regex.add(equivalences.get(c));
             } else {
                 regex.add(Pattern.quote(String.valueOf(c)));
             }
