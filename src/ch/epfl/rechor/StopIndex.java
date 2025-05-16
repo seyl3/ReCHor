@@ -81,9 +81,9 @@ public class StopIndex {
                 }
             }
             if(hasUpperCase) {
-                subPatterns.add(Pattern.compile(regex));
+                subPatterns.add(Pattern.compile(regex));// flags non activés si l'utilisateur écrit une majuscule
             }else{
-                subPatterns.add(Pattern.compile(regex, flags));
+                subPatterns.add(Pattern.compile(regex, flags)); // flags activiés sss il n'y a pas majuscules
             }
 
         }
@@ -134,9 +134,9 @@ public class StopIndex {
     /**
      * Retourne les noms d'arrêts correspondant à la requête donnée, triés par pertinence.
      * <p>
-     * La requête est découpée en sous-requêtes selon les espaces. Un arrêt correspond s'il contient
-     * toutes les sous-requêtes, en ignorant les accents et la casse. Les noms alternatifs sont
-     * automatiquement convertis en leurs noms principaux dans les résultats.
+     * Un arrêt correspond s'il contient toutes les sous-requêtes, en ignorant les accents
+     * et la casse. Les noms alternatifs sont automatiquement convertis en leurs noms
+     * principaux dans les résultats.
      *
      * @param request la requête de recherche
      * @param limit   le nombre maximum de résultats à retourner
@@ -144,15 +144,13 @@ public class StopIndex {
      * sans doublons et de taille au plus {@code limit}
      */
     public List<String> stopsMatching(String request, int limit) {
+        //Construire les patterns correspondants à la requête
         List<Pattern> subPatterns = buildPatterns(request);
 
-        // Étape 3–4 : filtrer les noms (principaux + alternatifs)
-        // On filtre tous les noms (noms principaux et alternatifs) qui matchent toutes les
-        // sous-requêtes
-        return Stream.concat(stopsNames.stream(), alternativeNames.keySet().stream())
-                .filter(name -> subPatterns.stream().anyMatch(p -> p.matcher(name).find()))
+        return Stream.concat(stopsNames.stream(), alternativeNames.keySet().stream())// recherche dans tous les noms de stations (alternatifs et prencipaux)
+                .filter(name -> subPatterns.stream().anyMatch(p -> p.matcher(name).find()))// trouve ceux qui matchent
                 .sorted(Comparator.comparingInt((String name) -> pertinence(name, subPatterns)).reversed()) // tri par pertinence décroissante
-                .map(name -> alternativeNames.getOrDefault(name, name)) // remplace le nom alternatif par son nom principal
+                .map(name -> alternativeNames.getOrDefault(name, name)) // remplace tout nom alternatif par son nom principal
                 .distinct()
                 .limit(limit)
                 .toList();

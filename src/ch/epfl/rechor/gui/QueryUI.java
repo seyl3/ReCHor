@@ -90,7 +90,6 @@ public record QueryUI(Node rootNode,
         TextField timeField = new TextField();
         timeField.setId("time");
 
-
         DateTimeFormatter formatterDisplay = DateTimeFormatter.ofPattern("HH:mm");
         DateTimeFormatter formatterParse = DateTimeFormatter.ofPattern("[H:mm][HH:mm]");
         LocalTimeStringConverter timeConverter = new LocalTimeStringConverter(formatterDisplay, formatterParse);

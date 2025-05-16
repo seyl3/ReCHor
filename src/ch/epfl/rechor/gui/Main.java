@@ -36,7 +36,7 @@ import java.util.stream.IntStream;
  * et établit les liaisons entre les éléments de l’interface via des valeurs observables.
  * </p>
  *
- * <h2>Fonctionnalités principales :</h2>
+ * <b>Fonctionnalités principales :</b>
  * <ul>
  *     <li>Charge les données horaires depuis le dossier "timetable".</li>
  *     <li>Crée et connecte les éléments de l'interface utilisateur.</li>
@@ -44,7 +44,7 @@ import java.util.stream.IntStream;
  *     <li>Lie dynamiquement la liste des voyages à afficher à l’entrée utilisateur.</li>
  * </ul>
  *
- * <h2>Structure de l’interface graphique :</h2>
+ * <b>Structure de l’interface graphique :</b>
  * <pre>
  * ┌────────────────────────────┐
  * │        QueryUI             │ ← zone de recherche (top)
@@ -57,7 +57,7 @@ import java.util.stream.IntStream;
  * @author : Sarra Zghal, Elyes Ben Abid
  */
 public class Main extends Application {
-    // Date du voyage -> (l'indice de la station d'arrivée -> le profile)
+    // Strcuture dela map (Date du voyage -> (l'indice de la station d'arrivée -> le profile))
     private final Map<LocalDate, Map<Integer, Profile>> profileCache = new ConcurrentHashMap<>();
     private final SimpleObjectProperty<List<Journey>> journeysO = new SimpleObjectProperty<>(List.of());
 

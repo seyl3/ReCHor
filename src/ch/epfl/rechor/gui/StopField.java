@@ -59,7 +59,7 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
                 tf.setText(selected);
             }
             popup.hide();
-            tf.requestFocus();   // rend le focus au champ
+            tf.getParent().requestFocus();// rend le focus au champ
         };
 
         listView.setOnMouseClicked(e -> {
