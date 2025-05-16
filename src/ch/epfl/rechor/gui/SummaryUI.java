@@ -114,22 +114,25 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
     private static void updateSelection(ListView<Journey> listView,
                                         ObservableValue<LocalTime> desiredTimeO,
                                         boolean useArrivalTime) {
+
         List<Journey> journeys = listView.getItems();
+        LocalTime target = desiredTimeO.getValue();
 
         if (journeys.isEmpty()) return;
 
-        LocalTime target = desiredTimeO.getValue();
-        int idx = 0;
-        while (idx < journeys.size() &&
-                (useArrivalTime
-                 ? journeys.get(idx).arrTime().toLocalTime().isBefore(target)
-                 : journeys.get(idx).depTime().toLocalTime().isBefore(target))) {
-            idx++;
-        }
-        if (idx == journeys.size()) idx--;
+        int journeyIndex = IntStream.range(0, journeys.size())
+                .filter(i -> {
+                    Journey j = journeys.get(i);
+                    LocalTime time = useArrivalTime
+                            ? j.arrTime().toLocalTime()
+                            : j.depTime().toLocalTime();
+                    return !time.isBefore(target);
+                })
+                .findFirst()
+                .orElse(journeys.size() - 1);
 
-        listView.getSelectionModel().select(idx);
-        listView.scrollTo(idx);
+        listView.getSelectionModel().select(journeyIndex);
+        listView.scrollTo(journeyIndex);
     }
 
     /**
