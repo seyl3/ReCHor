@@ -4,7 +4,8 @@ import ch.epfl.rechor.StopIndex;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.util.converter.LocalTimeStringConverter;
 
 import java.time.LocalDate;
@@ -19,12 +20,11 @@ import java.time.format.DateTimeFormatter;
  * un sélecteur de date, et un champ formaté pour saisir l'heure. Elle fournit aussi un bouton permettant
  * d'échanger les arrêts de départ et d'arrivée.
  *
- * @param rootNode  le nœud JavaFX à la racine de l'interface
- * @param depStopO  la valeur observable représentant l'arrêt de départ (valide ou chaîne vide)
- * @param arrStopO  la valeur observable représentant l'arrêt d'arrivée (valide ou chaîne vide)
- * @param dateO     la valeur observable représentant la date du voyage
- * @param timeO     la valeur observable représentant l'heure de départ du voyage
- *
+ * @param rootNode le nœud JavaFX à la racine de l'interface
+ * @param depStopO la valeur observable représentant l'arrêt de départ (valide ou chaîne vide)
+ * @param arrStopO la valeur observable représentant l'arrêt d'arrivée (valide ou chaîne vide)
+ * @param dateO    la valeur observable représentant la date du voyage
+ * @param timeO    la valeur observable représentant l'heure de départ du voyage
  * @author : Sarra Zghal, Elyes Ben Abid
  */
 public record QueryUI(Node rootNode,
@@ -32,7 +32,7 @@ public record QueryUI(Node rootNode,
                       ObservableValue<String> arrStopO,
                       ObservableValue<LocalDate> dateO,
                       ObservableValue<LocalTime> timeO
-                      ) {
+) {
 
     /**
      * Crée l'interface graphique de requête, avec les champs nécessaires à la saisie des informations

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
+
 /**
  * Classe principale de l'application ReCHor.
  * <p>
@@ -61,9 +62,13 @@ public class Main extends Application {
     private final Map<LocalDate, Map<Integer, Profile>> profileCache = new ConcurrentHashMap<>();
     private final SimpleObjectProperty<List<Journey>> journeysO = new SimpleObjectProperty<>(List.of());
 
-    /** Largeur minimale de la fenêtre principale (en px). */
-    private static final double MIN_WINDOW_WIDTH  = 800;
-    /** Hauteur minimale de la fenêtre principale (en px). */
+    /**
+     * Largeur minimale de la fenêtre principale (en px).
+     */
+    private static final double MIN_WINDOW_WIDTH = 800;
+    /**
+     * Hauteur minimale de la fenêtre principale (en px).
+     */
     private static final double MIN_WINDOW_HEIGHT = 600;
 
     /**
@@ -149,7 +154,8 @@ public class Main extends Application {
             }
 
             Task<List<Journey>> task = new Task<>() {
-                @Override protected List<Journey> call() {
+                @Override
+                protected List<Journey> call() {
                     Profile profile = profileCache
                             .computeIfAbsent(date, d -> new ConcurrentHashMap<>())
                             .computeIfAbsent(arrId, id -> router.profile(date, id));
@@ -158,7 +164,7 @@ public class Main extends Application {
             };
 
             task.setOnSucceeded(e -> journeysO.set(task.getValue()));
-            task.setOnFailed   (e -> journeysO.set(List.of()));
+            task.setOnFailed(e -> journeysO.set(List.of()));
 
             currentTask.set(task);
             new Thread(task, "CSA-worker").start();
@@ -167,8 +173,8 @@ public class Main extends Application {
         // on relance la recherche dès qu'un paramètre change
         queryUI.depStopO().addListener((o, oldV, newV) -> launchSearch.run());
         queryUI.arrStopO().addListener((o, oldV, newV) -> launchSearch.run());
-        queryUI.dateO().addListener    ((o, oldV, newV) -> launchSearch.run());
-        queryUI.timeO().addListener    ((o, oldV, newV) -> launchSearch.run());
+        queryUI.dateO().addListener((o, oldV, newV) -> launchSearch.run());
+        queryUI.timeO().addListener((o, oldV, newV) -> launchSearch.run());
 
         // première recherche (si champs pré‑remplis)
         launchSearch.run();

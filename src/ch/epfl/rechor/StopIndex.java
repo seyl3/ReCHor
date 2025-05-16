@@ -19,8 +19,8 @@ import java.util.stream.Stream;
  * @author : Sarra Zghal, Elyes Ben Abid
  */
 public class StopIndex {
-    public static final int flags = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
-    private static List<String> stopsNames;
+    public static final int FLAGS = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
+    private final List<String> stopsNames;
     private final Map<String, String> alternativeNames;
 
     /**
@@ -57,9 +57,9 @@ public class StopIndex {
                 'o', "[oóòôö]",
                 'u', "[uúùûü]",
                 'c', "[cç]");
-        StringJoiner regex = new StringJoiner("","","");
+        StringJoiner regex = new StringJoiner("", "", "");
         for (char c : query.toCharArray()) {
-            if (equivalences.containsKey(c)) {
+            if (equivalences.containsKey(c)){
                 regex.add(equivalences.get(c));
             } else {
                 regex.add(Pattern.quote(String.valueOf(c)));
@@ -67,48 +67,51 @@ public class StopIndex {
         }
         return regex.toString();
     }
+
     private static List<Pattern> buildPatterns(String request) {
         Pattern spaceSplitter = Pattern.compile("\\s+"); // un ou plusieurs espaces
         String[] subRequests = spaceSplitter.split(request.trim());
 
         List<Pattern> subPatterns = new ArrayList<>();
-        for(String subRequest : subRequests) {
+        for (String subRequest : subRequests) {
             String regex = buildRegex(subRequest);
             boolean hasUpperCase = false;
-            for(char c : subRequest.toCharArray()) {
+            for (char c : subRequest.toCharArray()) {
                 if (Character.isUpperCase(c)) {
                     hasUpperCase = true;
                 }
             }
-            if(hasUpperCase) {
+            if (hasUpperCase) {
                 subPatterns.add(Pattern.compile(regex));// flags non activés si l'utilisateur écrit une majuscule
-            }else{
-                subPatterns.add(Pattern.compile(regex, flags)); // flags activiés sss il n'y a pas majuscules
+            } else {
+                subPatterns.add(Pattern.compile(regex, FLAGS)); // flags activiés sss il n'y a pas majuscules
             }
 
         }
         return subPatterns;
     }
+
     /**
-     * Calcule le score de pertinence d'un nom d'arrêt par rapport aux sous-requêtes données.
+     * Calcule le score de pertinence d'un nom d'arrêt par rapport aux patterns des sous-requêtes donnés.
      * <p>
-     * Pour chaque sous-requête, le score est calculé comme suit :
+     * Pour chaque pattern de sous-requête, le score est calculé comme suit :
      * <ul>
      *   <li>Score de base : pourcentage du nom correspondant à la sous-requête</li>
      *   <li>Multiplicateur ×4 si la sous-requête est au début d'un mot</li>
      *   <li>Multiplicateur ×2 si la sous-requête est à la fin d'un mot</li>
+     *   <li> 0 si une sous requête de correspond pas au même non de station</li>
      * </ul>
      * Le score final est la somme des scores de toutes les sous-requêtes.
      * Seule la première occurrence de chaque sous-requête est considérée.
      *
      * @param stopName    le nom de l'arrêt à évaluer
-     * @param subPatterns une liste des sous patterns, correspondant aux sous requêtes
-    // A REMPLIR
+     * @param subPatterns une liste des patterns correspondant aux sous requêtes
+     *
      * @return le score de pertinence total
      */
     private static int pertinence(String stopName, List<Pattern> subPatterns) {
         int score = 0;
-        for (Pattern subPatttern : subPatterns ) {
+        for (Pattern subPatttern : subPatterns) {
             Matcher matcher = subPatttern.matcher(stopName);
 
             if (matcher.find()) {
@@ -124,7 +127,7 @@ public class StopIndex {
                 if (atWordEnd) factor *= 2;
                 score += baseScore * factor;
 
-            }else{
+            } else {
                 return 0;
             }
         }
@@ -147,10 +150,16 @@ public class StopIndex {
         //Construire les patterns correspondants à la requête
         List<Pattern> subPatterns = buildPatterns(request);
 
-        return Stream.concat(stopsNames.stream(), alternativeNames.keySet().stream())// recherche dans tous les noms de stations (alternatifs et prencipaux)
-                .filter(name -> subPatterns.stream().anyMatch(p -> p.matcher(name).find()))// trouve ceux qui matchent
-                .sorted(Comparator.comparingInt((String name) -> pertinence(name, subPatterns)).reversed()) // tri par pertinence décroissante
-                .map(name -> alternativeNames.getOrDefault(name, name)) // remplace tout nom alternatif par son nom principal
+        //1. recherche dans tous les noms de stations (alternatifs et prencipaux)
+        //2. trouve ceux qui matchent
+        //3. tri par pertinence décroissante
+        //4. remplace tout nom alternatif par son nom principal
+        //5. enlève les doublons
+        //6. limite la taille
+        return Stream.concat(stopsNames.stream(), alternativeNames.keySet().stream())
+                .filter(name -> subPatterns.stream().anyMatch(p -> p.matcher(name).find()))
+                .sorted(Comparator.comparingInt((String name) -> pertinence(name, subPatterns)).reversed())
+                .map(name -> alternativeNames.getOrDefault(name, name))
                 .distinct()
                 .limit(limit)
                 .toList();

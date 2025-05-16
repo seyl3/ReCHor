@@ -168,6 +168,11 @@ public record Journey(List<Leg> legs) {
 
             }
 
+            /**
+             * Retourne la liste des arrêts intermédiaires de cette étape du voyage.
+             *
+             * @return une liste vide comme les Foot n'ont pasd d'arrês intermédiaires.
+             */
             public List<IntermediateStop> intermediateStops() {
                 return List.of();
             }
