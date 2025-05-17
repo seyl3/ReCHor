@@ -21,7 +21,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static ch.epfl.rechor.FormatterFr.*;
@@ -246,14 +245,17 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                 durationTime.setText(formatDuration(item.duration()));
 
                 List<Journey.Leg> legs = item.legs();
-                Optional<Journey.Leg.Transport> firstTransport = legs.stream()
-                        .filter(Journey.Leg.Transport.class::isInstance)
-                        .map(Journey.Leg.Transport.class::cast)
-                        .findFirst();
-                firstTransport.ifPresent(tleg -> {
-                    vehicleIcon.setImage(iconFor(tleg.vehicle()));
-                    routeAndDestination.setText(formatRouteDestination(tleg));
-                });
+                Journey.Leg.Transport firstTransport = null;
+
+                for (Journey.Leg leg : legs) {
+                    if (leg instanceof Journey.Leg.Transport) {
+                        firstTransport = (Journey.Leg.Transport) leg;
+                        break;
+                    }
+                }
+
+                vehicleIcon.setImage(iconFor(firstTransport.vehicle()));
+                routeAndDestination.setText(formatRouteDestination(firstTransport));
 
                 transferCircles.clear();
 

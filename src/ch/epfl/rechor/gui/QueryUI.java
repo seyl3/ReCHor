@@ -4,7 +4,6 @@ import ch.epfl.rechor.StopIndex;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.converter.LocalTimeStringConverter;
@@ -105,14 +104,9 @@ public record QueryUI(Node rootNode,
         dateTime.getChildren().addAll(time, timeField);
 
         // Toggle "Départ" / "Arrivée"
-        ToggleButton modeToggle = new ToggleButton("Départ");
-        modeToggle.setOnAction(e -> {
-            if (modeToggle.isSelected()) {
-                modeToggle.setText("Arrivée");
-            } else {
-                modeToggle.setText("Départ");
-            }
-        });
+        SwitchButton modeToggle = new SwitchButton("Départ", "Arrivée");
+        modeToggle.getStylesheets().add("switch.css");
+        modeToggle.setId("mode-toggle");
         dateTime.getChildren().add(modeToggle);
 
 
