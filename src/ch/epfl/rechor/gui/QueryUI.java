@@ -105,8 +105,6 @@ public record QueryUI(Node rootNode,
 
         // Toggle "Départ" / "Arrivée"
         SwitchButton modeToggle = new SwitchButton("Départ", "Arrivée");
-        modeToggle.getStylesheets().add("switch.css");
-        modeToggle.setId("mode-toggle");
         dateTime.getChildren().add(modeToggle);
 
 

@@ -54,7 +54,6 @@ public record Router(TimeTable timeTable) {
 
         progressListener.progress(0d);
 
-
         Stations stations = timeTable.stations();
         Transfers transfers = timeTable.transfers();
         Connections connections = timeTable.connectionsFor(date);

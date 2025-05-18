@@ -19,8 +19,8 @@ import javafx.util.Duration;
  * A toggle switch with smooth sliding animation and fixed track bounds.
  */
 public class SwitchButton extends ToggleButton {
-    private static final double TRACK_WIDTH = 75;
-    private static final double TRACK_HEIGHT = 25;
+    private static final double TRACK_WIDTH = 73;
+    private static final double TRACK_HEIGHT = 26;
     private static final double THUMB_SIZE = TRACK_HEIGHT - 6;
     // horizontal/vertical margin for thumb within track
     private static final double THUMB_MARGIN = (TRACK_HEIGHT - THUMB_SIZE) / 2;
