@@ -2,11 +2,13 @@ package ch.epfl.rechor.gui;
 
 import ch.epfl.rechor.StopIndex;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableSet;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.converter.LocalTimeStringConverter;
+import ch.epfl.rechor.journey.Vehicle;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -26,6 +28,7 @@ import java.time.format.DateTimeFormatter;
  * @param dateO    la valeur observable représentant la date du voyage
  * @param timeO    la valeur observable représentant l'heure de départ du voyage
  * @param arrivalModeO la valeur observable représentant le mode arrivée/départ
+ * @param excludedVehiclesO la valeur observable représentant les véhicules exclus
  * @author : Sarra Zghal, Elyes Ben Abid
  */
 public record QueryUI(Node rootNode,
@@ -33,7 +36,8 @@ public record QueryUI(Node rootNode,
                       ObservableValue<String> arrStopO,
                       ObservableValue<LocalDate> dateO,
                       ObservableValue<LocalTime> timeO,
-                      ObservableValue<Boolean> arrivalModeO
+                      ObservableValue<Boolean> arrivalModeO,
+                      ObservableSet<Vehicle> excludedVehiclesO
 ) {
 
     /**
@@ -70,6 +74,8 @@ public record QueryUI(Node rootNode,
         arrField.textField().setPromptText("Nom de l'arrêt d'arrivée");
         search.getChildren().addAll(arrStop, arrField.textField());
 
+        VehicleFilterMenu vehicleFilter = new VehicleFilterMenu();
+        search.getChildren().add(vehicleFilter);
 
         exchangeB.setOnAction(e -> {
             String dep = depField.stopO().getValue();
@@ -113,7 +119,8 @@ public record QueryUI(Node rootNode,
                 arrField.stopO(),
                 datePicker.valueProperty(),
                 timeFormatter.valueProperty(),
-                modeToggle.selectedProperty());
+                modeToggle.selectedProperty(),
+                vehicleFilter.excludedVehicles());
 
 
     }

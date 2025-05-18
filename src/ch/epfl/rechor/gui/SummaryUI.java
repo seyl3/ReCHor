@@ -1,10 +1,13 @@
 package ch.epfl.rechor.gui;
 
 import ch.epfl.rechor.journey.Journey;
+import ch.epfl.rechor.journey.Vehicle;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ListCell;
@@ -21,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static ch.epfl.rechor.FormatterFr.*;
@@ -57,7 +61,8 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                                    ObservableValue<LocalTime> desiredTime,
                                    ObservableBooleanValue loadingO,
                                    ObjectProperty<Number> progressO,
-                                   ObservableValue<Boolean> arrivalO) {
+                                   ObservableValue<Boolean> arrivalO,
+                                   ObservableSet<Vehicle> excludedVehiclesO) {
 
         ListView<Journey> listView = new ListView<>();
         listView.getStylesheets().add("summary.css");
@@ -86,7 +91,14 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
 
         // Met à jour le voyage séléctionné
         journeyList.subscribe(newList -> {
-            listView.getItems().setAll(newList);
+            listView.getItems().setAll(
+                newList.stream()
+                       .filter(j -> j.legs().stream()
+                                     .filter(leg -> leg instanceof Journey.Leg.Transport)
+                                     .map(leg -> ((Journey.Leg.Transport) leg).vehicle())
+                                     .noneMatch(excludedVehiclesO::contains))
+                       .collect(Collectors.toList())
+            );
             updateSelection(listView, desiredTime, arrivalO.getValue());
         });
 
@@ -95,12 +107,14 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
             updateSelection(listView, desiredTime, arrivalO.getValue());
         });
         arrivalO.subscribe(v -> updateSelection(listView, desiredTime, v));
+        excludedVehiclesO.addListener((SetChangeListener<Vehicle>) change ->
+            filterJourneys(listView, journeyList, desiredTime, arrivalO, excludedVehiclesO)
+        );
         ObservableValue<Journey> selectedJourney =
                 listView.getSelectionModel().selectedItemProperty();
 
         return new SummaryUI(summaryPane, selectedJourney);
     }
-
     /**
      * Méthode auxiliaire, sélectionne et fait défiler la liste jusqu’au voyage correspondant à
      * l’heure
@@ -132,6 +146,35 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
 
         listView.getSelectionModel().select(journeyIndex);
         listView.scrollTo(journeyIndex);
+    }
+
+
+    /**
+     * Filtre et met à jour la sélection des voyages selon les modes exclus.
+     *
+     * @param listView            la ListView contenant les voyages
+     * @param journeyList         observable de la liste brute de voyages
+     * @param desiredTime         observable de l'heure désirée
+     * @param arrivalO            observable du mode arrivée/départ
+     * @param excludedVehiclesO   set observable des véhicules exclus
+     */
+    private static void filterJourneys(ListView<Journey> listView,
+                                       ObservableValue<List<Journey>> journeyList,
+                                       ObservableValue<LocalTime> desiredTime,
+                                       ObservableValue<Boolean> arrivalO,
+                                       ObservableSet<Vehicle> excludedVehiclesO) {
+        List<Journey> currentList = journeyList.getValue();
+        if (currentList != null) {
+            listView.getItems().setAll(
+                    currentList.stream()
+                            .filter(j -> j.legs().stream()
+                                    .filter(leg -> leg instanceof Journey.Leg.Transport)
+                                    .map(leg -> ((Journey.Leg.Transport) leg).vehicle())
+                                    .noneMatch(excludedVehiclesO::contains))
+                            .collect(Collectors.toList())
+            );
+            updateSelection(listView, desiredTime, arrivalO.getValue());
+        }
     }
 
     /**

@@ -9,6 +9,7 @@ import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.SetChangeListener;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
@@ -194,11 +195,20 @@ public class Main extends Application {
         queryUI.arrStopO().addListener((o, oldV, newV) -> launchSearch.run());
         queryUI.dateO().addListener((o, oldV, newV) -> launchSearch.run());
         queryUI.timeO().addListener((o, oldV, newV) -> launchSearch.run());
+        queryUI.arrivalModeO().addListener((o, oldV, newV) -> launchSearch.run());
+        queryUI.excludedVehiclesO().addListener((SetChangeListener<Vehicle>) change -> launchSearch.run());
 
         // première recherche (si champs pré‑remplis)
         launchSearch.run();
 
-        SummaryUI summaryUI = SummaryUI.create(journeysO, queryUI.timeO(), loadingO, progressO,  queryUI.arrivalModeO());
+        SummaryUI summaryUI = SummaryUI.create(
+            journeysO,
+            queryUI.timeO(),
+            loadingO,
+            progressO,
+            queryUI.arrivalModeO(),
+            queryUI.excludedVehiclesO()
+        );
         DetailUI detailUI = DetailUI.create(summaryUI.selectedJourneyO());
 
 
