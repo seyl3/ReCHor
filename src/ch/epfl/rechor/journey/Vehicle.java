@@ -26,11 +26,6 @@ public enum Vehicle {
         return displayName;
     }
 
-    @Override
-    public String toString() {
-        return displayName;
-    }
-
     /**
      * Liste contenant tous les types de véhicules.
      */
