@@ -42,19 +42,38 @@ public record Journey(List<Leg> legs) {
 
         }
     }
-
+    /**
+     * Donne l'arrêt de départ du voyage soit celui de sa première étape
+     *
+     * @return l'arrêt de départ du voyage
+     */
     public Stop depStop() {
         return legs.getFirst().depStop();
     }
 
+    /**
+     * Donne l'arrêt d'arrivée du voyage soit celui de sa dernière étape
+     *
+     * @return l'arrêt d'arrivée du voyage
+     */
     public Stop arrStop() {
         return legs.getLast().arrStop();
     }
 
+    /**
+     * Donne l'heure de départ du voyage soit celle de sa première étape
+     *
+     * @return l'heure de départ du voyage
+     */
     public LocalDateTime depTime() {
         return legs.getFirst().depTime();
     }
 
+    /**
+     * Donne l'heure d'arrivée du voyage soit celle de sa dernière étape
+     *
+     * @return l'heure d'arrivée du voyage
+     */
     public LocalDateTime arrTime() {
         return legs.getLast().arrTime();
     }
@@ -73,14 +92,39 @@ public record Journey(List<Leg> legs) {
      * Représente une étape du voyage.
      */
     public sealed interface Leg {
+        /**
+         * Donne l'arrêt de départ de l'étape
+         *
+         * @return l'arrêt de départ de l'étape
+         */
         Stop depStop();
 
+        /**
+         * Donne l'arrêt d'arrivée de l'étape
+         *
+         * @return l'arrêt d'arrivée de l'étape
+         */
         Stop arrStop();
 
+        /**
+         * Donne l'heure de départ de l'étape
+         *
+         * @return l'heure de départ de l'étape
+         */
         LocalDateTime depTime();
 
+        /**
+         * Donne l'heure d'arrivée de l'étape
+         *
+         * @return l'heure d'arrivée de l'étape
+         */
         LocalDateTime arrTime();
 
+        /**
+         * Donne une liste des arrêts intermédiaires de l'étape
+         *
+         * @return une liste des arrêts intermédiaires
+         */
         List<IntermediateStop> intermediateStops();
 
         /**
@@ -169,9 +213,11 @@ public record Journey(List<Leg> legs) {
             }
 
             /**
-             * Retourne la liste des arrêts intermédiaires de cette étape du voyage.
+             * Donne la liste des arrêts intermédiaires de l'étape à pied
+             * L'étape à pied ne pouvant pas avoir d'arrêts intermédiaires, la méthode
+             * retourne une liste vide
              *
-             * @return une liste vide comme les Foot n'ont pasd d'arrês intermédiaires.
+             * @return une liste vide représentant les arrêts intermédiaires.
              */
             public List<IntermediateStop> intermediateStops() {
                 return List.of();
