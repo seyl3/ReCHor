@@ -25,7 +25,7 @@ public final class PackedCriteria {
     }
 
     /**
-     * Embpaquette les critères donnés en une valeur long.
+     * Empaquette les critères donnés en une valeur long.
      *
      * @param arrMins Temps d'arrivée en minutes avec minuit comme référence.
      * @param changes Nombre de changements d'itinéraire.

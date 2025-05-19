@@ -72,7 +72,7 @@ public record Router(TimeTable timeTable) {
 
         // ------------------------------------------------------------------
         // Pré‑alloue des builders vides pour toutes les gares et toutes les
-        // courses.  On évite ainsi les tests « null » et les allocations
+        // courses.  On évite ainsi les tests «null» et les allocations
         // répétées dans la boucle CSA.
         preallocateBuilders(profile,
                 timeTable.stations().size(),
@@ -164,7 +164,7 @@ public record Router(TimeTable timeTable) {
 
     /**
      * Pré‑alloue un {@link ParetoFront.Builder} vide pour chaque station et
-     * chaque course.  Cela simplifie la boucle principale : on n’a plus à
+     * chaque course.  Cela simplifie la boucle principale : on n’a plus à
      * tester la présence d’un builder ni à l’instancier à chaud, ce qui
      * économise quelques allocations et branches conditionnelles.
      *
