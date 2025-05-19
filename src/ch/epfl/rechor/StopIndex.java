@@ -1,10 +1,6 @@
 package ch.epfl.rechor;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -68,6 +64,19 @@ public class StopIndex {
         return regex.toString();
     }
 
+    /**
+     * Construit une liste de patterns pour une requête de la part de l'utilisateur
+     * La requête est divisée en sous-requête à chaque espace entré par l'utilisateur
+     * Chaque sous-requête est alors transformée :
+     * <ol>
+     *     <li>en expression régulière (<i>Regular Expression</i>) via {@code builRegex()} </li>
+     *     <li>2) en pattern </li>
+     * </ol>
+     *
+     *
+     * @param request la chaine de caractères entrée par l'utilisateur dans sa recherche
+     * @return
+     */
     private static List<Pattern> buildPatterns(String request) {
         Pattern spaceSplitter = Pattern.compile("\\s+"); // un ou plusieurs espaces
         String[] subRequests = spaceSplitter.split(request.trim());
@@ -88,6 +97,22 @@ public class StopIndex {
             }
 
         }
+        ///________A VOIR  _____ Version alternative orientée programmation par flots _______///
+//        Iterator<String> it = Arrays.asList(subRequests).iterator();
+//        subPatterns= Arrays.stream(subRequests).map(StopIndex::buildRegex).map(regex->{
+//            String subRequest = it.next();
+//            boolean hasUpperCase = false;
+//            for (char c : subRequest.toCharArray()) {
+//                if (Character.isUpperCase(c)) {
+//                    hasUpperCase = true;
+//                }
+//            }
+//            if (hasUpperCase) {
+//               return Pattern.compile(regex);// flags non activés si l'utilisateur écrit une majuscule
+//            } else {
+//                return Pattern.compile(regex, FLAGS); // flags activiés sss il n'y a pas majuscules
+//            }
+//        }).toList();
         return subPatterns;
     }
 
