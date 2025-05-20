@@ -5,13 +5,12 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Bounds;
-import javafx.scene.control.*;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Popup;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,7 +24,6 @@ import java.util.List;
  *
  * @param textField le champ textuel de saisie
  * @param stopO     la valeur observable représentant l'arrêt sélectionné
- *
  * @author : Sarra Zghal, Elyes Ben Abid
  */
 public record StopField(TextField textField, ObservableValue<String> stopO) {
@@ -66,14 +64,15 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
             listView.scrollTo(listView.getSelectionModel().getSelectedIndex());
         });
 
-
-        tf.focusedProperty().subscribe(focus->{
-            if(focus){
+        // Mise à jour de l'apparance du champ textuel en fonction du focus
+        tf.focusedProperty().subscribe(focus -> {
+            // Si le focus est bien sur le text Field → on effectue la recherche
+            if (focus) {
                 popup.show(tf.getScene().getWindow());
-                setListView(stopIndex,tf.textProperty().getValue(),listView);
+                setListView(stopIndex, tf.textProperty().getValue(), listView);
                 // Mise à jour du contenu de la liste à chaque changement de texte
                 tf.textProperty().subscribe(() -> {
-                    setListView(stopIndex,tf.textProperty().getValue(),listView);
+                    setListView(stopIndex, tf.textProperty().getValue(), listView);
                 });
 
                 // Positionnement du popup juste sous le champ textuel
@@ -82,9 +81,7 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
                 popup.setAnchorY(bounds.getMaxY());
 
             } else {
-                // Quand le champ perd le focus
-
-                popup.hide(); // On cache la fenêtre de suggestions
+                // Quand le champ perd le focus → on affiche le nom sélectionné et on range le pop-up
 
                 // On récupère l'élément sélectionné (ou vide si rien)
                 String selected = listView.getSelectionModel().getSelectedItem();
@@ -94,6 +91,9 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
                 } else {
                     stopO.set(""); // aucune correspondance
                 }
+
+                // On cache la fenêtre de suggestions
+                popup.hide();
             }
         });
 
@@ -113,7 +113,7 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
      * @param listView  la liste affichant les suggestions
      * @throws NullPointerException si l'un des arguments est {@code null}
      */
-    private static void setListView(StopIndex stopIndex, String request, ListView<String> listView){
+    private static void setListView(StopIndex stopIndex, String request, ListView<String> listView) {
         List<String> suggestionss = stopIndex.stopsMatching(request, 30);
         listView.getItems().setAll(suggestionss);
         if (!suggestionss.isEmpty()) {
@@ -128,8 +128,8 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
      * @param stopName le nom d'arrêt à associer au champ
      * @throws NullPointerException si {@code stopName} est {@code null}
      */
-    public void setTo(String stopName){
+    public void setTo(String stopName) {
         textField.setText(stopName);
-        ((SimpleStringProperty)stopO).set(stopName);
+        ((SimpleStringProperty) stopO).set(stopName);
     }
 }

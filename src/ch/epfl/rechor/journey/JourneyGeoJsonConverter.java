@@ -55,7 +55,8 @@ public final class JourneyGeoJsonConverter {
      *
      * @param number le nombre à arrondir (longitude ou latitude)
      * @return un Json.JNumber contenant la valeur arrondie
-     */    private static Json.JNumber roundToJnumber(double number) {
+     */
+    private static Json.JNumber roundToJnumber(double number) {
         return new Json.JNumber((Math.round(number * 1e5) / 1e5));
     }
 
@@ -65,7 +66,8 @@ public final class JourneyGeoJsonConverter {
      *
      * @param stop l'arrêt dont on extrait les coordonnées
      * @return un Json.JArray contenant [longitude, latitude]
-     */    private static Json createJArray(Stop stop) {
+     */
+    private static Json createJArray(Stop stop) {
         Json.JNumber lon = roundToJnumber(stop.longitude());
         Json.JNumber lat = roundToJnumber(stop.latitude());
         return new Json.JArray(List.of(lon, lat));

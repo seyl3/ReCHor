@@ -15,7 +15,25 @@ import java.time.temporal.ChronoField;
  * @author Sarra Zghal, Elyes Ben Abid
  */
 public final class FormatterFr {
-    private FormatterFr() {}
+    private static final DateTimeFormatter TIME_FORMATTER =
+            new DateTimeFormatterBuilder()
+                    .appendValue(ChronoField.HOUR_OF_DAY)
+                    .appendLiteral('h')
+                    .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+                    .toFormatter();
+    private static final DateTimeFormatter EVENT_TIME_FORMATTER =
+            new DateTimeFormatterBuilder()
+                    .appendValue(ChronoField.YEAR)
+                    .appendValue(ChronoField.MONTH_OF_YEAR, 2)
+                    .appendValue(ChronoField.DAY_OF_MONTH, 2)
+                    .appendLiteral('T')
+                    .appendValue(ChronoField.HOUR_OF_DAY, 2)
+                    .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+                    .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
+                    .toFormatter();
+
+    private FormatterFr() {
+    }
 
     /**
      * Formate une durée en une chaîne de caractères.
@@ -33,13 +51,6 @@ public final class FormatterFr {
         }
     }
 
-    private static final DateTimeFormatter TIME_FORMATTER =
-            new DateTimeFormatterBuilder()
-                    .appendValue(ChronoField.HOUR_OF_DAY)
-                    .appendLiteral('h')
-                    .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
-                    .toFormatter();
-
     /**
      * Formate un objet {@code LocalDateTime} en une chaîne représentant l'heure.
      * Construit une instance d'un formatter statique.
@@ -50,18 +61,6 @@ public final class FormatterFr {
     public static String formatTime(LocalDateTime dateTime) {
         return dateTime.format(TIME_FORMATTER);
     }
-
-
-    private static final DateTimeFormatter EVENT_TIME_FORMATTER =
-            new DateTimeFormatterBuilder()
-                    .appendValue(ChronoField.YEAR)
-                    .appendValue(ChronoField.MONTH_OF_YEAR, 2)
-                    .appendValue(ChronoField.DAY_OF_MONTH, 2)
-                    .appendLiteral('T')
-                    .appendValue(ChronoField.HOUR_OF_DAY, 2)
-                    .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
-                    .appendValue(ChronoField.SECOND_OF_MINUTE   , 2)
-                    .toFormatter();
 
     /**
      * Formate un objet {@code LocalDateTime} sous le format utilisé par les fichier iCalendar.

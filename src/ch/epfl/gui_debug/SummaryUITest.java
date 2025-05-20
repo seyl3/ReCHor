@@ -7,7 +7,10 @@ package ch.epfl.gui_debug;
 
 import ch.epfl.rechor.gui.DetailUI;
 import ch.epfl.rechor.gui.SummaryUI;
-import ch.epfl.rechor.journey.*;
+import ch.epfl.rechor.journey.Journey;
+import ch.epfl.rechor.journey.JourneyExtractor;
+import ch.epfl.rechor.journey.Profile;
+import ch.epfl.rechor.journey.Router;
 import ch.epfl.rechor.timetable.CachedTimeTable;
 import ch.epfl.rechor.timetable.Stations;
 import ch.epfl.rechor.timetable.TimeTable;

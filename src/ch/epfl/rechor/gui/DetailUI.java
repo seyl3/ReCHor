@@ -47,7 +47,7 @@ import static javafx.scene.layout.GridPane.*;
  *   <li>les arrêts intermédiaires (dépliables)</li>
  *   <li>les connexions entre étapes</li>
  * </ul>
- *
+ * <p>
  * Cette interface met à jour automatiquement son affichage en fonction de la valeur observable
  * du voyage fourni. Elle contient deux enfants principaux : un affichage "aucun voyage" lorsque
  * aucun voyage n'est sélectionné, et un affichage détaillé lorsque le voyage est présent.
@@ -208,10 +208,10 @@ public record DetailUI(Node rootNode) {
      * cercle,
      * le nom de la station et le nom de la plateforme.
      *
-     * @param grid la grille dans laquelle ajouter la ligne
-     * @param row l'indice de la ligne où ajouter les éléments
-     * @param time l'heure à afficher
-     * @param stop l'arrêt (station) concerné
+     * @param grid        la grille dans laquelle ajouter la ligne
+     * @param row         l'indice de la ligne où ajouter les éléments
+     * @param time        l'heure à afficher
+     * @param stop        l'arrêt (station) concerné
      * @param isDeparture indique si l'arrêt est un départ (true) ou une arrivée (false)
      * @return le cercle créé représentant l'arrêt, utilisé pour les annotations graphiques
      */
@@ -246,8 +246,8 @@ public record DetailUI(Node rootNode) {
      * Le bouton carte ouvre une carte web avec le trajet au format GeoJSON.
      *
      * @param calendarButton le bouton pour exporter le calendrier
-     * @param mapButton le bouton pour afficher la carte
-     * @param journeyO l'observable du voyage utilisé pour récupérer les données
+     * @param mapButton      le bouton pour afficher la carte
+     * @param journeyO       l'observable du voyage utilisé pour récupérer les données
      */
     private static void wireButtons(Button calendarButton,
                                     Button mapButton,
@@ -278,7 +278,7 @@ public record DetailUI(Node rootNode) {
 
             try {
                 URI uri = new URI("https", "umap.osm.ch", "/fr/map",
-                                  "data=" + toGeoJson(j), "null");
+                        "data=" + toGeoJson(j), "null");
                 getDesktop().browse(uri);
             } catch (IOException | URISyntaxException ex) {
                 throw new RuntimeException(ex);
@@ -332,8 +332,8 @@ public record DetailUI(Node rootNode) {
             lineList.clear();
 
             circlePairs.stream()
-                .map(this::createLine)
-                .forEach(lineList::add);
+                    .map(this::createLine)
+                    .forEach(lineList::add);
 
             annotationLayer.getChildren().setAll(lineList);
         }
@@ -346,11 +346,11 @@ public record DetailUI(Node rootNode) {
          */
         private Line createLine(Pair<Circle, Circle> pair) {
             Circle start = pair.getKey();
-            Circle end   = pair.getValue();
+            Circle end = pair.getValue();
             double startX = start.getBoundsInParent().getCenterX();
             double startY = start.getBoundsInParent().getCenterY();
-            double endX   = end.getBoundsInParent().getCenterX();
-            double endY   = end.getBoundsInParent().getCenterY();
+            double endX = end.getBoundsInParent().getCenterX();
+            double endY = end.getBoundsInParent().getCenterY();
             Line line = new Line(startX, startY, endX, endY);
             line.setStroke(Color.RED);
             line.setStrokeWidth(LINE_STROKE_WIDTH);

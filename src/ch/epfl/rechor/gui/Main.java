@@ -1,7 +1,10 @@
 package ch.epfl.rechor.gui;
 
 import ch.epfl.rechor.StopIndex;
-import ch.epfl.rechor.journey.*;
+import ch.epfl.rechor.journey.Journey;
+import ch.epfl.rechor.journey.JourneyExtractor;
+import ch.epfl.rechor.journey.Profile;
+import ch.epfl.rechor.journey.Router;
 import ch.epfl.rechor.timetable.TimeTable;
 import ch.epfl.rechor.timetable.mapped.FileTimeTable;
 import javafx.application.Application;
@@ -17,12 +20,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
 /**
  * Classe principale de l'application ReCHor.
  * <p>
@@ -54,9 +57,6 @@ import java.util.stream.IntStream;
  * @author : Sarra Zghal, Elyes Ben Abid
  */
 public class Main extends Application {
-    // Date du voyage -> (l'indice de la station d'arrivée -> le profile)
-    private final Map<LocalDate, Map<Integer, Profile>> profileCache = new ConcurrentHashMap<>();
-    private ObservableValue<List<Journey>> journeysO;
     /**
      * Largeur minimale de la fenêtre principale (en px).
      */
@@ -65,11 +65,13 @@ public class Main extends Application {
      * Hauteur minimale de la fenêtre principale (en px).
      */
     private static final double MIN_WINDOW_HEIGHT = 600;
-
-    /** Largeur minimale de la fenêtre principale (en px). */
-    private static final double MIN_WINDOW_WIDTH  = 800;
-    /** Hauteur minimale de la fenêtre principale (en px). */
-    private static final double MIN_WINDOW_HEIGHT = 600;
+    /**
+     * Cache qui permet de gagner en rapidité et en efficacité
+     * Structure de la Map : Date du voyage → (l'indice de la station d'arrivée → le profile)
+     */
+//
+    private final Map<LocalDate, Map<Integer, Profile>> profileCache = new ConcurrentHashMap<>();
+    private ObservableValue<List<Journey>> journeysO;
 
     /**
      * Point d'entrée principal de l'application ReCHor.
@@ -126,7 +128,7 @@ public class Main extends Application {
 
         // Création de la valeur observable des voyages
         // Vérification des paramètres
-            journeysO = Bindings.createObjectBinding(() -> {
+        journeysO = Bindings.createObjectBinding(() -> {
             String depStop = queryUI.depStopO().getValue();
             String arrStop = queryUI.arrStopO().getValue();
             LocalDate date = queryUI.dateO().getValue();

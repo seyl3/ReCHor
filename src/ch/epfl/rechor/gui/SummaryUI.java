@@ -33,12 +33,12 @@ import static ch.epfl.rechor.gui.VehicleIcons.iconFor;
  *   <li>durée et mode de transport principal</li>
  *   <li>visuel des transferts à pied sous forme de cercles</li>
  * </ul>
- *
+ * <p>
  * La sélection du voyage se fait automatiquement en fonction de l'heure désirée,
  * et peut être récupérée via la valeur observable fournie.
  *
- * @param rootNode          le nœud racine affichant la liste des voyages
- * @param selectedJourneyO  observable du voyage actuellement sélectionné
+ * @param rootNode         le nœud racine affichant la liste des voyages
+ * @param selectedJourneyO observable du voyage actuellement sélectionné
  * @author Sarra Zghal, Elyes Ben Abid
  */
 public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO) {
@@ -119,9 +119,9 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         private final Text durationTime;
         private final Pane transferLinePane;
         private final List<Circle> transferCircles;
+        private final Line backgroundLine;
         private Circle startCircle;
         private Circle endCircle;
-        private final Line backgroundLine;
 
         /**
          * Initialise les composants graphiques de la cellule : icône du véhicule,
@@ -146,7 +146,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                     endCircle.setCenterX(width - HORIZONTAL_MARGIN);
                     endCircle.setCenterY(VERTICAL_POSITION);
 
-                    for(Circle circle : transferCircles) {
+                    for (Circle circle : transferCircles) {
                         double relativePosition = (double) circle.getUserData();
                         double x = HORIZONTAL_MARGIN + relativePosition * (width - 2 * HORIZONTAL_MARGIN);
                         circle.setCenterX(x);
@@ -214,9 +214,9 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
 
                 List<Journey.Leg> legs = item.legs();
                 Optional<Journey.Leg.Transport> firstTransport = legs.stream()
-                    .filter(Journey.Leg.Transport.class::isInstance)
-                    .map(Journey.Leg.Transport.class::cast)
-                    .findFirst();
+                        .filter(Journey.Leg.Transport.class::isInstance)
+                        .map(Journey.Leg.Transport.class::cast)
+                        .findFirst();
                 firstTransport.ifPresent(tleg -> {
                     vehicleIcon.setImage(iconFor(tleg.vehicle()));
                     routeAndDestination.setText(formatRouteDestination(tleg));
@@ -224,20 +224,20 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
 
                 transferCircles.clear();
 
-                    LocalDateTime departureTime = legs.getFirst().depTime();
-                    double totalDurationMinutes = (double) item.duration().toMinutes();
+                LocalDateTime departureTime = legs.getFirst().depTime();
+                double totalDurationMinutes = (double) item.duration().toMinutes();
 
-                    IntStream.range(1, legs.size() - 1).mapToObj(legs::get)
-                            .filter(leg -> leg instanceof Journey.Leg.Foot)
-                            .map(leg -> (Journey.Leg.Foot) leg)
-                            .mapToDouble(footLeg -> Duration.between(departureTime, footLeg.depTime()).toMinutes())
-                            .map(minutesFromStart -> minutesFromStart / totalDurationMinutes)
-                            .forEach(relativePosition -> {
-                                Circle changeCircle = new Circle(CIRCLE_RADIUS);
-                                changeCircle.getStyleClass().add("transfer");
-                                changeCircle.setUserData(relativePosition);
-                                transferCircles.add(changeCircle);
-                            });
+                IntStream.range(1, legs.size() - 1).mapToObj(legs::get)
+                        .filter(leg -> leg instanceof Journey.Leg.Foot)
+                        .map(leg -> (Journey.Leg.Foot) leg)
+                        .mapToDouble(footLeg -> Duration.between(departureTime, footLeg.depTime()).toMinutes())
+                        .map(minutesFromStart -> minutesFromStart / totalDurationMinutes)
+                        .forEach(relativePosition -> {
+                            Circle changeCircle = new Circle(CIRCLE_RADIUS);
+                            changeCircle.getStyleClass().add("transfer");
+                            changeCircle.setUserData(relativePosition);
+                            transferCircles.add(changeCircle);
+                        });
 
                 transferLinePane.getChildren().addAll(transferCircles);
             }

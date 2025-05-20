@@ -25,6 +25,25 @@ import java.util.Arrays;
 public record Router(TimeTable timeTable) {
 
     /**
+     * Pré‑alloue un {@link ParetoFront.Builder} vide pour chaque station et
+     * chaque course.
+     *
+     * @param p            le builder de profil à initialiser
+     * @param stationCount nombre total de gares
+     * @param tripCount    nombre total de courses actives pour la date
+     */
+    private static void preallocateBuilders(Profile.Builder p,
+                                            int stationCount,
+                                            int tripCount) {
+        for (int s = 0; s < stationCount; ++s) {
+            p.setForStation(s, new ParetoFront.Builder());
+        }
+        for (int t = 0; t < tripCount; ++t) {
+            p.setForTrip(t, new ParetoFront.Builder());
+        }
+    }
+
+    /**
      * Calcule le profil de voyages optimaux permettant de rejoindre la gare d'arrivée spécifiée.
      * <p>
      * L'algorithme parcourt toutes les liaisons actives du jour en ordre croissant d'indice
@@ -121,25 +140,6 @@ public record Router(TimeTable timeTable) {
             }
         }
         return profile.build();
-    }
-
-    /**
-     * Pré‑alloue un {@link ParetoFront.Builder} vide pour chaque station et
-     * chaque course.
-     *
-     * @param p            le builder de profil à initialiser
-     * @param stationCount nombre total de gares
-     * @param tripCount    nombre total de courses actives pour la date
-     */
-    private static void preallocateBuilders(Profile.Builder p,
-                                            int stationCount,
-                                            int tripCount) {
-        for (int s = 0; s < stationCount; ++s) {
-            p.setForStation(s, new ParetoFront.Builder());
-        }
-        for (int t = 0; t < tripCount; ++t) {
-            p.setForTrip(t, new ParetoFront.Builder());
-        }
     }
 
 }

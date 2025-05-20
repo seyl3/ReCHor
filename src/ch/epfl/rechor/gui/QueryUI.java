@@ -4,7 +4,8 @@ import ch.epfl.rechor.StopIndex;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.util.converter.LocalTimeStringConverter;
 
 import java.time.LocalDate;
@@ -19,12 +20,11 @@ import java.time.format.DateTimeFormatter;
  * un sélecteur de date, et un champ formaté pour saisir l'heure. Elle fournit aussi un bouton permettant
  * d'échanger les arrêts de départ et d'arrivée.
  *
- * @param rootNode  le nœud JavaFX à la racine de l'interface
- * @param depStopO  la valeur observable représentant l'arrêt de départ (valide ou chaîne vide)
- * @param arrStopO  la valeur observable représentant l'arrêt d'arrivée (valide ou chaîne vide)
- * @param dateO     la valeur observable représentant la date du voyage
- * @param timeO     la valeur observable représentant l'heure de départ du voyage
- *
+ * @param rootNode le nœud JavaFX à la racine de l'interface
+ * @param depStopO la valeur observable représentant l'arrêt de départ (valide ou chaîne vide)
+ * @param arrStopO la valeur observable représentant l'arrêt d'arrivée (valide ou chaîne vide)
+ * @param dateO    la valeur observable représentant la date du voyage
+ * @param timeO    la valeur observable représentant l'heure de départ du voyage
  * @author : Sarra Zghal, Elyes Ben Abid
  */
 public record QueryUI(Node rootNode,
@@ -32,12 +32,16 @@ public record QueryUI(Node rootNode,
                       ObservableValue<String> arrStopO,
                       ObservableValue<LocalDate> dateO,
                       ObservableValue<LocalTime> timeO
-                      ) {
+) {
 
-    /** Format d'affichage de l'heure (toujours HH:mm). */
+    /**
+     * Format d'affichage de l'heure (toujours HH:mm).
+     */
     private static final DateTimeFormatter DISPLAY_TIME_FORMATTER =
             DateTimeFormatter.ofPattern("HH:mm");
-    /** Format(s) d'analyse accepté(s) pour la saisie de l'heure (H:mm ou HH:mm). */
+    /**
+     * Format(s) d'analyse accepté(s) pour la saisie de l'heure (H:mm ou HH:mm).
+     */
     private static final DateTimeFormatter PARSE_TIME_FORMATTER =
             DateTimeFormatter.ofPattern("[H:mm][HH:mm]");
 
@@ -98,7 +102,8 @@ public record QueryUI(Node rootNode,
         timeField.setId("time");
 
 
-        LocalTimeStringConverter timeConverter = new LocalTimeStringConverter(DISPLAY_TIME_FORMATTER, PARSE_TIME_FORMATTER);
+        LocalTimeStringConverter timeConverter =
+                    new LocalTimeStringConverter(DISPLAY_TIME_FORMATTER, PARSE_TIME_FORMATTER);
         TextFormatter<LocalTime> timeFormatter = new TextFormatter<>(timeConverter);
         timeField.setTextFormatter(timeFormatter);
 

@@ -55,7 +55,7 @@ public class StopIndex {
                 'c', "[cç]");
         StringJoiner regex = new StringJoiner("", "", "");
         for (char c : query.toCharArray()) {
-            if (equivalences.containsKey(c)){
+            if (equivalences.containsKey(c)) {
                 regex.add(equivalences.get(c));
             } else {
                 regex.add(Pattern.quote(String.valueOf(c)));
@@ -77,7 +77,6 @@ public class StopIndex {
      * </ol>
      * La liste de pattern ainsi construite est retournée.
      *
-     *
      * @param request la chaine de caractères entrée par l'utilisateur dans sa recherche
      * @return la liste des {@link java.util.regex.Pattern}  compilés en fonction de la chaine de caractères entrée en requête
      */
@@ -89,7 +88,7 @@ public class StopIndex {
 
         return Arrays.stream(subRequests)
                 .map(StopIndex::buildRegex)
-                .map(regex->{
+                .map(regex -> {
                     String subRequest = it.next();
                     for (char c : subRequest.toCharArray()) {
                         // flags non activés si l'utilisateur écrit une majuscule
@@ -116,7 +115,6 @@ public class StopIndex {
      *
      * @param stopName    le nom de l'arrêt à évaluer
      * @param subPatterns une liste des patterns correspondant aux sous requêtes
-     *
      * @return le score de pertinence total
      */
     private static int pertinence(String stopName, List<Pattern> subPatterns) {
@@ -154,7 +152,7 @@ public class StopIndex {
      * @param request la requête de recherche
      * @param limit   le nombre maximum de résultats à retourner
      * @return la liste des noms d'arrêts correspondants, triés par pertinence décroissante,
-     * sans doublons et de taille au plus {@code limit}
+     * sans doublons et, au plus, de taille {@code limit}
      */
     public List<String> stopsMatching(String request, int limit) {
         //Construire les patterns correspondants à la requête

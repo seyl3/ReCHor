@@ -122,12 +122,9 @@ public final class Submit {
                             paths.stream().map(Object::toString).collect(Collectors.joining("\n  "
                             )));
                 }
-                case HTTP_ENTITY_TOO_LARGE ->
-                        printStream.println("Erreur : l'archive est trop volumineuse !");
-                case HTTP_UNAUTHORIZED ->
-                        printStream.println("Erreur : au moins un des jetons est invalide !");
-                case HTTP_BAD_GATEWAY ->
-                        printStream.println("Erreur : le serveur de rendu n'est pas actif !");
+                case HTTP_ENTITY_TOO_LARGE -> printStream.println("Erreur : l'archive est trop volumineuse !");
+                case HTTP_UNAUTHORIZED -> printStream.println("Erreur : au moins un des jetons est invalide !");
+                case HTTP_BAD_GATEWAY -> printStream.println("Erreur : le serveur de rendu n'est pas actif !");
                 default -> printStream.printf("Erreur : réponse inattendue (%s)", response);
             }
             printStream.printf("\nUne copie de sauvegarde de l'archive a été stockée dans :\n  " +

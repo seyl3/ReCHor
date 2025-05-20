@@ -105,7 +105,7 @@ public final class PackedCriteria {
      */
     public static boolean dominatesOrIsEqual(long criteria1, long criteria2) {
         Preconditions.checkArgument((hasDepMins(criteria1) && hasDepMins(criteria2)) || !
-         (hasDepMins(criteria2) && !hasDepMins(criteria1)));
+                (hasDepMins(criteria2) && !hasDepMins(criteria1)));
 
         int a1 = arrMins(criteria1);
         int a2 = arrMins(criteria2);
