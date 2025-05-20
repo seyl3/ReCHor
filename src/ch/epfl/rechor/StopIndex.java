@@ -66,54 +66,39 @@ public class StopIndex {
 
     /**
      * Construit une liste de patterns pour une requête de la part de l'utilisateur
-     * La requête est divisée en sous-requête à chaque espace entré par l'utilisateur
+     * La requête est divisée en sous-requête à chaque espace entré par l'utilisateur.
+     * <p>
      * Chaque sous-requête est alors transformée :
      * <ol>
      *     <li>en expression régulière (<i>Regular Expression</i>) via {@code builRegex()} </li>
-     *     <li>2) en pattern </li>
+     *     <li>en pattern avec des fanions activés si et seulement si l'utilisateur ne
+     *     demande pas explicitement des majuscules → activés, la différence entre les
+     *     majuscules et les minuscules est ignorée lors de la recherche</li>
      * </ol>
+     * La liste de pattern ainsi construite est retournée.
      *
      *
      * @param request la chaine de caractères entrée par l'utilisateur dans sa recherche
-     * @return
+     * @return la liste des {@link java.util.regex.Pattern}  compilés en fonction de la chaine de caractères entrée en requête
      */
     private static List<Pattern> buildPatterns(String request) {
         Pattern spaceSplitter = Pattern.compile("\\s+"); // un ou plusieurs espaces
         String[] subRequests = spaceSplitter.split(request.trim());
 
-        List<Pattern> subPatterns = new ArrayList<>();
-        for (String subRequest : subRequests) {
-            String regex = buildRegex(subRequest);
-            boolean hasUpperCase = false;
-            for (char c : subRequest.toCharArray()) {
-                if (Character.isUpperCase(c)) {
-                    hasUpperCase = true;
-                }
-            }
-            if (hasUpperCase) {
-                subPatterns.add(Pattern.compile(regex));// flags non activés si l'utilisateur écrit une majuscule
-            } else {
-                subPatterns.add(Pattern.compile(regex, FLAGS)); // flags activiés sss il n'y a pas majuscules
-            }
+        Iterator<String> it = Arrays.asList(subRequests).iterator();
 
-        }
-        ///________A VOIR  _____ Version alternative orientée programmation par flots _______///
-//        Iterator<String> it = Arrays.asList(subRequests).iterator();
-//        subPatterns= Arrays.stream(subRequests).map(StopIndex::buildRegex).map(regex->{
-//            String subRequest = it.next();
-//            boolean hasUpperCase = false;
-//            for (char c : subRequest.toCharArray()) {
-//                if (Character.isUpperCase(c)) {
-//                    hasUpperCase = true;
-//                }
-//            }
-//            if (hasUpperCase) {
-//               return Pattern.compile(regex);// flags non activés si l'utilisateur écrit une majuscule
-//            } else {
-//                return Pattern.compile(regex, FLAGS); // flags activiés sss il n'y a pas majuscules
-//            }
-//        }).toList();
-        return subPatterns;
+        return Arrays.stream(subRequests)
+                .map(StopIndex::buildRegex)
+                .map(regex->{
+                    String subRequest = it.next();
+                    for (char c : subRequest.toCharArray()) {
+                        // flags non activés si l'utilisateur écrit une majuscule
+                        if (Character.isUpperCase(c)) return Pattern.compile(regex);
+                    }
+                    // flags activiés sss il n'y a aucune pas majuscules
+                    return Pattern.compile(regex, FLAGS);
+                })
+                .toList();
     }
 
     /**

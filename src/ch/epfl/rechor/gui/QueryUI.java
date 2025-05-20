@@ -122,7 +122,6 @@ public record QueryUI(Node rootNode,
                 modeToggle.selectedProperty(),
                 vehicleFilter.excludedVehicles());
 
-
     }
 
 }
