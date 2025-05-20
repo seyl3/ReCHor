@@ -1,10 +1,6 @@
 package ch.epfl.rechor;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -19,8 +15,8 @@ import java.util.stream.Stream;
  * @author : Sarra Zghal, Elyes Ben Abid
  */
 public class StopIndex {
-    public static final int flags = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
-    private static List<String> stopsNames;
+    public static final int FLAGS = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
+    private final List<String> stopsNames;
     private final Map<String, String> alternativeNames;
 
     /**
@@ -50,65 +46,82 @@ public class StopIndex {
      * @throws NullPointerException si {@code query} est {@code null}
      */
     private static String buildRegex(String query) {
-        final Map<Character, String> equivalences = Map.of('a', "[aáàâä]",
+        final Map<Character, String> equivalences = Map.of(
+                'a', "[aáàâä]",
                 'e', "[eéèêë]",
                 'i', "[iíìîï]",
                 'o', "[oóòôö]",
                 'u', "[uúùûü]",
                 'c', "[cç]");
-        StringJoiner regex = new StringJoiner("","","");
+        StringJoiner regex = new StringJoiner("", "", "");
         for (char c : query.toCharArray()) {
-            char lower = Character.toLowerCase(c);
-            if (equivalences.containsKey(lower)) {
-                regex.add(equivalences.get(lower));
+            if (equivalences.containsKey(c)){
+                regex.add(equivalences.get(c));
             } else {
                 regex.add(Pattern.quote(String.valueOf(c)));
             }
         }
         return regex.toString();
     }
+
+    /**
+     * Construit une liste de patterns pour une requête de la part de l'utilisateur
+     * La requête est divisée en sous-requête à chaque espace entré par l'utilisateur.
+     * <p>
+     * Chaque sous-requête est alors transformée :
+     * <ol>
+     *     <li>en expression régulière (<i>Regular Expression</i>) via {@code builRegex()} </li>
+     *     <li>en pattern avec des fanions activés si et seulement si l'utilisateur ne
+     *     demande pas explicitement des majuscules → activés, la différence entre les
+     *     majuscules et les minuscules est ignorée lors de la recherche</li>
+     * </ol>
+     * La liste de pattern ainsi construite est retournée.
+     *
+     *
+     * @param request la chaine de caractères entrée par l'utilisateur dans sa recherche
+     * @return la liste des {@link java.util.regex.Pattern}  compilés en fonction de la chaine de caractères entrée en requête
+     */
     private static List<Pattern> buildPatterns(String request) {
         Pattern spaceSplitter = Pattern.compile("\\s+"); // un ou plusieurs espaces
         String[] subRequests = spaceSplitter.split(request.trim());
 
-        // Étape 2 : créer les Patterns pour chaque sous-requête
-        List<Pattern> subPatterns = new ArrayList<>();
-        for(String subRequest : subRequests) {
-            String regex = buildRegex(subRequest);
-            boolean hasUpperCase = false;
-            for(char c : subRequest.toCharArray()) {
-                if (Character.isUpperCase(c)) {
-                    hasUpperCase = true;
-                }
-            }
-            if(hasUpperCase) {
-                subPatterns.add(Pattern.compile(regex));
-            }else{
-                subPatterns.add(Pattern.compile(regex, flags));
-            }
+        Iterator<String> it = Arrays.asList(subRequests).iterator();
 
-        }
-        return subPatterns;
+        return Arrays.stream(subRequests)
+                .map(StopIndex::buildRegex)
+                .map(regex->{
+                    String subRequest = it.next();
+                    for (char c : subRequest.toCharArray()) {
+                        // flags non activés si l'utilisateur écrit une majuscule
+                        if (Character.isUpperCase(c)) return Pattern.compile(regex);
+                    }
+                    // flags activiés sss il n'y a aucune pas majuscules
+                    return Pattern.compile(regex, FLAGS);
+                })
+                .toList();
     }
+
     /**
-     * Calcule le score de pertinence d'un nom d'arrêt par rapport aux sous-requêtes données.
+     * Calcule le score de pertinence d'un nom d'arrêt par rapport aux patterns des sous-requêtes donnés.
      * <p>
-     * Pour chaque sous-requête, le score est calculé comme suit :
+     * Pour chaque pattern de sous-requête, le score est calculé comme suit :
      * <ul>
      *   <li>Score de base : pourcentage du nom correspondant à la sous-requête</li>
      *   <li>Multiplicateur ×4 si la sous-requête est au début d'un mot</li>
      *   <li>Multiplicateur ×2 si la sous-requête est à la fin d'un mot</li>
+     *   <li> 0 si une sous requête de correspond pas au même non de station</li>
      * </ul>
      * Le score final est la somme des scores de toutes les sous-requêtes.
      * Seule la première occurrence de chaque sous-requête est considérée.
      *
      * @param stopName    le nom de l'arrêt à évaluer
-    // A REMPLIR
+     * @param subPatterns une liste des patterns correspondant aux sous requêtes
+     *
      * @return le score de pertinence total
      */
-    private static int pertinence(String stopName, List<Pattern> patterns) {
+    private static int pertinence(String stopName, List<Pattern> subPatterns) {
         int score = 0;
-        for (Pattern subPatttern : patterns ) {
+        for (Pattern subPatttern : subPatterns) {
             Matcher matcher = subPatttern.matcher(stopName);
 
             if (matcher.find()) {
@@ -116,9 +129,7 @@ public class StopIndex {
                 int end = matcher.end();
                 int baseScore = (100 * (end - start)) / stopName.length();
 
-                // Vérification stricte du début de mot
                 boolean atWordStart = start == 0 || !Character.isLetter(stopName.charAt(start - 1));
-                // Vérification stricte de la fin de mot
                 boolean atWordEnd = end == stopName.length() || !Character.isLetter(stopName.charAt(end));
 
                 int factor = 1;
@@ -126,7 +137,7 @@ public class StopIndex {
                 if (atWordEnd) factor *= 2;
                 score += baseScore * factor;
 
-            }else{
+            } else {
                 return 0;
             }
         }
@@ -136,9 +147,9 @@ public class StopIndex {
     /**
      * Retourne les noms d'arrêts correspondant à la requête donnée, triés par pertinence.
      * <p>
-     * La requête est découpée en sous-requêtes selon les espaces. Un arrêt correspond s'il contient
-     * toutes les sous-requêtes, en ignorant les accents et la casse. Les noms alternatifs sont
-     * automatiquement convertis en leurs noms principaux dans les résultats.
+     * Un arrêt correspond s'il contient toutes les sous-requêtes, en ignorant les accents
+     * et la casse. Les noms alternatifs sont automatiquement convertis en leurs noms
+     * principaux dans les résultats.
      *
      * @param request la requête de recherche
      * @param limit   le nombre maximum de résultats à retourner
@@ -146,15 +157,19 @@ public class StopIndex {
      * sans doublons et de taille au plus {@code limit}
      */
     public List<String> stopsMatching(String request, int limit) {
+        //Construire les patterns correspondants à la requête
         List<Pattern> subPatterns = buildPatterns(request);
 
-        // Étape 3–4 : filtrer les noms (principaux + alternatifs)
-        // On filtre tous les noms (noms principaux et alternatifs) qui matchent toutes les
-        // sous-requêtes
+        //1. recherche dans tous les noms de stations (alternatifs et prencipaux)
+        //2. trouve ceux qui matchent
+        //3. tri par pertinence décroissante
+        //4. remplace tout nom alternatif par son nom principal
+        //5. enlève les doublons
+        //6. limite la taille
         return Stream.concat(stopsNames.stream(), alternativeNames.keySet().stream())
                 .filter(name -> subPatterns.stream().anyMatch(p -> p.matcher(name).find()))
-                .sorted(Comparator.comparingInt((String name) -> pertinence(name, subPatterns)).reversed()) // tri par pertinence décroissante
-                .map(name -> alternativeNames.getOrDefault(name, name)) // remplace le nom alternatif par son nom principal
+                .sorted(Comparator.comparingInt((String name) -> pertinence(name, subPatterns)).reversed())
+                .map(name -> alternativeNames.getOrDefault(name, name))
                 .distinct()
                 .limit(limit)
                 .toList();
