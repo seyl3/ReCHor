@@ -49,13 +49,23 @@ public final class JourneyGeoJsonConverter {
         return new Json.JObject(orderedMap);
     }
 
-    // Ajouter commentaire qui dit "méthode intermédiaire ggnngng"
-    private static Json.JNumber roundToJnumber(double number) {
+    /**
+     * Méthode auxiliaire qui arrondit un nombre à 5 décimales
+     * afin de limiter la précision des coordonnées et réduire la taille du GeoJSON.
+     *
+     * @param number le nombre à arrondir (longitude ou latitude)
+     * @return un Json.JNumber contenant la valeur arrondie
+     */    private static Json.JNumber roundToJnumber(double number) {
         return new Json.JNumber((Math.round(number * 1e5) / 1e5));
     }
 
-    // Ajouter commentaire qui dit "méthode intermédiaire ggnngng"
-    private static Json createJArray(Stop stop) {
+    /**
+     * Méthode auxiliaire qui crée un tableau JSON de deux éléments
+     * représentant la longitude et la latitude arrondies d'un arrêt.
+     *
+     * @param stop l'arrêt dont on extrait les coordonnées
+     * @return un Json.JArray contenant [longitude, latitude]
+     */    private static Json createJArray(Stop stop) {
         Json.JNumber lon = roundToJnumber(stop.longitude());
         Json.JNumber lat = roundToJnumber(stop.latitude());
         return new Json.JArray(List.of(lon, lat));
