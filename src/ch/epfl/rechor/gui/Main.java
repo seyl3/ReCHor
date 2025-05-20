@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 /**
  * Classe principale de l'application ReCHor.
@@ -56,6 +57,14 @@ public class Main extends Application {
     // Date du voyage -> (l'indice de la station d'arrivée -> le profile)
     private final Map<LocalDate, Map<Integer, Profile>> profileCache = new ConcurrentHashMap<>();
     private ObservableValue<List<Journey>> journeysO;
+    /**
+     * Largeur minimale de la fenêtre principale (en px).
+     */
+    private static final double MIN_WINDOW_WIDTH = 800;
+    /**
+     * Hauteur minimale de la fenêtre principale (en px).
+     */
+    private static final double MIN_WINDOW_HEIGHT = 600;
 
     /** Largeur minimale de la fenêtre principale (en px). */
     private static final double MIN_WINDOW_WIDTH  = 800;
@@ -100,12 +109,14 @@ public class Main extends Application {
                 .mapToObj(i -> tt.stations().name(i))
                 .toList();
 
-        Map<String, String> alternativeNames = new HashMap<>();
-        for (int i = 0; i < tt.stationAliases().size(); i++) {
-            String alias = tt.stationAliases().alias(i);
-            String stationName = tt.stationAliases().stationName(i);
-            alternativeNames.put(alias, stationName);
-        } // boucle remplaçable par un stream mais pour le moment c'est plus rapide comme ça
+        Map<String, String> alternativeNames =
+                IntStream.range(0, tt.stationAliases().size())
+                        .boxed()
+                        .collect(Collectors.toMap(
+                                i -> tt.stationAliases().alias(i),
+                                i -> tt.stationAliases().stationName(i)
+                        ));
+
 
         StopIndex stopIndex = new StopIndex(stopNames, alternativeNames);
         QueryUI queryUI = QueryUI.create(stopIndex);
