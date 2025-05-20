@@ -169,6 +169,7 @@ public class Main extends Application {
         splitPane.getItems().addAll(summaryUI.rootNode(), detailUI.rootNode());
         root.setCenter(splitPane);
         Scene scene = new Scene(root);
+
         primaryStage.setScene(scene);
         primaryStage.show();
 
