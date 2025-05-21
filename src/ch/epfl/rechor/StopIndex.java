@@ -158,7 +158,7 @@ public class StopIndex {
         //Construire les patterns correspondants à la requête
         List<Pattern> subPatterns = buildPatterns(request);
 
-        //1. recherche dans tous les noms de stations (alternatifs et prencipaux)
+        //1. recherche dans tous les noms de stations (alternatifs et principaux)
         //2. trouve ceux qui matchent
         //3. tri par pertinence décroissante
         //4. remplace tout nom alternatif par son nom principal
