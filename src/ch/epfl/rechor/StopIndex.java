@@ -55,7 +55,7 @@ public class StopIndex {
                 'c', "[cç]");
         StringJoiner regex = new StringJoiner("", "", "");
         for (char c : query.toCharArray()) {
-            if (equivalences.containsKey(c)){
+            if (equivalences.containsKey(c)) {
                 regex.add(equivalences.get(c));
             } else {
                 regex.add(Pattern.quote(String.valueOf(c)));
@@ -77,7 +77,6 @@ public class StopIndex {
      * </ol>
      * La liste de pattern ainsi construite est retournée.
      *
-     *
      * @param request la chaine de caractères entrée par l'utilisateur dans sa recherche
      * @return la liste des {@link java.util.regex.Pattern}  compilés en fonction de la chaine de caractères entrée en requête
      */
@@ -89,7 +88,7 @@ public class StopIndex {
 
         return Arrays.stream(subRequests)
                 .map(StopIndex::buildRegex)
-                .map(regex->{
+                .map(regex -> {
                     String subRequest = it.next();
                     for (char c : subRequest.toCharArray()) {
                         // flags non activés si l'utilisateur écrit une majuscule
@@ -109,20 +108,19 @@ public class StopIndex {
      *   <li>Score de base : pourcentage du nom correspondant à la sous-requête</li>
      *   <li>Multiplicateur ×4 si la sous-requête est au début d'un mot</li>
      *   <li>Multiplicateur ×2 si la sous-requête est à la fin d'un mot</li>
-     *   <li> 0 si une sous requête de correspond pas au même non de station</li>
+     *   <li> 0 si une des sous requête de correspond pas au nom de station</li>
      * </ul>
      * Le score final est la somme des scores de toutes les sous-requêtes.
      * Seule la première occurrence de chaque sous-requête est considérée.
      *
      * @param stopName    le nom de l'arrêt à évaluer
      * @param subPatterns une liste des patterns correspondant aux sous requêtes
-     *
      * @return le score de pertinence total
      */
     private static int pertinence(String stopName, List<Pattern> subPatterns) {
         int score = 0;
-        for (Pattern subPatttern : subPatterns) {
-            Matcher matcher = subPatttern.matcher(stopName);
+        for (Pattern subPattern : subPatterns) {
+            Matcher matcher = subPattern.matcher(stopName);
 
             if (matcher.find()) {
                 int start = matcher.start();
@@ -154,7 +152,7 @@ public class StopIndex {
      * @param request la requête de recherche
      * @param limit   le nombre maximum de résultats à retourner
      * @return la liste des noms d'arrêts correspondants, triés par pertinence décroissante,
-     * sans doublons et de taille au plus {@code limit}
+     * sans doublons et, au plus, de taille {@code limit}
      */
     public List<String> stopsMatching(String request, int limit) {
         //Construire les patterns correspondants à la requête
@@ -167,7 +165,7 @@ public class StopIndex {
         //5. enlève les doublons
         //6. limite la taille
         return Stream.concat(stopsNames.stream(), alternativeNames.keySet().stream())
-                .filter(name -> subPatterns.stream().anyMatch(p -> p.matcher(name).find()))
+                .filter(name -> subPatterns.stream().allMatch(p -> p.matcher(name).find()))
                 .sorted(Comparator.comparingInt((String name) -> pertinence(name, subPatterns)).reversed())
                 .map(name -> alternativeNames.getOrDefault(name, name))
                 .distinct()
