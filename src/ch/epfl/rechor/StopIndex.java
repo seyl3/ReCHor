@@ -165,7 +165,7 @@ public class StopIndex {
         //5. enlève les doublons
         //6. limite la taille
         return Stream.concat(stopsNames.stream(), alternativeNames.keySet().stream())
-                .filter(name -> request.isEmpty() || pertinence(name, subPatterns) > 0)
+                .filter(name -> subPatterns.stream().allMatch(p -> p.matcher(name).find()))
                 .sorted(Comparator.comparingInt((String name) -> pertinence(name, subPatterns)).reversed())
                 .map(name -> alternativeNames.getOrDefault(name, name))
                 .distinct()

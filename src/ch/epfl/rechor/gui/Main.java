@@ -174,7 +174,5 @@ public class Main extends Application {
         primaryStage.show();
 
         Platform.runLater(() -> scene.lookup("#depStop").requestFocus());
-
-
     }
 }
