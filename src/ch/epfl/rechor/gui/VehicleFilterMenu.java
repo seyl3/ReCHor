@@ -8,11 +8,24 @@ import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.CheckBox;
 
 /**
- * Menu allowing users to exclude transport modes.
+ * Menu déroulant permettant d’exclure des modes de transport, hérite du bouton MenuButton.
+ *
+ * <p>Chaque case est cochée par défaut (aucun mode n’est exclu initialement).</p>
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
  */
 public class VehicleFilterMenu extends MenuButton {
+    /**
+     * Ensemble observable des modes de transport actuellement exclus par l’utilisateur.
+     */
     private final ObservableSet<Vehicle> excluded = FXCollections.observableSet();
 
+    /**
+     * Construit le menu de sélection des modes de transport.
+     *
+     * <p>Pour chaque type de véhicule, crée une case à cocher associée
+     * et met à jour l’ensemble exclu lors de la sélection.</p>
+     */
     public VehicleFilterMenu() {
         super("Modes de transport");
         for (Vehicle v : Vehicle.values()) {
@@ -29,8 +42,11 @@ public class VehicleFilterMenu extends MenuButton {
             getItems().add(item);
         }
     }
-
-    /** @return the set of vehicles currently excluded */
+    /**
+     * Renvoie l’ensemble des véhicules actuellement exclus.
+     *
+     * @return ObservableSet&lt;Vehicle&gt; des modes exclus
+     */
     public ObservableSet<Vehicle> excludedVehicles() {
         return excluded;
     }

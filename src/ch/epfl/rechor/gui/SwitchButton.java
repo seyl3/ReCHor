@@ -2,8 +2,6 @@ package ch.epfl.rechor.gui;
 
 import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.Pane;
@@ -16,14 +14,22 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 /**
- * A toggle switch with smooth sliding animation and fixed track bounds.
+ * Interrupteur graphique (type « toggle ») avec animation fluide et piste de taille fixe.
+ *
+ * <p>Le déplacement du « thumb » est animé, et le composant respecte une largeur/hauteur
+ * constante afin de s’aligner facilement dans les barres d’outils.</p>
+ *
+ * @author Sarra Zghal, Elyes Ben Abid
  */
 public class SwitchButton extends ToggleButton {
     private static final double TRACK_WIDTH = 73;
     private static final double TRACK_HEIGHT = 26;
     private static final double THUMB_SIZE = TRACK_HEIGHT - 6;
-    // horizontal/vertical margin for thumb within track
     private static final double THUMB_MARGIN = (TRACK_HEIGHT - THUMB_SIZE) / 2;
+
+    private static final Color COLOR_BG           = Color.web("#f4f4f5");
+    private static final Color COLOR_STROKE_DEF   = Color.GRAY;
+    private static final Color COLOR_STROKE_FOCUS = Color.web("#70B9D9FF");
     private final Rectangle track;
     private final Rectangle thumb;
     private final Text label;
@@ -33,87 +39,52 @@ public class SwitchButton extends ToggleButton {
     private Duration SLIDE_DURATION = Duration.millis(300);
     private PauseTransition textTransition;
 
-    /**
-     * Duration of the slide animation; adjustable via setter.
-     */
-
     public SwitchButton() {
-        // initialize labels for off/on states
         offText = "";
         onText = "";
         setPrefSize(TRACK_WIDTH, TRACK_HEIGHT);
-        // Fix height for proper alignment
         setMinSize(TRACK_WIDTH, TRACK_HEIGHT);
         setMaxSize(TRACK_WIDTH, TRACK_HEIGHT);
 
-        // Track background (inset by 1px for border)
         track = new Rectangle(1, 1, TRACK_WIDTH - 2, TRACK_HEIGHT - 2);
-        track.setFill(Color.web("#f4f4f5"));
+        track.setFill(COLOR_BG);
         track.setArcWidth(TRACK_HEIGHT - 2);
         track.setArcHeight(TRACK_HEIGHT - 2);
-        // visible border
-        track.setStroke(Color.GRAY);
+        track.setStroke(COLOR_STROKE_DEF);
         track.setStrokeWidth(1);
 
-        // Sliding thumb
         thumb = new Rectangle(THUMB_SIZE, THUMB_SIZE, Color.web("E4E4E4FF"));
         thumb.setArcWidth(THUMB_SIZE);
         thumb.setArcHeight(THUMB_SIZE);
-        // position thumb centered within track
         thumb.setLayoutX(THUMB_MARGIN);
         thumb.setLayoutY(THUMB_MARGIN);
-        // visible border on thumb
-        thumb.setStroke(Color.GRAY);
+        thumb.setStroke(COLOR_STROKE_DEF);
         thumb.setStrokeWidth(0.8);
 
-        // Label text
         label = new Text(offText);
         label.setFill(Color.BLACK);
         label.setY(TRACK_HEIGHT / 2 + label.getFont().getSize() / 3);
         label.setX(THUMB_SIZE + 8);
 
-        // build graphic pane and assign to ToggleButton
         Pane graphic = new Pane(track, label, thumb);
         graphic.setPrefSize(TRACK_WIDTH, TRACK_HEIGHT);
         setGraphic(graphic);
 
-        // show only the graphic and remove default button styling
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         setStyle("-fx-background-color: transparent; -fx-padding: 0;");
 
         transition = new TranslateTransition(SLIDE_DURATION, thumb);
 
-        // Reflect state change
         selectedProperty().addListener((obs, oldV, newV) -> applyState(newV));
 
-        // change border color and fill on focus to match enhanced style
-        focusedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> ov, Boolean oldV, Boolean newV) {
-                if (newV) {
-                    // focused: gradient border, interior unchanged
-                    track.setFill(Color.web("#f4f4f5"));
-                    track.setStrokeWidth(2.0);
-                    track.setStroke(new LinearGradient(
-                            0, 0, 1, 0, true, CycleMethod.NO_CYCLE,
-                            new Stop(0, Color.web("#70B9D9FF")),
-                            new Stop(1, Color.web("#70B9D9FF"))
-                    ));
-                } else {
-                    // unfocused: default fill and stroke
-                    track.setFill(Color.web("#f4f4f5"));
-                    track.setStrokeWidth(1.0);
-                    track.setStroke(Color.GRAY);
-                }
-            }
-        });
+        focusedProperty().addListener((obs, oldV, newV) -> updateFocus(newV));
     }
 
     /**
-     * Create a SwitchButton with separate texts for off and on states.
+     * Construit un commutateur avec deux libellés distincts.
      *
-     * @param offText text to display when the switch is off
-     * @param onText  text to display when the switch is on
+     * @param offText texte affiché lorsque le switch est désactivé
+     * @param onText  texte affiché lorsque le switch est activé
      */
     public SwitchButton(String offText, String onText) {
         this();
@@ -128,40 +99,57 @@ public class SwitchButton extends ToggleButton {
         transition.setToX(targetX - thumb.getLayoutX());
         transition.play();
         thumb.toFront();
-        track.setFill(Color.WHITE);
-        // schedule text update at mid-animation
+        // track.setFill(Color.WHITE);
         if (textTransition != null) {
             textTransition.stop();
         }
         textTransition = new PauseTransition(SLIDE_DURATION.divide(2));
         textTransition.setOnFinished(evt -> {
             label.setText(on ? onText : offText);
-            if (on) {
-                label.setX(8);
-            } else {
-                double textWidth = label.getLayoutBounds().getWidth();
-                label.setX(TRACK_WIDTH - textWidth - 8);
-            }
+            positionLabel(on);
         });
         textTransition.play();
     }
 
     /**
-     * Set the duration of the slide animation.
-     *
-     * @param duration the new animation duration
+     * Positionne le texte à gauche ou à droite du track.
      */
-    public void setSLIDE_DURATION(Duration duration) {
-        this.SLIDE_DURATION = duration;
-        transition.setDuration(duration);
+    private void positionLabel(boolean on) {
+        if (on) {
+            label.setX(8);
+        } else {
+            double textWidth = label.getLayoutBounds().getWidth();
+            label.setX(TRACK_WIDTH - textWidth - 8);
+        }
     }
 
     /**
-     * Provide a baseline offset so that baseline alignment in HBox works correctly.
+     * Décale la ligne de base pour que l’alignement « baseline » dans un {@code HBox}
+     * fonctionne correctement.
      */
     @Override
     public double getBaselineOffset() {
-        // Align on the label's baseline position
         return label.getY();
+    }
+
+    /**
+     * Met à jour l’aspect du contour en fonction du focus.
+     *
+     * @param focused true si le contrôle a le focus clavier
+     */
+    private void updateFocus(boolean focused) {
+        if (focused) {
+            track.setFill(COLOR_BG);
+            track.setStrokeWidth(2);
+            track.setStroke(new LinearGradient(
+                    0, 0, 1, 0, true, CycleMethod.NO_CYCLE,
+                    new Stop(0, COLOR_STROKE_FOCUS),
+                    new Stop(1, COLOR_STROKE_FOCUS)
+            ));
+        } else {
+            track.setFill(COLOR_BG);
+            track.setStrokeWidth(1);
+            track.setStroke(COLOR_STROKE_DEF);
+        }
     }
 }
