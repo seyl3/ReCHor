@@ -157,7 +157,7 @@ public class Main extends Application {
             if (currentTask.get() != null && currentTask.get().isRunning()) {
                 currentTask.get().cancel();
             }
-            // Le calcul va être lancé en arrière‑plan → on affiche le spinner
+
             loadingO.set(true);
             progressO.set(-1);
 
