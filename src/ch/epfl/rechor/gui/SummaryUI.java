@@ -2,6 +2,7 @@ package ch.epfl.rechor.gui;
 
 import ch.epfl.rechor.journey.Journey;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -64,9 +65,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         });
 
         // Met à jour et sélectionne automatiquement le voyage correspondant a l'heure désirée
-        desiredTime.subscribe(newTime -> {
-            updateSelection(listView, desiredTime);
-        });
+        desiredTime.subscribe(newTime -> updateSelection(listView, desiredTime));
         ObservableValue<Journey> selectedJourney =
                 listView.getSelectionModel().selectedItemProperty();
 
@@ -118,6 +117,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         private final Text arrivalTime;
         private final Text durationTime;
         private final Pane transferLinePane;
+        private final Group transferGroup;
         private final List<Circle> transferCircles;
         private final Line backgroundLine;
         private final Circle startCircle;
@@ -154,6 +154,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                     }
                 }
             };
+            transferGroup = new Group();
             transferLinePane.setPrefSize(0, 0);
 
             startCircle = new Circle(CIRCLE_RADIUS);
@@ -165,7 +166,8 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
             backgroundLine = new Line(HORIZONTAL_MARGIN, VERTICAL_POSITION, HORIZONTAL_MARGIN, VERTICAL_POSITION);
             backgroundLine.endXProperty().bind(transferLinePane.widthProperty().subtract(HORIZONTAL_MARGIN));
 
-            transferLinePane.getChildren().addAll(backgroundLine, startCircle, endCircle);
+            transferLinePane.getChildren().addAll(backgroundLine, transferGroup);
+            transferGroup.getChildren().addAll(startCircle, endCircle);
 
             BorderPane journey = new BorderPane();
             journey.getStyleClass().add("journey");
@@ -202,7 +204,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         @Override
         protected void updateItem(Journey item, boolean empty) {
             super.updateItem(item, empty);
-            transferLinePane.getChildren().setAll(backgroundLine, startCircle, endCircle);
+            transferGroup.getChildren().setAll(startCircle, endCircle);
             if (empty || item == null) {
                 setGraphic(null);
             } else {
@@ -239,7 +241,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                             transferCircles.add(changeCircle);
                         });
 
-                transferLinePane.getChildren().addAll(transferCircles);
+                transferGroup.getChildren().addAll(transferCircles);
             }
         }
     }

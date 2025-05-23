@@ -1,4 +1,2 @@
 package ch.epfl;
-
-public class Bonus {
-}
+public enum Bonus {}
