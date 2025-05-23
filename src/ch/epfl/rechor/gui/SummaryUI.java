@@ -6,6 +6,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.Group;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.geometry.Pos;
@@ -102,10 +103,10 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
             updateSelection(listView, desiredTime, arrivalO.getValue());
         });
 
-        // Met à jour et sélectionne automatiquement le voyage correspondant a l'heure désirée
         desiredTime.subscribe(newTime -> {
             updateSelection(listView, desiredTime, arrivalO.getValue());
         });
+
         arrivalO.subscribe(v -> updateSelection(listView, desiredTime, v));
         excludedVehiclesO.addListener((SetChangeListener<Vehicle>) change ->
             filterJourneys(listView, journeyList, desiredTime, arrivalO, excludedVehiclesO)
@@ -184,19 +185,20 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         private static final double HORIZONTAL_MARGIN = 5;
         private static final double VERTICAL_POSITION = 10;
         private static final double CIRCLE_RADIUS = 3;
+        private static final int ICON_SIZE = 20;
 
         private final BorderPane journey;
         private final ImageView vehicleIcon;
-        private final int iconSize = 20;
         private final Text routeAndDestination;
         private final Text departureTime;
         private final Text arrivalTime;
         private final Text durationTime;
         private final Pane transferLinePane;
+        private final Group transferGroup;
         private final List<Circle> transferCircles;
+        private final Line backgroundLine;
         private final Circle startCircle;
         private final Circle endCircle;
-        private final Line backgroundLine;
 
         /**
          * Initialise les composants graphiques de la cellule : icône du véhicule,
@@ -229,6 +231,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                     }
                 }
             };
+            transferGroup = new Group();
             transferLinePane.setPrefSize(0, 0);
 
             startCircle = new Circle(CIRCLE_RADIUS);
@@ -240,7 +243,8 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
             backgroundLine = new Line(HORIZONTAL_MARGIN, VERTICAL_POSITION, HORIZONTAL_MARGIN, VERTICAL_POSITION);
             backgroundLine.endXProperty().bind(transferLinePane.widthProperty().subtract(HORIZONTAL_MARGIN));
 
-            transferLinePane.getChildren().addAll(backgroundLine, startCircle, endCircle);
+            transferLinePane.getChildren().addAll(backgroundLine, transferGroup);
+            transferGroup.getChildren().addAll(startCircle, endCircle);
 
             BorderPane journey = new BorderPane();
             journey.getStyleClass().add("journey");
@@ -249,7 +253,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
             HBox route = new HBox();
             route.getStyleClass().add("route");
             vehicleIcon.setPreserveRatio(true);
-            vehicleIcon.setFitWidth(iconSize);
+            vehicleIcon.setFitWidth(ICON_SIZE);
             route.getChildren().addAll(vehicleIcon, routeAndDestination);
             journey.setTop(route);
 
@@ -277,7 +281,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         @Override
         protected void updateItem(Journey item, boolean empty) {
             super.updateItem(item, empty);
-            transferLinePane.getChildren().setAll(backgroundLine, startCircle, endCircle);
+            transferGroup.getChildren().setAll(startCircle, endCircle);
             if (empty || item == null) {
                 setGraphic(null);
             } else {
@@ -291,7 +295,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                 Journey.Leg.Transport firstTransport = null;
 
                 for (Journey.Leg leg : legs) {
-                    if (leg instanceof Journey.Leg.Transport) {
+                        if (leg instanceof Journey.Leg.Transport) {
                         firstTransport = (Journey.Leg.Transport) leg;
                         break;
                     }
@@ -317,7 +321,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                             transferCircles.add(changeCircle);
                         });
 
-                transferLinePane.getChildren().addAll(transferCircles);
+                transferGroup.getChildren().addAll(transferCircles);
             }
         }
     }

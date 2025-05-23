@@ -90,6 +90,23 @@ public record FileTimeTable(Path directory, List<String> stringTable, Stations s
 
     }
 
+    /**
+     * Méthode auxiliaire qui effectue le mappage mémoire d'un fichier donné.
+     * <p>
+     * Cette méthode ouvre un canal de lecture vers le fichier spécifié et le mappe
+     * en mémoire en mode lecture seule, retournant ainsi un ByteBuffer permettant
+     * un accès efficace aux données du fichier sans le charger entièrement en mémoire.
+     * </p>
+     *
+     * @param path Le chemin vers le fichier à mapper en mémoire
+     * @return Un ByteBuffer représentant le contenu du fichier en mémoire
+     * @throws IOException En cas d'erreur lors de l'ouverture ou du mappage du fichier
+     */
+    private static ByteBuffer map(Path path) throws IOException {
+        try (FileChannel fileChannel = FileChannel.open(path)) {
+            return fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+        }
+    }
 
     /**
      * Retourne les courses actives à la date spécifiée.
@@ -144,24 +161,6 @@ public record FileTimeTable(Path directory, List<String> stringTable, Stations s
             return new BufferedConnections(connectionsBuffer, succConnectionsBuffer);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
-        }
-    }
-
-    /**
-     * Méthode auxiliaire qui effectue le mappage mémoire d'un fichier donné.
-     * <p>
-     * Cette méthode ouvre un canal de lecture vers le fichier spécifié et le mappe
-     * en mémoire en mode lecture seule, retournant ainsi un ByteBuffer permettant
-     * un accès efficace aux données du fichier sans le charger entièrement en mémoire.
-     * </p>
-     *
-     * @param path Le chemin vers le fichier à mapper en mémoire
-     * @return Un ByteBuffer représentant le contenu du fichier en mémoire
-     * @throws IOException En cas d'erreur lors de l'ouverture ou du mappage du fichier
-     */
-    private static ByteBuffer map(Path path) throws IOException {
-        try (FileChannel fileChannel = FileChannel.open(path)) {
-            return fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
         }
     }
 }

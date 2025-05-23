@@ -90,12 +90,8 @@ public class StopIndex {
                 .map(StopIndex::buildRegex)
                 .map(regex -> {
                     String subRequest = it.next();
-                    for (char c : subRequest.toCharArray()) {
-                        // flags non activés si l'utilisateur écrit une majuscule
-                        if (Character.isUpperCase(c)) return Pattern.compile(regex);
-                    }
-                    // flags activiés sss il n'y a aucune pas majuscules
-                    return Pattern.compile(regex, FLAGS);
+                    return subRequest.chars().anyMatch(Character::isUpperCase) ?
+                            Pattern.compile(regex) : Pattern.compile(regex,FLAGS);
                 })
                 .toList();
     }
@@ -158,7 +154,7 @@ public class StopIndex {
         //Construire les patterns correspondants à la requête
         List<Pattern> subPatterns = buildPatterns(request);
 
-        //1. recherche dans tous les noms de stations (alternatifs et prencipaux)
+        //1. recherche dans tous les noms de stations (alternatifs et principaux)
         //2. trouve ceux qui matchent
         //3. tri par pertinence décroissante
         //4. remplace tout nom alternatif par son nom principal

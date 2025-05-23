@@ -67,17 +67,10 @@ public record Router(TimeTable timeTable) {
             walkTab[transfers.depStationId(i)] = transfers.minutes(i);
         }
 
-
         Profile.Builder profile = new Profile.Builder(timeTable, date, destinationId);
 
-        // ------------------------------------------------------------------
-        // Pré‑alloue des builders vides pour toutes les gares et toutes les
-        // courses.  On évite ainsi les tests «null» et les allocations
-        // répétées dans la boucle CSA.
-        preallocateBuilders(profile,
-                timeTable.stations().size(),
-                timeTable.tripsFor(date).size());
-        // ------------------------------------------------------------------
+        // Pré‑alloue des builders vides pour toutes les gares et toutes les courses
+        preallocateBuilders(profile, timeTable.stations().size(), timeTable.tripsFor(date).size());
 
         for (int i = 0; i < connections.size(); ++i) {
 
@@ -90,10 +83,8 @@ public record Router(TimeTable timeTable) {
             int arrMins = connections.arrMins(liaisonId);
             int depMins = connections.depMins(liaisonId);
 
-
-            // option 1 : marcher a pied
+            // option 1 : marcher à pied
             int walkMin = walkTab[arrStationId];
-
             if (walkMin != -1) {
                 f.add((arrMins + walkMin), 0, liaisonId);
             }
@@ -117,27 +108,22 @@ public record Router(TimeTable timeTable) {
                 int end = PackedRange.endExclusive(transfers.arrivingAt(depStationId));
 
                 for (int j = start; j < end; ++j) {
-
                     int newDepMins = depMins - transfers.minutes(j);
-
                     int depTransferStationId = transfers.depStationId(j);
 
-
                     if (!profile.forStation(depStationId).fullyDominates(f, depMins)) {
-
                         f.forEach((long t) -> {
-
                             int tLiaisonId = PackedCriteria.payload(t);
-
-
-                            int nbInterStops = connections.tripPos(tLiaisonId) - connections.tripPos(liaisonId);
+                            int nbInterStops = connections.tripPos(tLiaisonId) -
+                                    connections.tripPos(liaisonId);
 
                             profile.forStation(depTransferStationId)
                                     .add(PackedCriteria.withDepMins(
-                                    withPayload(t, liaisonId, nbInterStops),
-                                            newDepMins));
+                                            PackedCriteria.withPayload(t,
+                                                    Bits32_24_8.pack(liaisonId, nbInterStops)),
+                                            newDepMins
+                                    ));
                         });
-
                     }
                 }
             }
@@ -145,21 +131,6 @@ public record Router(TimeTable timeTable) {
         }
         progressListener.progress(1d);
         return profile.build();
-    }
-
-
-    /**
-     * Méthode auxiliaire, ajoute a un critère de Pareto existant une nouvelle charge utile
-     * combinant l'identifiant de la liaison et le nombre d'arrêts intermédiaires.
-     *
-     * @param criteria  le critère Pareto initial empaqueté
-     * @param liaisonId l'identifiant de la liaison source
-     * @param nbStops   le nombre d'arrêts intermédiaires dans la course
-     * @return un nouveau critère Pareto incluant la charge utile mise à jour
-     */
-    private long withPayload (long criteria, int liaisonId, int nbStops){
-        int payload = Bits32_24_8.pack(liaisonId, nbStops);
-        return PackedCriteria.withPayload(criteria, payload);
     }
 
     /**

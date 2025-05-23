@@ -104,9 +104,9 @@ public class ParetoFront {
      * Cette classe permet de construire une frontière de Pareto de manière progressive.
      */
     public static class Builder {
+        private static final double CAPACITY_FACTOR = 1.5;
         private int effectiveLength;
         private long[] front;
-        private static final double CAPACITY_FACTOR = 1.5;
 
 
         /**

@@ -50,13 +50,12 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
         listView.setMaxHeight(240);
         popup.getContent().add(listView);
 
-        // AJOUT PERSONNEL --- validation par double‑clic ou touche Entrée ---
+        // Validation par double‑clic ou touche Entrée ---
         Runnable validateSelection = () -> {
             tf.getParent().requestFocus();// retire le focus du champ
             String selected = listView.getSelectionModel().getSelectedItem();
             if (selected != null) {
                 stopO.set(selected);
-                //tf.setText(selected);
             }
             popup.hide();
 
@@ -72,7 +71,7 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
             if (event.getCode() == KeyCode.ENTER) {
                 validateSelection.run();
                 event.consume();
-                return; // nothing else to do
+                return;
             }
             int selectedIndex = listView.getSelectionModel().getSelectedIndex();
             if (event.getCode() == KeyCode.UP && selectedIndex > 0) {
@@ -103,10 +102,6 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
                 popup.setAnchorY(bounds.getMaxY());
 
             } else {
-                // Quand le champ perd le focus
-
-                popup.hide(); // On cache la fenêtre de suggestions
-
                 // On récupère l'élément sélectionné (ou vide si rien)
                 String selected = listView.getSelectionModel().getSelectedItem();
                 if (selected != null) {
@@ -115,6 +110,9 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
                 } else {
                     stopO.set(""); // aucune correspondance
                 }
+
+                // Quand le champ perd le focus → on affiche le nom sélectionné et on range le pop-up
+                popup.hide();
             }
         });
 
