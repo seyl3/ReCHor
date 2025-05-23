@@ -69,8 +69,10 @@ public class Main extends Application {
      * Cache qui permet de gagner en rapidité et en efficacité
      * Structure de la Map : Date du voyage → (l'indice de la station d'arrivée → le profile)
      */
-//
     private final Map<LocalDate, Map<Integer, Profile>> profileCache = new ConcurrentHashMap<>();
+    /**
+     * Une valeur observable contenant la liste des instances de {@link Journey} calculées.
+     */
     private ObservableValue<List<Journey>> journeysO;
 
     /**
@@ -105,6 +107,7 @@ public class Main extends Application {
      * @throws IOException si le chargement des données horaires échoue
      */
     public void start(Stage primaryStage) throws IOException {
+        // Extraction des données
         TimeTable tt = FileTimeTable.in(Path.of("timetable"));
 
         List<String> stopNames = IntStream.range(0, tt.stations().size())
@@ -159,20 +162,22 @@ public class Main extends Application {
         SummaryUI summaryUI = SummaryUI.create(journeysO, queryUI.timeO());
         DetailUI detailUI = DetailUI.create(summaryUI.selectedJourneyO());
 
-
+        // Mise en place de la fenêtre et de son contenu
         primaryStage.setTitle("ReCHor");
         primaryStage.setMinWidth(MIN_WINDOW_WIDTH);
         primaryStage.setMinHeight(MIN_WINDOW_HEIGHT);
+
         BorderPane root = new BorderPane();
         root.setTop(queryUI.rootNode());
         SplitPane splitPane = new SplitPane();
         splitPane.getItems().addAll(summaryUI.rootNode(), detailUI.rootNode());
         root.setCenter(splitPane);
-        Scene scene = new Scene(root);
 
+        Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.show();
 
+        // Le focus est directement donné au champ de l'arrêt de départ lors du démarrage
         Platform.runLater(() -> scene.lookup("#depStop").requestFocus());
     }
 }
