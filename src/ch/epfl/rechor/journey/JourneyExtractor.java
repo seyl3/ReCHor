@@ -285,7 +285,7 @@ public class JourneyExtractor {
      *
      * @param timeAfterMidnight Minutes après minuit
      * @param date              Date de référence
-     * @return DateTime représentant le temps spécifié
+     * @return LocalDateTime représentant le temps spécifié
      */
     private static LocalDateTime createTime(int timeAfterMidnight, LocalDate date) {
         return date.atStartOfDay().plusMinutes(timeAfterMidnight);

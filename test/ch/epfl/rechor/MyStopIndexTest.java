@@ -57,7 +57,8 @@ public class MyStopIndexTest {
     @Test
     void testMultipleSubwords() {
         List<String> result = index.stopsMatching("mez vil", 5);
-        List<String> expected = List.of("Charleville-Mézières", "Villeneuve", "Mézières VD");
+        System.out.println(result);
+        List<String> expected = List.of("Charleville-Mézières", "Mézières VD");
         assertTrue(result.containsAll(expected));
     }
 

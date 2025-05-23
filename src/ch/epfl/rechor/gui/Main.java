@@ -1,16 +1,16 @@
 package ch.epfl.rechor.gui;
 
 import ch.epfl.rechor.StopIndex;
-import ch.epfl.rechor.journey.Journey;
-import ch.epfl.rechor.journey.JourneyExtractor;
-import ch.epfl.rechor.journey.Profile;
-import ch.epfl.rechor.journey.Router;
+import ch.epfl.rechor.journey.*;
 import ch.epfl.rechor.timetable.TimeTable;
 import ch.epfl.rechor.timetable.mapped.FileTimeTable;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.SetChangeListener;
+import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
@@ -20,10 +20,10 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -36,7 +36,7 @@ import java.util.stream.IntStream;
  * et établit les liaisons entre les éléments de l’interface via des valeurs observables.
  * </p>
  *
- * <h2>Fonctionnalités principales :</h2>
+ * <b>Fonctionnalités principales :</b>
  * <ul>
  *     <li>Charge les données horaires depuis le dossier "timetable".</li>
  *     <li>Crée et connecte les éléments de l'interface utilisateur.</li>
@@ -44,7 +44,7 @@ import java.util.stream.IntStream;
  *     <li>Lie dynamiquement la liste des voyages à afficher à l’entrée utilisateur.</li>
  * </ul>
  *
- * <h2>Structure de l’interface graphique :</h2>
+ * <b>Structure de l’interface graphique :</b>
  * <pre>
  * ┌────────────────────────────┐
  * │        QueryUI             │ ← zone de recherche (top)
@@ -57,6 +57,13 @@ import java.util.stream.IntStream;
  * @author : Sarra Zghal, Elyes Ben Abid
  */
 public class Main extends Application {
+    // Strcuture dela map (Date du voyage -> (l'indice de la station d'arrivée -> le profile))
+    private final Map<LocalDate, Map<Integer, Profile>> profileCache = new ConcurrentHashMap<>();
+    private final SimpleObjectProperty<List<Journey>> journeysO = new SimpleObjectProperty<>(List.of());
+    private final SimpleBooleanProperty loadingO = new SimpleBooleanProperty(false);
+    /** Avancement actuel du calcul CSA. */
+    private final ObjectProperty<Number> progressO = new SimpleObjectProperty<>(-1);
+
     /**
      * Largeur minimale de la fenêtre principale (en px).
      */
@@ -65,15 +72,6 @@ public class Main extends Application {
      * Hauteur minimale de la fenêtre principale (en px).
      */
     private static final double MIN_WINDOW_HEIGHT = 600;
-    /**
-     * Cache qui permet de gagner en rapidité et en efficacité
-     * Structure de la Map : Date du voyage → (l'indice de la station d'arrivée → le profile)
-     */
-    private final Map<LocalDate, Map<Integer, Profile>> profileCache = new ConcurrentHashMap<>();
-    /**
-     * Une valeur observable contenant la liste des instances de {@link Journey} calculées.
-     */
-    private ObservableValue<List<Journey>> journeysO;
 
     /**
      * Point d'entrée principal de l'application ReCHor.
@@ -107,21 +105,18 @@ public class Main extends Application {
      * @throws IOException si le chargement des données horaires échoue
      */
     public void start(Stage primaryStage) throws IOException {
-        // Extraction des données
         TimeTable tt = FileTimeTable.in(Path.of("timetable"));
 
         List<String> stopNames = IntStream.range(0, tt.stations().size())
                 .mapToObj(i -> tt.stations().name(i))
                 .toList();
 
-        Map<String, String> alternativeNames =
-                IntStream.range(0, tt.stationAliases().size())
-                        .boxed()
-                        .collect(Collectors.toMap(
-                                i -> tt.stationAliases().alias(i),
-                                i -> tt.stationAliases().stationName(i)
-                        ));
-
+        Map<String, String> alternativeNames = new HashMap<>();
+        for (int i = 0; i < tt.stationAliases().size(); i++) {
+            String alias = tt.stationAliases().alias(i);
+            String stationName = tt.stationAliases().stationName(i);
+            alternativeNames.put(alias, stationName);
+        } // boucle remplaçable par un stream mais pour le moment c'est plus rapide comme ça
 
         StopIndex stopIndex = new StopIndex(stopNames, alternativeNames);
         QueryUI queryUI = QueryUI.create(stopIndex);
@@ -129,55 +124,108 @@ public class Main extends Application {
 
         Router router = new Router(tt);
 
-        // Création de la valeur observable des voyages
-        // Vérification des paramètres
-        journeysO = Bindings.createObjectBinding(() -> {
+        // AJOUT PERSONNEL : Bonus
+        // --- Recherche asynchrone des voyages
+        ObjectProperty<Task<List<Journey>>> currentTask = new SimpleObjectProperty<>();
+        Runnable launchSearch = () -> {
             String depStop = queryUI.depStopO().getValue();
             String arrStop = queryUI.arrStopO().getValue();
             LocalDate date = queryUI.dateO().getValue();
             LocalTime time = queryUI.timeO().getValue();
 
-            // Vérification des paramètres
+            // paramètres incomplets -> liste vide et on ne lance rien
             if (depStop.isEmpty() || arrStop.isEmpty() || date == null || time == null) {
-                return List.of();
+                journeysO.set(List.of());
+                loadingO.set(false);
+                return;
             }
 
-            try {
-                String depStopMain = alternativeNames.getOrDefault(depStop, depStop);
-                String arrStopMain = alternativeNames.getOrDefault(arrStop, arrStop);
-
-                int depId = stopNames.indexOf(depStopMain);
-                int arrId = stopNames.indexOf(arrStopMain);
-
-                Profile profile = profileCache
-                        .computeIfAbsent(date, d -> new ConcurrentHashMap<>())
-                        .computeIfAbsent(arrId, id -> router.profile(date, id));
-
-                return JourneyExtractor.journeys(profile, depId);
-            } catch (IllegalArgumentException e) {
-                return List.of();
+            // --- 2) Si le profil est déjà en cache, pas besoin de lancer une tâche asynchrone :
+            String depMain = alternativeNames.getOrDefault(depStop, depStop);
+            String arrMain = alternativeNames.getOrDefault(arrStop, arrStop);
+            int depId = stopNames.indexOf(depMain);
+            int arrId = stopNames.indexOf(arrMain);
+            Map<Integer, Profile> byDate = profileCache.get(date);
+            if (byDate != null && byDate.containsKey(arrId)) {
+                Profile cachedProfile = byDate.get(arrId);
+                journeysO.set(JourneyExtractor.journeys(cachedProfile, depId));
+                loadingO.set(false);
+                return;                     // rien de long : on s'arrête ici
             }
-        }, queryUI.depStopO(), queryUI.arrStopO(), queryUI.dateO(), queryUI.timeO());
 
-        SummaryUI summaryUI = SummaryUI.create(journeysO, queryUI.timeO());
+            // annule la recherche précédente le cas échéant
+            if (currentTask.get() != null && currentTask.get().isRunning()) {
+                currentTask.get().cancel();
+            }
+            // Le calcul va être lancé en arrière‑plan → on affiche le spinner
+            loadingO.set(true);
+            progressO.set(-1);
+
+            Task<List<Journey>> task = new Task<>() {
+                @Override
+                protected List<Journey> call() {
+                    ProgressListener listener = p -> updateProgress(p, 1); // p est déjà entre 0 et 1
+                    Profile profile = profileCache
+                            .computeIfAbsent(date, d -> new ConcurrentHashMap<>())
+                            .computeIfAbsent(arrId, id -> router.profile(date, id, listener));
+                    return JourneyExtractor.journeys(profile, depId);
+                }
+            };
+            progressO.bind(task.progressProperty());
+
+            task.setOnSucceeded(e -> {
+                journeysO.set(task.getValue());
+                loadingO.set(false);
+                progressO.unbind();
+                progressO.set(1);   // terminé
+            });
+            task.setOnFailed(e -> {
+                journeysO.set(List.of());
+                loadingO.set(false);
+                progressO.unbind();
+                progressO.set(1);   // terminé
+            });
+
+            currentTask.set(task);
+            new Thread(task, "CSA-worker").start();
+        };
+
+        // on relance la recherche dès qu'un paramètre change
+        queryUI.depStopO().addListener((o, oldV, newV) -> launchSearch.run());
+        queryUI.arrStopO().addListener((o, oldV, newV) -> launchSearch.run());
+        queryUI.dateO().addListener((o, oldV, newV) -> launchSearch.run());
+        queryUI.timeO().addListener((o, oldV, newV) -> launchSearch.run());
+        queryUI.arrivalModeO().addListener((o, oldV, newV) -> launchSearch.run());
+        queryUI.excludedVehiclesO().addListener((SetChangeListener<Vehicle>) change -> launchSearch.run());
+
+        // première recherche (si champs pré‑remplis)
+        launchSearch.run();
+
+        SummaryUI summaryUI = SummaryUI.create(
+            journeysO,
+            queryUI.timeO(),
+            loadingO,
+            progressO,
+            queryUI.arrivalModeO(),
+            queryUI.excludedVehiclesO()
+        );
         DetailUI detailUI = DetailUI.create(summaryUI.selectedJourneyO());
 
-        // Mise en place de la fenêtre et de son contenu
+
         primaryStage.setTitle("ReCHor");
         primaryStage.setMinWidth(MIN_WINDOW_WIDTH);
         primaryStage.setMinHeight(MIN_WINDOW_HEIGHT);
-
         BorderPane root = new BorderPane();
         root.setTop(queryUI.rootNode());
         SplitPane splitPane = new SplitPane();
         splitPane.getItems().addAll(summaryUI.rootNode(), detailUI.rootNode());
         root.setCenter(splitPane);
-
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        // Le focus est directement donné au champ de l'arrêt de départ lors du démarrage
         Platform.runLater(() -> scene.lookup("#depStop").requestFocus());
+
+
     }
 }

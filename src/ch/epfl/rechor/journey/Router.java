@@ -24,23 +24,11 @@ import java.util.Arrays;
  */
 public record Router(TimeTable timeTable) {
 
-    /**
-     * Pré‑alloue un {@link ParetoFront.Builder} vide pour chaque station et
-     * chaque course.
-     *
-     * @param p            le builder de profil à initialiser
-     * @param stationCount nombre total de gares
-     * @param tripCount    nombre total de courses actives pour la date
-     */
-    private static void preallocateBuilders(Profile.Builder p,
-                                            int stationCount,
-                                            int tripCount) {
-        for (int s = 0; s < stationCount; ++s) {
-            p.setForStation(s, new ParetoFront.Builder());
-        }
-        for (int t = 0; t < tripCount; ++t) {
-            p.setForTrip(t, new ParetoFront.Builder());
-        }
+    /** Implémentation vide utilisée lorsqu'aucun écouteur de progression n'est fourni. */
+    private static final ProgressListener NO_OP = f -> { };
+
+    public Profile profile(LocalDate date, int destinationId) {
+        return profile(date, destinationId, NO_OP);
     }
 
     /**
@@ -62,7 +50,9 @@ public record Router(TimeTable timeTable) {
      * @param destinationId l'identifiant de la gare d'arrivée
      * @return un {@link Profile} immuable contenant les frontières de Pareto pour toutes les gares
      */
-    public Profile profile(LocalDate date, int destinationId) {
+    public Profile profile(LocalDate date, int destinationId, ProgressListener progressListener) {
+
+        progressListener.progress(0d);
 
         Stations stations = timeTable.stations();
         Transfers transfers = timeTable.transfers();
@@ -93,7 +83,7 @@ public record Router(TimeTable timeTable) {
             int arrMins = connections.arrMins(liaisonId);
             int depMins = connections.depMins(liaisonId);
 
-            // option 1 : marcher a pied
+            // option 1 : marcher à pied
             int walkMin = walkTab[arrStationId];
             if (walkMin != -1) {
                 f.add((arrMins + walkMin), 0, liaisonId);
@@ -122,7 +112,6 @@ public record Router(TimeTable timeTable) {
                     int depTransferStationId = transfers.depStationId(j);
 
                     if (!profile.forStation(depStationId).fullyDominates(f, depMins)) {
-
                         f.forEach((long t) -> {
                             int tLiaisonId = PackedCriteria.payload(t);
                             int nbInterStops = connections.tripPos(tLiaisonId) -
@@ -138,8 +127,30 @@ public record Router(TimeTable timeTable) {
                     }
                 }
             }
+            progressListener.progress((i + 1) / (double) connections.size());
         }
+        progressListener.progress(1d);
         return profile.build();
     }
 
+    /**
+     * Pré‑alloue un {@link ParetoFront.Builder} vide pour chaque station et
+     * chaque course.  Cela simplifie la boucle principale : on n’a plus à
+     * tester la présence d’un builder ni à l’instancier à chaud, ce qui
+     * économise quelques allocations et branches conditionnelles.
+     *
+     * @param p            le builder de profil à initialiser
+     * @param stationCount nombre total de gares
+     * @param tripCount    nombre total de courses actives pour la date
+     */
+    private static void preallocateBuilders(Profile.Builder p,
+                                            int stationCount,
+                                            int tripCount) {
+        for (int s = 0; s < stationCount; ++s) {
+            p.setForStation(s, new ParetoFront.Builder());
+        }
+        for (int t = 0; t < tripCount; ++t) {
+            p.setForTrip(t, new ParetoFront.Builder());
+        }
+    }
 }

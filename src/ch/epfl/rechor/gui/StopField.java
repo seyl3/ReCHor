@@ -50,7 +50,29 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
         listView.setMaxHeight(240);
         popup.getContent().add(listView);
 
+        // Validation par double‑clic ou touche Entrée ---
+        Runnable validateSelection = () -> {
+            tf.getParent().requestFocus();// retire le focus du champ
+            String selected = listView.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                stopO.set(selected);
+            }
+            popup.hide();
+
+
+        };
+
+        listView.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2) {
+                validateSelection.run();
+            }
+        });
         tf.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                validateSelection.run();
+                event.consume();
+                return;
+            }
             int selectedIndex = listView.getSelectionModel().getSelectedIndex();
             if (event.getCode() == KeyCode.UP && selectedIndex > 0) {
                 listView.getSelectionModel().select(selectedIndex - 1);
@@ -64,9 +86,8 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
             listView.scrollTo(listView.getSelectionModel().getSelectedIndex());
         });
 
-        // Mise à jour de l'apparance du champ textuel en fonction du focus
+
         tf.focusedProperty().subscribe(focus -> {
-            // Si le focus est bien sur le text Field → on effectue la recherche
             if (focus) {
                 popup.show(tf.getScene().getWindow());
                 setListView(stopIndex, tf.textProperty().getValue(), listView);
@@ -81,8 +102,6 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
                 popup.setAnchorY(bounds.getMaxY());
 
             } else {
-                // Quand le champ perd le focus → on affiche le nom sélectionné et on range le pop-up
-
                 // On récupère l'élément sélectionné (ou vide si rien)
                 String selected = listView.getSelectionModel().getSelectedItem();
                 if (selected != null) {
@@ -92,7 +111,7 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
                     stopO.set(""); // aucune correspondance
                 }
 
-                // On cache la fenêtre de suggestions
+                // Quand le champ perd le focus → on affiche le nom sélectionné et on range le pop-up
                 popup.hide();
             }
         });

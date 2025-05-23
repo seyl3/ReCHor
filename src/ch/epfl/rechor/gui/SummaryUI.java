@@ -1,15 +1,21 @@
 package ch.epfl.rechor.gui;
 
 import ch.epfl.rechor.journey.Journey;
+import ch.epfl.rechor.journey.Vehicle;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Group;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
@@ -19,7 +25,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static ch.epfl.rechor.FormatterFr.*;
@@ -49,29 +55,67 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
      *
      * @param journeyList liste observable des voyages à afficher
      * @param desiredTime heure désirée pour sélectionner automatiquement le voyage le plus proche
+     * @param loadingO    observable indiquant si le chargement est en cours
      * @return une instance de SummaryUI
      */
     public static SummaryUI create(ObservableValue<List<Journey>> journeyList,
-                                   ObservableValue<LocalTime> desiredTime) {
+                                   ObservableValue<LocalTime> desiredTime,
+                                   ObservableBooleanValue loadingO,
+                                   ObjectProperty<Number> progressO,
+                                   ObservableValue<Boolean> arrivalO,
+                                   ObservableSet<Vehicle> excludedVehiclesO) {
 
         ListView<Journey> listView = new ListView<>();
         listView.getStylesheets().add("summary.css");
         listView.setCellFactory(lv -> new JourneyCell());
 
+        VBox loadingOverlay = new VBox();
+        loadingOverlay.setAlignment(Pos.CENTER);
+        loadingOverlay.visibleProperty().bind(loadingO);
+        loadingOverlay.getStylesheets().add("progress.css");
+        loadingOverlay.setId("loading-overlay");
+
+        Text loadingText = new Text("Calcul de trajet en cours...");
+        loadingText.setId("loading-text");
+        loadingOverlay.getChildren().add(loadingText);
+
+        ProgressBar progressBar = new ProgressBar();
+        progressBar.setId("loading-bar");
+        progressBar.setPrefWidth(150);
+        progressBar.progressProperty().bind(progressO);
+        loadingOverlay.getChildren().add(progressBar);
+
+        StackPane summaryPane = new StackPane(listView, loadingOverlay);
+
+        progressBar.visibleProperty().bind(loadingO);
+        listView.visibleProperty().bind(Bindings.not(loadingO));
+
         // Met à jour le voyage séléctionné
         journeyList.subscribe(newList -> {
-            listView.getItems().setAll(newList);
-            updateSelection(listView, desiredTime);
+            listView.getItems().setAll(
+                newList.stream()
+                       .filter(j -> j.legs().stream()
+                                     .filter(leg -> leg instanceof Journey.Leg.Transport)
+                                     .map(leg -> ((Journey.Leg.Transport) leg).vehicle())
+                                     .noneMatch(excludedVehiclesO::contains))
+                       .collect(Collectors.toList())
+            );
+            updateSelection(listView, desiredTime, arrivalO.getValue());
         });
 
-        // Met à jour et sélectionne automatiquement le voyage correspondant a l'heure désirée
-        desiredTime.subscribe(newTime -> updateSelection(listView, desiredTime));
+        desiredTime.subscribe(newTime -> {
+            updateSelection(listView, desiredTime, arrivalO.getValue());
+        });
+
+        arrivalO.subscribe(v -> updateSelection(listView, desiredTime, v));
+        excludedVehiclesO.addListener((SetChangeListener<Vehicle>) change ->
+            filterJourneys(listView, journeyList, desiredTime, arrivalO, excludedVehiclesO)
+        );
         ObservableValue<Journey> selectedJourney =
                 listView.getSelectionModel().selectedItemProperty();
 
-        return new SummaryUI(listView, selectedJourney);
+        return new SummaryUI(summaryPane, selectedJourney);
     }
-
     /**
      * Méthode auxiliaire, sélectionne et fait défiler la liste jusqu’au voyage correspondant à
      * l’heure
@@ -79,9 +123,11 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
      *
      * @param listView     la ListView contenant les voyages
      * @param desiredTimeO observable de l’heure désirée pour la sélection
+     * @param useArrivalTime booléen indiquant s'il faut utiliser l'heure d'arrivée pour la sélection
      */
     private static void updateSelection(ListView<Journey> listView,
-                                        ObservableValue<LocalTime> desiredTimeO) {
+                                        ObservableValue<LocalTime> desiredTimeO,
+                                        boolean useArrivalTime) {
 
         List<Journey> journeys = listView.getItems();
         LocalTime target = desiredTimeO.getValue();
@@ -91,7 +137,9 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         int journeyIndex = IntStream.range(0, journeys.size())
                 .filter(i -> {
                     Journey j = journeys.get(i);
-                    LocalTime time = j.depTime().toLocalTime();
+                    LocalTime time = useArrivalTime
+                            ? j.arrTime().toLocalTime()
+                            : j.depTime().toLocalTime();
                     return !time.isBefore(target);
                 })
                 .findFirst()
@@ -99,6 +147,35 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
 
         listView.getSelectionModel().select(journeyIndex);
         listView.scrollTo(journeyIndex);
+    }
+
+
+    /**
+     * Filtre et met à jour la sélection des voyages selon les modes exclus.
+     *
+     * @param listView            la ListView contenant les voyages
+     * @param journeyList         observable de la liste brute de voyages
+     * @param desiredTime         observable de l'heure désirée
+     * @param arrivalO            observable du mode arrivée/départ
+     * @param excludedVehiclesO   set observable des véhicules exclus
+     */
+    private static void filterJourneys(ListView<Journey> listView,
+                                       ObservableValue<List<Journey>> journeyList,
+                                       ObservableValue<LocalTime> desiredTime,
+                                       ObservableValue<Boolean> arrivalO,
+                                       ObservableSet<Vehicle> excludedVehiclesO) {
+        List<Journey> currentList = journeyList.getValue();
+        if (currentList != null) {
+            listView.getItems().setAll(
+                    currentList.stream()
+                            .filter(j -> j.legs().stream()
+                                    .filter(leg -> leg instanceof Journey.Leg.Transport)
+                                    .map(leg -> ((Journey.Leg.Transport) leg).vehicle())
+                                    .noneMatch(excludedVehiclesO::contains))
+                            .collect(Collectors.toList())
+            );
+            updateSelection(listView, desiredTime, arrivalO.getValue());
+        }
     }
 
     /**
@@ -215,14 +292,17 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                 durationTime.setText(formatDuration(item.duration()));
 
                 List<Journey.Leg> legs = item.legs();
-                Optional<Journey.Leg.Transport> firstTransport = legs.stream()
-                        .filter(Journey.Leg.Transport.class::isInstance)
-                        .map(Journey.Leg.Transport.class::cast)
-                        .findFirst();
-                firstTransport.ifPresent(tleg -> {
-                    vehicleIcon.setImage(iconFor(tleg.vehicle()));
-                    routeAndDestination.setText(formatRouteDestination(tleg));
-                });
+                Journey.Leg.Transport firstTransport = null;
+
+                for (Journey.Leg leg : legs) {
+                        if (leg instanceof Journey.Leg.Transport) {
+                        firstTransport = (Journey.Leg.Transport) leg;
+                        break;
+                    }
+                }
+
+                vehicleIcon.setImage(iconFor(firstTransport.vehicle()));
+                routeAndDestination.setText(formatRouteDestination(firstTransport));
 
                 transferCircles.clear();
 
