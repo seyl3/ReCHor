@@ -90,12 +90,8 @@ public class StopIndex {
                 .map(StopIndex::buildRegex)
                 .map(regex -> {
                     String subRequest = it.next();
-                    for (char c : subRequest.toCharArray()) {
-                        // flags non activés si l'utilisateur écrit une majuscule
-                        if (Character.isUpperCase(c)) return Pattern.compile(regex);
-                    }
-                    // flags activiés sss il n'y a aucune pas majuscules
-                    return Pattern.compile(regex, FLAGS);
+                    return subRequest.chars().anyMatch(Character::isUpperCase) ?
+                            Pattern.compile(regex) : Pattern.compile(regex,FLAGS);
                 })
                 .toList();
     }

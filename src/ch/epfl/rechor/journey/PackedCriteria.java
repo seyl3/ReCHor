@@ -1,8 +1,8 @@
 package ch.epfl.rechor.journey;
 
-import ch.epfl.rechor.Preconditions;
-
 import static java.lang.Integer.toUnsignedLong;
+
+import ch.epfl.rechor.Preconditions;
 
 /**
  * Classe utilitaire permettant de compresser et manipuler des critères de recherche d'itinéraire
@@ -12,7 +12,7 @@ import static java.lang.Integer.toUnsignedLong;
  */
 public final class PackedCriteria {
 
-    public static final int MAXIMUM_ARR_MINS = 2880;
+    public static final int MAXIMUM_MINS = 2880;
     private static final int DEPMINS_SHIFT = 51;
     private static final int ARRMINS_SHIFT = 39;
     private static final int CHANGES_SHIFT = 32;
@@ -60,7 +60,7 @@ public final class PackedCriteria {
      */
     public static long pack(int arrMins, int changes, int payload) {
         Preconditions.checkArgument((changes >>> CHANGES_MASK_BITS == 0) &&
-                (arrMins >= -MINUTES_OFFSET && arrMins < MAXIMUM_ARR_MINS));
+                (arrMins >= -MINUTES_OFFSET && arrMins < MAXIMUM_MINS));
         int arrMinsConv = convertToInternalMinutes(arrMins);
         return ((long) arrMinsConv) << ARRMINS_SHIFT | ((long) changes) << CHANGES_SHIFT |
                 toUnsignedLong(payload);
@@ -161,7 +161,7 @@ public final class PackedCriteria {
      * @throws IllegalArgumentException si depMins1 est hors limites.
      */
     public static long withDepMins(long criteria, int depMins1) {
-        Preconditions.checkArgument(depMins1 >= -MINUTES_OFFSET && depMins1 < 2880);
+        Preconditions.checkArgument(depMins1 >= -MINUTES_OFFSET && depMins1 < MAXIMUM_MINS);
         int depMinsConv = ~convertToInternalMinutes(depMins1);
         long depMins = ((long) depMinsConv) << DEPMINS_SHIFT;
         return criteria | depMins;

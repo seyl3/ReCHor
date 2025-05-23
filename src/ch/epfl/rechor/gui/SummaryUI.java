@@ -109,10 +109,10 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         private static final double HORIZONTAL_MARGIN = 5;
         private static final double VERTICAL_POSITION = 10;
         private static final double CIRCLE_RADIUS = 3;
+        private static final int ICON_SIZE = 20;
 
         private final BorderPane journey;
         private final ImageView vehicleIcon;
-        private final int iconSize = 20;
         private final Text routeAndDestination;
         private final Text departureTime;
         private final Text arrivalTime;
@@ -120,8 +120,8 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         private final Pane transferLinePane;
         private final List<Circle> transferCircles;
         private final Line backgroundLine;
-        private Circle startCircle;
-        private Circle endCircle;
+        private final Circle startCircle;
+        private final Circle endCircle;
 
         /**
          * Initialise les composants graphiques de la cellule : icône du véhicule,
@@ -174,7 +174,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
             HBox route = new HBox();
             route.getStyleClass().add("route");
             vehicleIcon.setPreserveRatio(true);
-            vehicleIcon.setFitWidth(iconSize);
+            vehicleIcon.setFitWidth(ICON_SIZE);
             route.getChildren().addAll(vehicleIcon, routeAndDestination);
             journey.setTop(route);
 

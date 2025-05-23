@@ -15,6 +15,7 @@ import java.util.Map;
  * @author : Sarra Zghal, Elyes Ben Abid
  */
 public final class JourneyGeoJsonConverter {
+    private static final double COORDINATE_PRECISION = 1e5;
 
     private JourneyGeoJsonConverter() {
     }
@@ -57,7 +58,7 @@ public final class JourneyGeoJsonConverter {
      * @return un Json.JNumber contenant la valeur arrondie
      */
     private static Json.JNumber roundToJnumber(double number) {
-        return new Json.JNumber((Math.round(number * 1e5) / 1e5));
+        return new Json.JNumber((Math.round(number * COORDINATE_PRECISION) / COORDINATE_PRECISION));
     }
 
     /**
