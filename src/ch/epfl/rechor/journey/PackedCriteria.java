@@ -1,8 +1,8 @@
 package ch.epfl.rechor.journey;
 
-import ch.epfl.rechor.Preconditions;
-
 import static java.lang.Integer.toUnsignedLong;
+
+import ch.epfl.rechor.Preconditions;
 
 /**
  * Classe utilitaire permettant de compresser et manipuler des critères de recherche d'itinéraire
@@ -12,6 +12,7 @@ import static java.lang.Integer.toUnsignedLong;
  */
 public final class PackedCriteria {
 
+    public static final int MAXIMUM_ARR_MINS = 2880;
     private static final int DEPMINS_SHIFT = 51;
     private static final int ARRMINS_SHIFT = 39;
     private static final int CHANGES_SHIFT = 32;
@@ -20,8 +21,33 @@ public final class PackedCriteria {
     private static final int PAYLOAD_MASK_BITS = 32;
     private static final int MINUTES_OFFSET = 240;
 
+    // Constantes pour les masques
+    private static final long ARRMINS_MASK = (1L << ARRMINS_MASK_BITS) - 1;
+    private static final long CHANGES_MASK = (1L << CHANGES_MASK_BITS) - 1;
+    private static final long PAYLOAD_MASK = (1L << PAYLOAD_MASK_BITS) - 1;
+    private static final long DEPMINS_MASK = (1L << DEPMINS_SHIFT) - 1;
 
     private PackedCriteria() {
+    }
+
+    /**
+     * Convertit les minutes en leur représentation interne.
+     *
+     * @param minutes Les minutes à convertir
+     * @return La représentation interne des minutes
+     */
+    private static int convertToInternalMinutes(int minutes) {
+        return minutes + MINUTES_OFFSET;
+    }
+
+    /**
+     * Convertit les minutes internes en minutes réelles.
+     *
+     * @param internalMinutes Les minutes internes à convertir
+     * @return Les minutes réelles
+     */
+    private static int convertFromInternalMinutes(int internalMinutes) {
+        return internalMinutes - MINUTES_OFFSET;
     }
 
     /**
@@ -34,8 +60,8 @@ public final class PackedCriteria {
      */
     public static long pack(int arrMins, int changes, int payload) {
         Preconditions.checkArgument((changes >>> CHANGES_MASK_BITS == 0) &&
-                (arrMins >= -MINUTES_OFFSET && arrMins < 2880));
-        int arrMinsConv = arrMins + MINUTES_OFFSET;
+                (arrMins >= -MINUTES_OFFSET && arrMins < MAXIMUM_ARR_MINS));
+        int arrMinsConv = convertToInternalMinutes(arrMins);
         return ((long) arrMinsConv) << ARRMINS_SHIFT | ((long) changes) << CHANGES_SHIFT |
                 toUnsignedLong(payload);
     }
@@ -59,7 +85,7 @@ public final class PackedCriteria {
      */
     public static int depMins(long criteria) {
         Preconditions.checkArgument(hasDepMins(criteria));
-        return (int) ~(criteria >> DEPMINS_SHIFT) - MINUTES_OFFSET;
+        return convertFromInternalMinutes((int) ~(criteria >> DEPMINS_SHIFT));
     }
 
     /**
@@ -69,8 +95,7 @@ public final class PackedCriteria {
      * @return Temps d'arrivée en minutes avec minuit comme référence.
      */
     public static int arrMins(long criteria) {
-        long mask = (1L << ARRMINS_MASK_BITS) - 1;
-        return ((int) (criteria >>> ARRMINS_SHIFT & mask)) - MINUTES_OFFSET;
+        return convertFromInternalMinutes((int) (criteria >>> ARRMINS_SHIFT & ARRMINS_MASK));
     }
 
     /**
@@ -80,8 +105,7 @@ public final class PackedCriteria {
      * @return Nombre de changements.
      */
     public static int changes(long criteria) {
-        long mask = (1L << CHANGES_MASK_BITS) - 1;
-        return (int) ((criteria >>> CHANGES_SHIFT) & mask);
+        return (int) ((criteria >>> CHANGES_SHIFT) & CHANGES_MASK);
     }
 
     /**
@@ -91,8 +115,7 @@ public final class PackedCriteria {
      * @return Valeur du payload.
      */
     public static int payload(long criteria) {
-        long mask = (1L << PAYLOAD_MASK_BITS) - 1;
-        return (int) (criteria & mask);
+        return (int) (criteria & PAYLOAD_MASK);
     }
 
     /**
@@ -126,8 +149,7 @@ public final class PackedCriteria {
      * @return Nouveaux critères sans les minutes de départ.
      */
     public static long withoutDepMins(long criteria) {
-        long mask = (1L << DEPMINS_SHIFT) - 1;
-        return criteria & mask;
+        return criteria & DEPMINS_MASK;
     }
 
     /**
@@ -140,11 +162,10 @@ public final class PackedCriteria {
      */
     public static long withDepMins(long criteria, int depMins1) {
         Preconditions.checkArgument(depMins1 >= -MINUTES_OFFSET && depMins1 < 2880);
-        int depMinsConv = ~(depMins1 + MINUTES_OFFSET);
+        int depMinsConv = ~convertToInternalMinutes(depMins1);
         long depMins = ((long) depMinsConv) << DEPMINS_SHIFT;
         return criteria | depMins;
     }
-
 
     /**
      * Ajoute un changement supplémentaire aux critères.
@@ -168,12 +189,7 @@ public final class PackedCriteria {
      * @return Nouveaux critères avec le payload modifié.
      */
     public static long withPayload(long criteria, int payload) {
-        long mask = ((1L << PAYLOAD_MASK_BITS) - 1) << PAYLOAD_MASK_BITS;
-        long withoutPayload = criteria & mask;
-        return (withoutPayload | toUnsignedLong(payload));
-
-
+        long withoutPayload = criteria & ~PAYLOAD_MASK;
+        return withoutPayload | toUnsignedLong(payload);
     }
-
-
 }
