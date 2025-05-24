@@ -1,10 +1,15 @@
 package ch.epfl.rechor.gui;
 
+import ch.epfl.rechor.gui.map.BaseMapController;
+import ch.epfl.rechor.gui.map.JourneyLayer;
+import ch.epfl.rechor.gui.map.MapParameters;
+import ch.epfl.rechor.gui.map.TileManager;
 import ch.epfl.rechor.journey.Journey;
 import ch.epfl.rechor.journey.Stop;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
@@ -21,9 +26,8 @@ import javafx.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -32,9 +36,7 @@ import java.util.List;
 
 import static ch.epfl.rechor.FormatterFr.*;
 import static ch.epfl.rechor.gui.VehicleIcons.iconFor;
-import static ch.epfl.rechor.journey.JourneyGeoJsonConverter.toGeoJson;
 import static ch.epfl.rechor.journey.JourneyIcalConverter.toIcalendar;
-import static java.awt.Desktop.getDesktop;
 import static javafx.scene.layout.GridPane.*;
 
 /**
@@ -101,14 +103,47 @@ public record DetailUI(Node rootNode) {
         legsGrid.setId("legs");
         journeyStack.getChildren().add(legsGrid);
 
-        HBox buttons = new HBox();
+        /* ------------------------------------------------------------------
+         * Carte OSM + tracé du trajet (BaseMapController + JourneyLayer)
+         * ------------------------------------------------------------------ */
+        TileManager tileManager = new TileManager(Path.of("tile-cache"), "tile.openstreetmap.org");
+        MapParameters mapParams = new MapParameters(9, 67522, 46287); // zoom par défaut ≈ Suisse
+        BaseMapController mapCtl = new BaseMapController(tileManager, mapParams);
+        JourneyLayer overlay = new JourneyLayer();
+        overlay.bindTo(mapCtl.pane());
+        overlay.canvas().setMouseTransparent(true);
+
+
+        StackPane mapStack = new StackPane(mapCtl.pane(), overlay.canvas());
+        mapStack.setVisible(true);
+
+        // Redessine le tracé à chaque pan/zoom
+        Runnable refreshOverlay = () -> {
+            Journey j = journey0.getValue();
+            if (j != null && mapStack.isVisible())
+                overlay.draw(j, mapParams);
+        };
+
+        mapParams.minXProperty().addListener((p,o,n) -> refreshOverlay.run());
+        mapParams.minYProperty().addListener((p,o,n) -> refreshOverlay.run());
+        mapParams.zoomProperty() .addListener((p,o,n) -> refreshOverlay.run());
+
+// (section de clip et bordure supprimée)
+
+        // Place la carte avant les boutons, avec un peu d'espacement sous la carte
+        mapStack.setPrefHeight(250);         // hauteur raisonnable par défaut
+        withJourney.getChildren().add(mapStack);
+        VBox.setMargin(mapStack, new Insets(0, 0, 8, 0));  // 8px d'espace sous la carte
+
+        // Boutons sous la carte, espacement horizontal de 8px
+        HBox buttons = new HBox(8);
         buttons.setId("buttons");
         withJourney.getChildren().add(buttons);
 
         Button calendarButton = new Button("Calendrier");
         Button mapButton = new Button("Carte");
         buttons.getChildren().addAll(calendarButton, mapButton);
-        wireButtons(calendarButton, mapButton, journey0);
+        wireButtons(calendarButton, mapButton, journey0, mapStack, overlay, mapParams, mapCtl);
 
         noJourney.visibleProperty().bind(
                 Bindings.createBooleanBinding(() -> journey0.getValue() == null, journey0)
@@ -200,6 +235,14 @@ public record DetailUI(Node rootNode) {
             }
         });
 
+        // redessine la couche itinéraire sur la carte lorsqu’on change de voyage
+        journey0.addListener((o, oldJ, newJ) -> {
+            if (newJ != null && mapStack.isVisible()) {
+                overlay.draw(newJ, mapParams);
+                mapCtl.centerOn(newJ.depStop());
+            }
+        });
+
         return new DetailUI(root);
     }
 
@@ -251,7 +294,11 @@ public record DetailUI(Node rootNode) {
      */
     private static void wireButtons(Button calendarButton,
                                     Button mapButton,
-                                    ObservableValue<Journey> journeyO) {
+                                    ObservableValue<Journey> journeyO,
+                                    StackPane mapStack,
+                                    JourneyLayer overlay,
+                                    MapParameters mapParams,
+                                    BaseMapController mapCtl) {
 
         calendarButton.setOnAction(e -> {
             Journey j = journeyO.getValue();
@@ -272,16 +319,13 @@ public record DetailUI(Node rootNode) {
             }
         });
 
+        // bouton « Carte » : toggle l’affichage interne
         mapButton.setOnAction(e -> {
+            mapStack.setVisible(!mapStack.isVisible());
             Journey j = journeyO.getValue();
-            if (j == null) return;
-
-            try {
-                URI uri = new URI("https", "umap.osm.ch", "/fr/map",
-                        "data=" + toGeoJson(j), "null");
-                getDesktop().browse(uri);
-            } catch (IOException | URISyntaxException ex) {
-                throw new RuntimeException(ex);
+            if (j != null && mapStack.isVisible()) {
+                overlay.draw(j, mapParams);
+                mapCtl.centerOn(j.depStop());
             }
         });
     }
