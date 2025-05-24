@@ -12,11 +12,15 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.SetChangeListener;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.scene.image.Image;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -74,6 +78,19 @@ public class Main extends Application {
     private static final double MIN_WINDOW_HEIGHT = 600;
 
     /**
+     * Vérifie si des trajets existent pour la date donnée dans l'horaire.
+     *
+     * @param tt   la table horaire
+     * @param date la date à tester
+     * @return true si au moins une course circule ce jour‑là
+     */
+    private static boolean hasDataFor(TimeTable tt, LocalDate date) {
+        // Vérifie d’abord si le dossier yyyy‑MM‑dd existe dans le répertoire "timetable"
+        Path dayDir = Path.of("timetable", date.toString());
+        return Files.exists(dayDir);
+    }
+
+    /**
      * Point d'entrée principal de l'application ReCHor.
      * <p>
      * Appelle simplement la méthode {@link #launch(String...)} pour démarrer
@@ -116,16 +133,26 @@ public class Main extends Application {
             String alias = tt.stationAliases().alias(i);
             String stationName = tt.stationAliases().stationName(i);
             alternativeNames.put(alias, stationName);
-        } // boucle remplaçable par un stream mais pour le moment c'est plus rapide comme ça
+        }
 
         StopIndex stopIndex = new StopIndex(stopNames, alternativeNames);
         QueryUI queryUI = QueryUI.create(stopIndex);
 
+        // Alerte si l'utilisateur choisit une date hors plage de l'horaire
+        queryUI.dateO().addListener((o, oldD, newD) -> {
+            if (newD != null && !hasDataFor(tt, newD)) {
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(AlertType.WARNING,
+                            "Données de semaine indisponibles pour la date sélectionnée.");
+                    alert.setHeaderText(null);
+                    alert.showAndWait();
+                });
+            }
+        });
 
         Router router = new Router(tt);
 
-        // AJOUT PERSONNEL : Bonus
-        // --- Recherche asynchrone des voyages
+        // Recherche "asynchrone" des voyages
         ObjectProperty<Task<List<Journey>>> currentTask = new SimpleObjectProperty<>();
         Runnable launchSearch = () -> {
             String depStop = queryUI.depStopO().getValue();
@@ -213,6 +240,11 @@ public class Main extends Application {
 
 
         primaryStage.setTitle("ReCHor");
+        // Icône personnalisée depuis le système de fichiers (resources/LOGO.png)
+        primaryStage.getIcons().add(
+                new Image(Path.of("resources/LOGO.png").toUri().toString())
+        );
+
         primaryStage.setMinWidth(MIN_WINDOW_WIDTH);
         primaryStage.setMinHeight(MIN_WINDOW_HEIGHT);
         BorderPane root = new BorderPane();
