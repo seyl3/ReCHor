@@ -6,10 +6,10 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.Group;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -93,12 +93,12 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
         // Met à jour le voyage séléctionné
         journeyList.subscribe(newList -> {
             listView.getItems().setAll(
-                newList.stream()
-                       .filter(j -> j.legs().stream()
-                                     .filter(leg -> leg instanceof Journey.Leg.Transport)
-                                     .map(leg -> ((Journey.Leg.Transport) leg).vehicle())
-                                     .noneMatch(excludedVehiclesO::contains))
-                       .collect(Collectors.toList())
+                    newList.stream()
+                            .filter(j -> j.legs().stream()
+                                    .filter(leg -> leg instanceof Journey.Leg.Transport)
+                                    .map(leg -> ((Journey.Leg.Transport) leg).vehicle())
+                                    .noneMatch(excludedVehiclesO::contains))
+                            .collect(Collectors.toList())
             );
             updateSelection(listView, desiredTime, arrivalO.getValue());
         });
@@ -109,21 +109,23 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
 
         arrivalO.subscribe(v -> updateSelection(listView, desiredTime, v));
         excludedVehiclesO.addListener((SetChangeListener<Vehicle>) change ->
-            filterJourneys(listView, journeyList, desiredTime, arrivalO, excludedVehiclesO)
+                filterJourneys(listView, journeyList, desiredTime, arrivalO, excludedVehiclesO)
         );
         ObservableValue<Journey> selectedJourney =
                 listView.getSelectionModel().selectedItemProperty();
 
         return new SummaryUI(summaryPane, selectedJourney);
     }
+
     /**
      * Méthode auxiliaire, sélectionne et fait défiler la liste jusqu’au voyage correspondant à
      * l’heure
      * désirée.
      *
-     * @param listView     la ListView contenant les voyages
-     * @param desiredTimeO observable de l’heure désirée pour la sélection
-     * @param useArrivalTime booléen indiquant s'il faut utiliser l'heure d'arrivée pour la sélection
+     * @param listView       la ListView contenant les voyages
+     * @param desiredTimeO   observable de l’heure désirée pour la sélection
+     * @param useArrivalTime booléen indiquant s'il faut utiliser l'heure d'arrivée pour la
+     *                       sélection
      */
     private static void updateSelection(ListView<Journey> listView,
                                         ObservableValue<LocalTime> desiredTimeO,
@@ -153,11 +155,11 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
     /**
      * Filtre et met à jour la sélection des voyages selon les modes exclus.
      *
-     * @param listView            la ListView contenant les voyages
-     * @param journeyList         observable de la liste brute de voyages
-     * @param desiredTime         observable de l'heure désirée
-     * @param arrivalO            observable du mode arrivée/départ
-     * @param excludedVehiclesO   set observable des véhicules exclus
+     * @param listView          la ListView contenant les voyages
+     * @param journeyList       observable de la liste brute de voyages
+     * @param desiredTime       observable de l'heure désirée
+     * @param arrivalO          observable du mode arrivée/départ
+     * @param excludedVehiclesO set observable des véhicules exclus
      */
     private static void filterJourneys(ListView<Journey> listView,
                                        ObservableValue<List<Journey>> journeyList,
@@ -225,7 +227,8 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
 
                     for (Circle circle : transferCircles) {
                         double relativePosition = (double) circle.getUserData();
-                        double x = HORIZONTAL_MARGIN + relativePosition * (width - 2 * HORIZONTAL_MARGIN);
+                        double x = HORIZONTAL_MARGIN +
+                                relativePosition * (width - 2 * HORIZONTAL_MARGIN);
                         circle.setCenterX(x);
                         circle.setCenterY(VERTICAL_POSITION);
                     }
@@ -240,8 +243,10 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
             endCircle = new Circle(CIRCLE_RADIUS);
             endCircle.getStyleClass().add("dep-arr");
 
-            backgroundLine = new Line(HORIZONTAL_MARGIN, VERTICAL_POSITION, HORIZONTAL_MARGIN, VERTICAL_POSITION);
-            backgroundLine.endXProperty().bind(transferLinePane.widthProperty().subtract(HORIZONTAL_MARGIN));
+            backgroundLine = new Line(HORIZONTAL_MARGIN, VERTICAL_POSITION, HORIZONTAL_MARGIN,
+                    VERTICAL_POSITION);
+            backgroundLine.endXProperty()
+                    .bind(transferLinePane.widthProperty().subtract(HORIZONTAL_MARGIN));
 
             transferLinePane.getChildren().addAll(backgroundLine, transferGroup);
             transferGroup.getChildren().addAll(startCircle, endCircle);
@@ -295,7 +300,7 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                 Journey.Leg.Transport firstTransport = null;
 
                 for (Journey.Leg leg : legs) {
-                        if (leg instanceof Journey.Leg.Transport) {
+                    if (leg instanceof Journey.Leg.Transport) {
                         firstTransport = (Journey.Leg.Transport) leg;
                         break;
                     }
@@ -312,7 +317,8 @@ public record SummaryUI(Node rootNode, ObservableValue<Journey> selectedJourneyO
                 IntStream.range(1, legs.size() - 1).mapToObj(legs::get)
                         .filter(leg -> leg instanceof Journey.Leg.Foot)
                         .map(leg -> (Journey.Leg.Foot) leg)
-                        .mapToDouble(footLeg -> Duration.between(departureTime, footLeg.depTime()).toMinutes())
+                        .mapToDouble(footLeg -> Duration.between(departureTime, footLeg.depTime())
+                                .toMinutes())
                         .map(minutesFromStart -> minutesFromStart / totalDurationMinutes)
                         .forEach(relativePosition -> {
                             Circle changeCircle = new Circle(CIRCLE_RADIUS);

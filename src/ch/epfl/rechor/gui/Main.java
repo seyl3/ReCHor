@@ -15,9 +15,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.SplitPane;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import javafx.scene.image.Image;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -61,13 +61,6 @@ import java.util.stream.IntStream;
  * @author : Sarra Zghal, Elyes Ben Abid
  */
 public class Main extends Application {
-    // Strcuture dela map (Date du voyage -> (l'indice de la station d'arrivée -> le profile))
-    private final Map<LocalDate, Map<Integer, Profile>> profileCache = new ConcurrentHashMap<>();
-    private final SimpleObjectProperty<List<Journey>> journeysO = new SimpleObjectProperty<>(List.of());
-    private final SimpleBooleanProperty loadingO = new SimpleBooleanProperty(false);
-    /** Avancement actuel du calcul CSA. */
-    private final ObjectProperty<Number> progressO = new SimpleObjectProperty<>(-1);
-
     /**
      * Largeur minimale de la fenêtre principale (en px).
      */
@@ -76,6 +69,15 @@ public class Main extends Application {
      * Hauteur minimale de la fenêtre principale (en px).
      */
     private static final double MIN_WINDOW_HEIGHT = 700;
+    // Strcuture dela map (Date du voyage -> (l'indice de la station d'arrivée -> le profile))
+    private final Map<LocalDate, Map<Integer, Profile>> profileCache = new ConcurrentHashMap<>();
+    private final SimpleObjectProperty<List<Journey>> journeysO =
+            new SimpleObjectProperty<>(List.of());
+    private final SimpleBooleanProperty loadingO = new SimpleBooleanProperty(false);
+    /**
+     * Avancement actuel du calcul CSA.
+     */
+    private final ObjectProperty<Number> progressO = new SimpleObjectProperty<>(-1);
 
     /**
      * Vérifie si des trajets existent pour la date donnée dans l'horaire.
@@ -191,7 +193,8 @@ public class Main extends Application {
             Task<List<Journey>> task = new Task<>() {
                 @Override
                 protected List<Journey> call() {
-                    ProgressListener listener = p -> updateProgress(p, 1); // p est déjà entre 0 et 1
+                    ProgressListener listener =
+                            p -> updateProgress(p, 1); // p est déjà entre 0 et 1
                     Profile profile = profileCache
                             .computeIfAbsent(date, d -> new ConcurrentHashMap<>())
                             .computeIfAbsent(arrId, id -> router.profile(date, id, listener));
@@ -223,18 +226,19 @@ public class Main extends Application {
         queryUI.dateO().addListener((o, oldV, newV) -> launchSearch.run());
         queryUI.timeO().addListener((o, oldV, newV) -> launchSearch.run());
         queryUI.arrivalModeO().addListener((o, oldV, newV) -> launchSearch.run());
-        queryUI.excludedVehiclesO().addListener((SetChangeListener<Vehicle>) change -> launchSearch.run());
+        queryUI.excludedVehiclesO()
+                .addListener((SetChangeListener<Vehicle>) change -> launchSearch.run());
 
         // première recherche (si champs pré‑remplis)
         launchSearch.run();
 
         SummaryUI summaryUI = SummaryUI.create(
-            journeysO,
-            queryUI.timeO(),
-            loadingO,
-            progressO,
-            queryUI.arrivalModeO(),
-            queryUI.excludedVehiclesO()
+                journeysO,
+                queryUI.timeO(),
+                loadingO,
+                progressO,
+                queryUI.arrivalModeO(),
+                queryUI.excludedVehiclesO()
         );
         DetailUI detailUI = DetailUI.create(summaryUI.selectedJourneyO());
 

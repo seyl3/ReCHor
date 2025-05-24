@@ -111,7 +111,8 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
                     stopO.set(""); // aucune correspondance
                 }
 
-                // Quand le champ perd le focus → on affiche le nom sélectionné et on range le pop-up
+                // Quand le champ perd le focus → on affiche le nom sélectionné et on range le
+                // pop-up
                 popup.hide();
             }
         });
@@ -121,7 +122,8 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
     }
 
     /**
-     * Met à jour le contenu d'une liste de suggestions d'arrêts en fonction d'une requête utilisateur.
+     * Met à jour le contenu d'une liste de suggestions d'arrêts en fonction d'une requête
+     * utilisateur.
      * <p>
      * Cette méthode interroge l'index des arrêts avec la requête donnée et affiche jusqu'à 30
      * résultats dans la {@code ListView}. Si des suggestions sont trouvées, le premier élément
@@ -132,7 +134,8 @@ public record StopField(TextField textField, ObservableValue<String> stopO) {
      * @param listView  la liste affichant les suggestions
      * @throws NullPointerException si l'un des arguments est {@code null}
      */
-    private static void setListView(StopIndex stopIndex, String request, ListView<String> listView) {
+    private static void setListView(StopIndex stopIndex, String request,
+                                    ListView<String> listView) {
         List<String> suggestionss = stopIndex.stopsMatching(request, 30);
         listView.getItems().setAll(suggestionss);
         if (!suggestionss.isEmpty()) {

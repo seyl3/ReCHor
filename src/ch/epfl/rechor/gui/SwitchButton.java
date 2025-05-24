@@ -13,22 +13,14 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
-/**
- * Interrupteur graphique (type « toggle ») avec animation fluide et piste de taille fixe.
- *
- * <p>Le déplacement du « thumb » est animé, et le composant respecte une largeur/hauteur
- * constante afin de s’aligner facilement dans les barres d’outils.</p>
- *
- * @author Sarra Zghal, Elyes Ben Abid
- */
 public class SwitchButton extends ToggleButton {
     private static final double TRACK_WIDTH = 73;
     private static final double TRACK_HEIGHT = 26;
     private static final double THUMB_SIZE = TRACK_HEIGHT - 6;
     private static final double THUMB_MARGIN = (TRACK_HEIGHT - THUMB_SIZE) / 2;
 
-    private static final Color COLOR_BG           = Color.web("#f4f4f5");
-    private static final Color COLOR_STROKE_DEF   = Color.GRAY;
+    private static final Color COLOR_BG = Color.web("#f4f4f5");
+    private static final Color COLOR_STROKE_DEF = Color.GRAY;
     private static final Color COLOR_STROKE_FOCUS = Color.web("#70B9D9FF");
     private final Rectangle track;
     private final Rectangle thumb;
@@ -36,7 +28,7 @@ public class SwitchButton extends ToggleButton {
     private final TranslateTransition transition;
     private String offText;
     private String onText;
-    private Duration SLIDE_DURATION = Duration.millis(300);
+    private final Duration SLIDE_DURATION = Duration.millis(300);
     private PauseTransition textTransition;
 
     public SwitchButton() {
@@ -80,12 +72,6 @@ public class SwitchButton extends ToggleButton {
         focusedProperty().addListener((obs, oldV, newV) -> updateFocus(newV));
     }
 
-    /**
-     * Construit un commutateur avec deux libellés distincts.
-     *
-     * @param offText texte affiché lorsque le switch est désactivé
-     * @param onText  texte affiché lorsque le switch est activé
-     */
     public SwitchButton(String offText, String onText) {
         this();
         this.offText = offText;
@@ -99,7 +85,6 @@ public class SwitchButton extends ToggleButton {
         transition.setToX(targetX - thumb.getLayoutX());
         transition.play();
         thumb.toFront();
-        // track.setFill(Color.WHITE);
         if (textTransition != null) {
             textTransition.stop();
         }
@@ -111,9 +96,6 @@ public class SwitchButton extends ToggleButton {
         textTransition.play();
     }
 
-    /**
-     * Positionne le texte à gauche ou à droite du track.
-     */
     private void positionLabel(boolean on) {
         if (on) {
             label.setX(8);
@@ -123,20 +105,11 @@ public class SwitchButton extends ToggleButton {
         }
     }
 
-    /**
-     * Décale la ligne de base pour que l’alignement « baseline » dans un {@code HBox}
-     * fonctionne correctement.
-     */
     @Override
     public double getBaselineOffset() {
         return label.getY();
     }
 
-    /**
-     * Met à jour l’aspect du contour en fonction du focus.
-     *
-     * @param focused true si le contrôle a le focus clavier
-     */
     private void updateFocus(boolean focused) {
         if (focused) {
             track.setFill(COLOR_BG);
