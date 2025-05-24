@@ -71,11 +71,11 @@ public class Main extends Application {
     /**
      * Largeur minimale de la fenêtre principale (en px).
      */
-    private static final double MIN_WINDOW_WIDTH = 800;
+    private static final double MIN_WINDOW_WIDTH = 900;
     /**
      * Hauteur minimale de la fenêtre principale (en px).
      */
-    private static final double MIN_WINDOW_HEIGHT = 600;
+    private static final double MIN_WINDOW_HEIGHT = 700;
 
     /**
      * Vérifie si des trajets existent pour la date donnée dans l'horaire.
