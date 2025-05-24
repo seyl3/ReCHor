@@ -10,11 +10,9 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Accordion;
-import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TitledPane;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -134,6 +132,10 @@ public record DetailUI(Node rootNode) {
 
 
         StackPane mapStack = new StackPane(mapCtl.pane(), overlay.canvas());
+        Label credit = new Label("© OpenStreetMap");
+        StackPane.setAlignment(credit, Pos.BOTTOM_RIGHT);
+        StackPane.setMargin(credit, new Insets(0, 4, 4, 0));
+        mapStack.getChildren().add(credit);
         mapStack.setVisible(true);
 
         // Redessine le tracé à chaque pan/zoom

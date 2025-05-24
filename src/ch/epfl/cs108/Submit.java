@@ -35,8 +35,11 @@ public final class Submit {
     private static final String TOKEN_2 = "Deigh5ia";
     // Noms des éventuels fichiers Java additionnels à inclure (p.ex. "MyClass.java")
     private static final List<String> ADDITIONAL_FILES =
-            List.of("src/ch/epfl/Bonus.java","resources/progress.css", "src/ch/epfl/rechor/gui" +
-                    "/SwitchButton.java", "src/ch/epfl/rechor/gui/VehicleFilterMenu.java", "resources/LOGO.png");
+            List.of("src/ch/epfl/Bonus.java","resources/progress.css", "src/ch/epfl/rechor/gui",
+                    "/SwitchButton.java", "src/ch/epfl/rechor/gui/VehicleFilterMenu.java",
+                    "resources/LOGO.png", "src/ch/epfl/rechor/gui/map/BaseMapController.java",
+                    "src/ch/epfl/rechor/gui/map/JourneyLayer.java", "src/ch/epfl/rechor/gui/map/MapParameters.java",
+                    "src/ch/epfl/rechor/gui/map/TileManager.java", "src/ch/epfl/rechor/gui/map/WebMercator.java");
     // -------------
 
     private static final String ZIP_ENTRY_NAME_PREFIX = "CS108/";
