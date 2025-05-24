@@ -1,6 +1,7 @@
 package ch.epfl.rechor.gui;
 
 import ch.epfl.rechor.StopIndex;
+import ch.epfl.rechor.journey.Vehicle;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableSet;
 import javafx.scene.Node;
@@ -8,26 +9,30 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.converter.LocalTimeStringConverter;
-import ch.epfl.rechor.journey.Vehicle;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Représente l'interface de requête permettant à l'utilisateur de saisir un arrêt de départ, un arrêt d'arrivée,
+ * Représente l'interface de requête permettant à l'utilisateur de saisir un arrêt de départ, un
+ * arrêt d'arrivée,
  * une date et une heure pour une recherche d'itinéraire.
  * <p>
- * Cette interface se compose d'un champ de saisie pour l'arrêt de départ, un autre pour l'arrêt d'arrivée,
- * un sélecteur de date, et un champ formaté pour saisir l'heure. Elle fournit aussi un bouton permettant
+ * Cette interface se compose d'un champ de saisie pour l'arrêt de départ, un autre pour l'arrêt
+ * d'arrivée,
+ * un sélecteur de date, et un champ formaté pour saisir l'heure. Elle fournit aussi un bouton
+ * permettant
  * d'échanger les arrêts de départ et d'arrivée.
  *
- * @param rootNode le nœud JavaFX à la racine de l'interface
- * @param depStopO la valeur observable représentant l'arrêt de départ (valide ou chaîne vide)
- * @param arrStopO la valeur observable représentant l'arrêt d'arrivée (valide ou chaîne vide)
- * @param dateO    la valeur observable représentant la date du voyage
- * @param timeO    la valeur observable représentant l'heure de départ du voyage
- * @param arrivalModeO la valeur observable représentant le mode arrivée/départ
+ * @param rootNode          le nœud JavaFX à la racine de l'interface
+ * @param depStopO          la valeur observable représentant l'arrêt de départ (valide ou chaîne
+ *                         vide)
+ * @param arrStopO          la valeur observable représentant l'arrêt d'arrivée (valide ou chaîne
+ *                         vide)
+ * @param dateO             la valeur observable représentant la date du voyage
+ * @param timeO             la valeur observable représentant l'heure de départ du voyage
+ * @param arrivalModeO      la valeur observable représentant le mode arrivée/départ
  * @param excludedVehiclesO la valeur observable représentant les véhicules exclus
  * @author : Sarra Zghal, Elyes Ben Abid
  */
@@ -41,11 +46,14 @@ public record QueryUI(Node rootNode,
 ) {
 
     /**
-     * Crée l'interface graphique de requête, avec les champs nécessaires à la saisie des informations
+     * Crée l'interface graphique de requête, avec les champs nécessaires à la saisie des
+     * informations
      * de recherche (départ, arrivée, date, heure).
      * <p>
-     * Les champs d'arrêt affichent des suggestions lors de la saisie, et le champ d'heure est formaté
-     * pour accepter des formats horaires suisses (par ex. 9:30 ou 09:30). Le bouton d’échange permet
+     * Les champs d'arrêt affichent des suggestions lors de la saisie, et le champ d'heure est
+     * formaté
+     * pour accepter des formats horaires suisses (par ex. 9:30 ou 09:30). Le bouton d’échange
+     * permet
      * d’inverser les champs de départ et d’arrivée.
      *
      * @param stopIndex l'index des noms d'arrêts utilisé pour les suggestions
@@ -100,7 +108,8 @@ public record QueryUI(Node rootNode,
 
         DateTimeFormatter formatterDisplay = DateTimeFormatter.ofPattern("HH:mm");
         DateTimeFormatter formatterParse = DateTimeFormatter.ofPattern("[H:mm][HH:mm]");
-        LocalTimeStringConverter timeConverter = new LocalTimeStringConverter(formatterDisplay, formatterParse);
+        LocalTimeStringConverter timeConverter =
+                new LocalTimeStringConverter(formatterDisplay, formatterParse);
         TextFormatter<LocalTime> timeFormatter = new TextFormatter<>(timeConverter);
         timeField.setTextFormatter(timeFormatter);
 

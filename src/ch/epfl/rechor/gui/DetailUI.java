@@ -32,6 +32,7 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static ch.epfl.rechor.FormatterFr.*;
@@ -113,6 +114,24 @@ public record DetailUI(Node rootNode) {
         overlay.bindTo(mapCtl.pane());
         overlay.canvas().setMouseTransparent(true);
 
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            Path cacheRoot = Path.of("tile-cache");
+            try (var walk = Files.walk(cacheRoot)) {
+                walk
+                        .filter(path -> !path.equals(
+                                cacheRoot))          // ne supprime pas le dossier racine
+                        .sorted(Comparator.reverseOrder())
+                        .forEach(path -> {
+                            try {
+                                Files.deleteIfExists(path);
+                            } catch (IOException ignored) {
+                            }
+                        });
+            } catch (IOException ignored) {
+                // ignore
+            }
+        }));
+
 
         StackPane mapStack = new StackPane(mapCtl.pane(), overlay.canvas());
         mapStack.setVisible(true);
@@ -124,9 +143,9 @@ public record DetailUI(Node rootNode) {
                 overlay.draw(j, mapParams);
         };
 
-        mapParams.minXProperty().addListener((p,o,n) -> refreshOverlay.run());
-        mapParams.minYProperty().addListener((p,o,n) -> refreshOverlay.run());
-        mapParams.zoomProperty() .addListener((p,o,n) -> refreshOverlay.run());
+        mapParams.minXProperty().addListener((p, o, n) -> refreshOverlay.run());
+        mapParams.minYProperty().addListener((p, o, n) -> refreshOverlay.run());
+        mapParams.zoomProperty().addListener((p, o, n) -> refreshOverlay.run());
 
 // (section de clip et bordure supprimée)
 
@@ -171,7 +190,9 @@ public record DetailUI(Node rootNode) {
                         case Journey.Leg.Transport transportLeg -> {
                             // Ajout de l'heure de départ, cercle de départ, nom de la gare et sa
                             // plateforme de départ
-                            Circle depCircle = addRow(legsGrid, currentRow, leg.depTime(), leg.depStop(), true);
+                            Circle depCircle =
+                                    addRow(legsGrid, currentRow, leg.depTime(), leg.depStop(),
+                                            true);
 
                             // Ajout de l'icone du véhicule, et du nom de la destination
                             ImageView vehicleIcon =
