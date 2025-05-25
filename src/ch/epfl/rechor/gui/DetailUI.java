@@ -24,6 +24,8 @@ import javafx.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -35,7 +37,9 @@ import java.util.List;
 
 import static ch.epfl.rechor.FormatterFr.*;
 import static ch.epfl.rechor.gui.VehicleIcons.iconFor;
+import static ch.epfl.rechor.journey.JourneyGeoJsonConverter.toGeoJson;
 import static ch.epfl.rechor.journey.JourneyIcalConverter.toIcalendar;
+import static java.awt.Desktop.getDesktop;
 import static javafx.scene.layout.GridPane.*;
 
 /**
@@ -352,13 +356,16 @@ public record DetailUI(Node rootNode) {
             }
         });
 
-        // bouton « Carte » : toggle l’affichage interne
         mapButton.setOnAction(e -> {
-            mapStack.setVisible(!mapStack.isVisible());
             Journey j = journeyO.getValue();
-            if (j != null && mapStack.isVisible()) {
-                overlay.draw(j, mapParams);
-                mapCtl.centerOn(j.depStop());
+            if (j == null) return;
+
+            try {
+                URI uri = new URI("https", "umap.osm.ch", "/fr/map",
+                        "data=" + toGeoJson(j), "null");
+                getDesktop().browse(uri);
+            } catch (IOException | URISyntaxException ex) {
+                throw new RuntimeException(ex);
             }
         });
     }
