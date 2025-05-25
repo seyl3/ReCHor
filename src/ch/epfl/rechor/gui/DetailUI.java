@@ -126,7 +126,6 @@ public record DetailUI(Node rootNode) {
                             }
                         });
             } catch (IOException ignored) {
-                // ignore
             }
         }));
 
@@ -137,6 +136,8 @@ public record DetailUI(Node rootNode) {
         StackPane.setMargin(credit, new Insets(0, 4, 4, 0));
         mapStack.getChildren().add(credit);
         mapStack.setVisible(true);
+
+        // Redessine le tracé à chaque pan/zoom
 
         // Redessine le tracé à chaque pan/zoom
         Runnable refreshOverlay = () -> {
@@ -155,6 +156,15 @@ public record DetailUI(Node rootNode) {
         mapStack.setPrefHeight(250);         // hauteur raisonnable par défaut
         withJourney.getChildren().add(mapStack);
         VBox.setMargin(mapStack, new Insets(0, 0, 8, 0));  // 8px d'espace sous la carte
+        // Label affiché si hors ligne (juste après la carte)
+        Label offlineLabel = new Label("Connectez-vous à internet pour avoir un aperçu du trajet.");
+        offlineLabel.setMaxWidth(Double.MAX_VALUE);
+        offlineLabel.setAlignment(Pos.CENTER);
+        withJourney.getChildren().add(offlineLabel);
+        offlineLabel.visibleProperty().bind(mapCtl.onlineProperty().not());
+        offlineLabel.managedProperty().bind(mapCtl.onlineProperty().not());
+        mapStack.visibleProperty().bind(mapCtl.onlineProperty());
+        mapStack.managedProperty().bind(mapCtl.onlineProperty());
 
         // Boutons sous la carte, espacement horizontal de 8px
         HBox buttons = new HBox(8);
