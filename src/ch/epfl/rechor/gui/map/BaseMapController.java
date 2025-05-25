@@ -2,11 +2,17 @@ package ch.epfl.rechor.gui.map;
 
 import ch.epfl.rechor.journey.Stop;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 
@@ -24,6 +30,7 @@ public final class BaseMapController {
     private boolean redrawNeeded = true;
 
     private double wheelAccumulator = 0;
+    private final BooleanProperty online = new SimpleBooleanProperty(true);
 
 
     private Point2D lastMouse = new Point2D(Double.NaN, Double.NaN);
@@ -36,11 +43,20 @@ public final class BaseMapController {
         installBindings();
         installEventHandlers();
         requestRedraw();
+        Timeline onlineChecker = new Timeline(
+            new KeyFrame(Duration.seconds(1), e -> checkConnectivity())
+        );
+        onlineChecker.setCycleCount(Timeline.INDEFINITE);
+        onlineChecker.play();
     }
 
 
     public Pane pane() {
         return pane;
+    }
+
+    public ReadOnlyBooleanProperty onlineProperty() {
+        return online;
     }
 
 
@@ -140,10 +156,24 @@ public final class BaseMapController {
                     double dx = tx * TILE_SIZE - minX;
                     double dy = ty * TILE_SIZE - minY;
                     gc.drawImage(img, dx, dy);
-                } catch (IOException ignored) {
-
+                } catch (IOException e) {
+                    online.set(false);
                 }
             }
+        }
+    }
+
+    private void checkConnectivity() {
+        if (online.get()) return;
+        int z = mapParams.zoom();
+        int tx = (int) Math.floor(mapParams.minX() / TILE_SIZE);
+        int ty = (int) Math.floor(mapParams.minY() / TILE_SIZE);
+        TileManager.TileId id = new TileManager.TileId(z, tx, ty);
+        try {
+            tileManager.imageForTileAt(id);
+            online.set(true);
+            requestRedraw();
+        } catch (IOException ignored) {
         }
     }
 }
