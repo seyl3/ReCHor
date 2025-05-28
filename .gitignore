@@ -27,6 +27,7 @@ Submit.java
 # Common Java gitignore patterns
 # Compiled class file
 *.class
+*.zip
 out/
 bin/
 

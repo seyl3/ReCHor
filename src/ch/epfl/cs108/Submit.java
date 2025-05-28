@@ -30,13 +30,13 @@ public final class Submit {
     // CONFIGURATION
     // -------------
     // Jeton du premier membre du groupe
-    private static final String TOKEN_1 = "Pee3ongi";
+    private static final String TOKEN_1 = "cei4EiZu";
     // Jeton du second membre (identique au premier pour les personnes travaillant seules)
-    private static final String TOKEN_2 = "Deigh5ia";
+    private static final String TOKEN_2 = "Nuphue6p";
     // Noms des éventuels fichiers Java additionnels à inclure (p.ex. "MyClass.java")
     private static final List<String> ADDITIONAL_FILES =
-            List.of("src/ch/epfl/Bonus.java","resources/progress.css", "src/ch/epfl/rechor/gui",
-                    "/SwitchButton.java", "src/ch/epfl/rechor/gui/VehicleFilterMenu.java",
+            List.of("src/ch/epfl/Bonus.java","resources/progress.css", "src/ch/epfl/rechor/gui/SwitchButton.java",
+                    "src/ch/epfl/rechor/gui/VehicleFilterMenu.java", "src/ch/epfl/rechor/journey/ProgressListener.java",
                     "resources/LOGO.png", "src/ch/epfl/rechor/gui/map/BaseMapController.java",
                     "src/ch/epfl/rechor/gui/map/JourneyLayer.java", "src/ch/epfl/rechor/gui/map/MapParameters.java",
                     "src/ch/epfl/rechor/gui/map/TileManager.java", "src/ch/epfl/rechor/gui/map/WebMercator.java");
